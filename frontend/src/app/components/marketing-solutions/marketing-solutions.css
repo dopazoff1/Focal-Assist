@@ -1,0 +1,143 @@
+:host {
+  display: block;
+}
+
+.solutions-page {
+  width: 100%;
+  display: grid;
+  gap: 0.86rem;
+}
+
+.panel {
+  border-radius: 24px;
+  border: 1px solid rgba(13, 20, 38, 0.12);
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow: 0 24px 72px rgba(4, 10, 28, 0.11);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 1.1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.panel::before {
+  content: '';
+  position: absolute;
+  inset: -44% -30%;
+  background:
+    radial-gradient(circle at 18% 30%, rgba(36, 91, 245, 0.14), transparent 56%),
+    radial-gradient(circle at 84% 64%, rgba(22, 177, 135, 0.1), transparent 58%);
+  pointer-events: none;
+}
+
+.panel > * {
+  position: relative;
+}
+
+.kicker {
+  margin: 0 0 0.28rem;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #66758f;
+}
+
+.intro h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 2.7vw, 3rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  max-width: 24ch;
+}
+
+.intro p {
+  margin: 0.56rem 0 0;
+  font-size: 0.92rem;
+  line-height: 1.58;
+  color: #1d273f;
+  font-weight: 650;
+  max-width: 76ch;
+}
+
+.persona-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.62rem;
+}
+
+.persona h2 {
+  margin: 0;
+  font-size: 1.04rem;
+}
+
+.goal {
+  margin: 0.36rem 0 0;
+  font-size: 0.84rem;
+  color: #1d273f;
+  font-weight: 700;
+  line-height: 1.42;
+}
+
+ul {
+  margin: 0.55rem 0 0;
+  padding-left: 1.02rem;
+  display: grid;
+  gap: 0.24rem;
+}
+
+li {
+  color: #1d273f;
+  font-size: 0.82rem;
+  line-height: 1.42;
+  font-weight: 660;
+}
+
+.industry-wrap h2 {
+  margin: 0;
+  font-size: clamp(1.3rem, 2vw, 1.8rem);
+  letter-spacing: -0.02em;
+}
+
+.industry-grid {
+  margin-top: 0.68rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.62rem;
+}
+
+.industry {
+  border-radius: 16px;
+  border: 1px solid rgba(13, 20, 38, 0.12);
+  background: rgba(247, 251, 255, 0.74);
+  padding: 0.76rem;
+}
+
+.industry h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.industry p {
+  margin: 0.3rem 0 0;
+  color: #1d273f;
+  font-size: 0.84rem;
+  line-height: 1.46;
+  font-weight: 650;
+}
+
+@media (max-width: 1280px) {
+  .persona-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .industry-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 860px) {
+  .persona-grid {
+    grid-template-columns: 1fr;
+  }
+}

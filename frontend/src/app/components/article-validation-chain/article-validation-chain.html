@@ -1,0 +1,39 @@
+<section class="validation-chain-panel">
+  <div class="validation-chain-heading">
+    <div>
+      <p class="editor-eyebrow">Validation chain</p>
+      <h2>Global reviewer sequence</h2>
+    </div>
+    <span class="chain-count">{{ selectedUsers.length }} reviewers</span>
+  </div>
+
+  <p class="chain-note">Drag the canvas to pan, use the wheel to zoom, and drag user nodes to position them.</p>
+
+  <div class="chain-canvas-wrap" #canvasRef
+    [class.panning]="isPanningCanvas"
+    (mousedown)="onCanvasMouseDown($event)"
+    (mousemove)="onCanvasMouseMove($event)"
+    (mouseup)="onCanvasMouseUp()"
+    (wheel)="onCanvasWheel($event)">
+    <div class="chain-canvas"
+      [style.background-size]="getCanvasBackgroundSize()"
+      [style.background-position]="getCanvasBackgroundPosition()">
+      <div class="chain-world" [style.width.px]="worldWidth" [style.height.px]="620" [style.transform]="getCanvasTransform()">
+        <svg class="chain-links" aria-hidden="true">
+          <path *ngFor="let user of selectedUsers; let index = index" [attr.d]="getConnectionPath(index)" class="chain-link"></path>
+        </svg>
+        <article class="chain-node node-card" *ngFor="let user of selectedUsers; let index = index; trackBy: trackByUser"
+          [class.active]="user.id === activeUserId"
+          [style.left.px]="getPosition(user.id, index).x"
+          [style.top.px]="getPosition(user.id, index).y"
+          (mousedown)="startDrag($event, user, index)"
+          (click)="selectUser(user.id)">
+          <header><span>#{{ user.id }}</span><strong>{{ user.name }}</strong></header>
+          <p class="meta">{{ user.role }}</p>
+          <p class="chain-email">{{ user.email }}</p>
+          <span class="start-pill">Step {{ index + 1 }}</span>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>

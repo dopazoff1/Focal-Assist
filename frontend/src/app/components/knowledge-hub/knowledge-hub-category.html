@@ -1,0 +1,18 @@
+<section class="hub-page hub-category-page">
+  <header class="hub-subpage-head">
+    <button type="button" class="hub-back-button" (click)="backToHub()"><svg lucideArrowLeft [size]="17" aria-hidden="true"></svg>Knowledge Hub</button>
+    <p class="hub-eyebrow">Category index</p>
+    <h1>{{ categoryName }}</h1>
+    <p>Every article in this knowledge area, in one place.</p>
+  </header>
+
+  <div class="hub-article-grid" *ngIf="!loading && articles.length; else categoryState">
+    <button type="button" class="hub-article-card" *ngFor="let article of articles" (click)="openArticle(article.id)">
+      <span class="hub-article-card-top"><svg lucideBookOpen [size]="18" aria-hidden="true"></svg><svg lucideArrowUpRight [size]="18" aria-hidden="true"></svg></span>
+      <strong>{{ article.title }}</strong>
+      <span class="hub-article-card-meta">{{ article.hasMap ? 'Article + map/SOP' : 'Article' }}</span>
+      <span class="hub-article-card-link">Read article <svg lucideArrowRight [size]="15" aria-hidden="true"></svg></span>
+    </button>
+  </div>
+  <ng-template #categoryState><div class="hub-empty">{{ loading ? 'Loading articles...' : 'This category has no published articles.' }}</div></ng-template>
+</section>

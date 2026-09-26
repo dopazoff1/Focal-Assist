@@ -1,0 +1,102 @@
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+  overflow: auto;
+}
+.reports-page {
+  display: grid;
+  gap: 0.85rem;
+  padding: 0.9rem;
+}
+
+.reports-page header h1 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.reports-page header p {
+  margin: 0.2rem 0 0;
+  color: var(--text-2);
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.kpis article {
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  background: var(--panel-1);
+  padding: 0.7rem;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.kpis strong {
+  font-size: 1.3rem;
+}
+
+.kpis span {
+  color: var(--text-2);
+  font-size: 0.78rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.panel {
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  background: var(--panel-1);
+  padding: 0.65rem;
+  display: grid;
+  gap: 0.42rem;
+}
+
+.panel h3 {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.metric-row {
+  display: grid;
+  grid-template-columns: 130px 1fr 34px;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.metric-row span {
+  font-size: 0.78rem;
+}
+
+.metric-row b {
+  font-size: 0.78rem;
+  text-align: right;
+}
+
+.bar {
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel-2);
+  overflow: hidden;
+}
+
+.bar i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #06b6d4, #2563eb);
+}
+
+@media (max-width: 1000px) {
+  .kpis,
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

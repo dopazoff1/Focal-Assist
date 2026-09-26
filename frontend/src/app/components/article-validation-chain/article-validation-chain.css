@@ -1,0 +1,133 @@
+.validation-chain-panel {
+  border-top: 1px solid var(--panel-border);
+  padding-top: 1.25rem;
+}
+
+.validation-chain-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.validation-chain-heading h2 {
+  margin: 0.15rem 0 0;
+  font-size: 1.05rem;
+}
+
+.chain-count,
+.chain-role,
+.chain-email,
+.chain-note,
+.eligible-label {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.chain-note {
+  margin: 0.5rem 0 0.85rem;
+  line-height: 1.45;
+}
+
+.chain-canvas-wrap {
+  position: relative;
+  height: calc(100vh - 120px);
+  min-height: 540px;
+  overflow: hidden;
+  cursor: grab;
+  border: var(--border-size) var(--border-style) var(--panel-border);
+  border-radius: var(--radius-card);
+  background: var(--panel-1);
+  box-shadow: var(--panel-shadow);
+}
+
+.chain-canvas-wrap.panning {
+  cursor: grabbing;
+}
+
+.chain-canvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background:
+    linear-gradient(color-mix(in srgb, var(--panel-border) 40%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--panel-border) 40%, transparent) 1px, transparent 1px);
+  background-position: -1px -1px;
+}
+
+.chain-world {
+  position: absolute;
+  inset: 0 auto auto 0;
+  transform-origin: 0 0;
+}
+
+.chain-links {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.chain-link {
+  fill: none;
+  stroke: color-mix(in srgb, var(--brand) 68%, var(--panel-border));
+  stroke-width: 2;
+  stroke-dasharray: 5 5;
+}
+
+.chain-node {
+  position: absolute;
+  width: 296px;
+  min-height: 126px;
+  padding: 0.8rem;
+  box-sizing: border-box;
+  border: var(--border-size) var(--border-style) var(--panel-border);
+  border-radius: var(--radius-card);
+  background: var(--panel-2);
+  box-shadow: var(--panel-shadow);
+  cursor: move;
+  user-select: none;
+}
+
+.chain-node header {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.chain-node header span {
+  color: var(--text-3);
+  font-size: 0.66rem;
+  letter-spacing: 0;
+}
+
+.chain-node header strong {
+  overflow-wrap: anywhere;
+}
+
+.chain-role,
+.chain-email {
+  margin: 0.35rem 0 0;
+  overflow-wrap: anywhere;
+}
+
+.chain-node .meta {
+  margin: 0.35rem 0 0;
+  color: var(--text-3);
+  font-size: 0.78rem;
+}
+
+.chain-empty {
+  border: 1px dashed var(--panel-border);
+  padding: 1.1rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+@media (max-width: 800px) {
+  .chain-node {
+    width: 230px;
+  }
+}

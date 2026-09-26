@@ -1,0 +1,186 @@
+<section class="article-editor-page">
+  <header class="editor-topbar">
+    <div class="editor-heading">
+      <button type="button" class="ghost back-button" (click)="goBackToManagement()">Back</button>
+      <div>
+        <p class="editor-eyebrow">Knowledge base / Article workspace</p>
+        <h1>{{ title || 'Untitled article' }}</h1>
+      </div>
+    </div>
+
+    <div class="topbar-actions">
+      <span class="save-state" *ngIf="statusMessage">{{ statusMessage }}</span>
+      <button type="button" class="ghost" (click)="metadataCollapsed = !metadataCollapsed">
+        {{ metadataCollapsed ? 'Show details' : 'Hide details' }}
+      </button>
+      <button type="button" (click)="save()" [disabled]="saving || deleting || loading">
+        {{ saving ? 'Saving...' : 'Save changes' }}
+      </button>
+      <button type="button" (click)="submitForValidation()" [disabled]="saving || deleting || loading || draftStatus === 'PENDING_REVIEW'">
+        {{ draftStatus === 'PENDING_REVIEW' ? 'In validation queue' : 'Submit for validation' }}
+      </button>
+    </div>
+  </header>
+
+  <div class="editor-workspace" [class.details-collapsed]="metadataCollapsed" *ngIf="!loading; else loadingTpl">
+    <main class="writing-column">
+      <section class="writing-surface">
+        <header class="surface-header">
+          <div>
+            <p class="editor-eyebrow">Article body</p>
+            <h2>Write the guidance your team will use</h2>
+          </div>
+          <span class="word-count">{{ wordCount }} words</span>
+        </header>
+
+        <nav class="editor-mode-tabs" aria-label="Editor modes">
+          <button type="button" [class.active]="editorMode === 'visual'" (click)="setEditorMode('visual')">Visual</button>
+          <button type="button" [class.active]="editorMode === 'flowchart'" (click)="setEditorMode('flowchart')">Flowchart</button>
+          <button type="button" [class.active]="editorMode === 'source'" (click)="setEditorMode('source')">HTML source</button>
+        </nav>
+
+        <div class="editor-shell" *ngIf="editorMode === 'visual'">
+          <editor
+            [licenseKey]="'gpl'"
+            [init]="editorInit"
+            [(ngModel)]="content"
+            (ngModelChange)="onEditorContentChange($event)"
+          ></editor>
+        </div>
+
+        <section class="flowchart-workspace" *ngIf="editorMode === 'flowchart'">
+          <div class="flowchart-source-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="editor-eyebrow">Mermaid source</p>
+                <h3>Describe the process as code</h3>
+              </div>
+              <span class="local-badge">Runs locally</span>
+            </div>
+            <textarea
+              class="flowchart-source"
+              [(ngModel)]="flowchartSource"
+              spellcheck="false"
+              aria-label="Mermaid flowchart source"
+            ></textarea>
+            <p class="field-note">Use Mermaid syntax such as <code>flowchart TD</code>. The source is stored in the article as an editable block.</p>
+            <button type="button" (click)="insertFlowchartIntoArticle()" [disabled]="!flowchartSource.trim()">
+              Insert into article
+            </button>
+          </div>
+
+          <div class="flowchart-preview-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="editor-eyebrow">Live preview</p>
+                <h3>Process view</h3>
+              </div>
+            </div>
+            <div class="flowchart-preview" appMermaidContent [mermaidContent]="flowchartSource">
+              <pre class="mermaid">{{ flowchartSource }}</pre>
+            </div>
+          </div>
+        </section>
+
+        <div class="source-editor" *ngIf="editorMode === 'source'">
+          <label for="article-html-source">Article HTML</label>
+          <textarea id="article-html-source" rows="24" [ngModel]="content" (ngModelChange)="setHtmlSource($event)"></textarea>
+        </div>
+
+        <section class="article-preview" *ngIf="showPreview">
+          <div class="panel-heading">
+            <div>
+              <p class="editor-eyebrow">Reader preview</p>
+              <h3>How agents will see it</h3>
+            </div>
+          </div>
+          <div class="kb-article-content" appMermaidContent [mermaidContent]="content" [innerHTML]="content"></div>
+        </section>
+
+        <footer class="writing-footer">
+          <button type="button" class="ghost" (click)="showPreview = !showPreview">
+            {{ showPreview ? 'Hide reader preview' : 'Show reader preview' }}
+          </button>
+          <button type="button" class="ghost" (click)="showHtmlSource = !showHtmlSource">
+            {{ showHtmlSource ? 'Hide quick source' : 'Open quick source' }}
+          </button>
+        </footer>
+
+        <textarea
+          class="quick-source"
+          *ngIf="showHtmlSource"
+          rows="8"
+          [ngModel]="content"
+          (ngModelChange)="setHtmlSource($event)"
+          aria-label="Quick HTML source"
+        ></textarea>
+      </section>
+    </main>
+
+    <aside class="metadata-rail" [class.minimized]="metadataCollapsed">
+      <div class="rail-header">
+        <div>
+          <p class="editor-eyebrow">Article details</p>
+          <h2>Publication settings</h2>
+        </div>
+        <button type="button" class="icon-button" (click)="metadataCollapsed = true" aria-label="Minimize article details">&times;</button>
+      </div>
+
+      <div class="rail-body">
+        <label>
+          <span>Title</span>
+          <input type="text" [(ngModel)]="title" placeholder="Article title" />
+        </label>
+
+        <label>
+          <span>Category</span>
+          <select [(ngModel)]="categoryId">
+            <option [ngValue]="null">Select category...</option>
+            <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.name }}</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Display order</span>
+          <input type="number" [(ngModel)]="displayOrder" />
+        </label>
+
+        <label class="status-toggle">
+          <input type="checkbox" [(ngModel)]="isActive" />
+          <span><strong>Publish after approval</strong><small>The live article changes only when the chain approves it.</small></span>
+        </label>
+
+        <p class="draft-status" *ngIf="draftStatus">
+          Draft status: <strong>{{ draftStatus === 'CHANGES_REQUESTED' ? 'Changes requested' : draftStatus }}</strong>
+        </p>
+        <p class="draft-rejection" *ngIf="article && reviewComments.length">
+          {{ reviewComments.length }} review comment{{ reviewComments.length === 1 ? '' : 's' }} attached to this draft.
+        </p>
+        <p class="validation-inheritance-note">This article uses the global validation chain configured in the Validation Chain feature.</p>
+
+        <div class="rail-divider"></div>
+
+        <div class="rail-actions">
+          <button type="button" (click)="save()" [disabled]="saving || deleting">
+            {{ saving ? 'Saving...' : 'Save changes' }}
+          </button>
+          <button type="button" class="ghost" (click)="openMapBuilder()">Open map builder</button>
+        </div>
+
+        <div class="rail-actions secondary-actions">
+          <button type="button" class="ghost" (click)="duplicate()" [disabled]="loading || saving || deleting">Duplicate</button>
+          <button type="button" class="danger" (click)="delete()" [disabled]="loading || saving || deleting">
+            {{ deleting ? 'Deleting...' : 'Delete' }}
+          </button>
+        </div>
+
+      </div>
+    </aside>
+  </div>
+
+  <ng-template #loadingTpl>
+    <div class="loading-state">Loading article workspace...</div>
+  </ng-template>
+
+  <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+</section>

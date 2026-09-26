@@ -1,0 +1,90 @@
+<div class="v5-layout" *ngIf="auth.isLoggedIn()">
+  <aside class="v5-sidebar">
+    <a class="v5-brand" routerLink="/v5/dashboard">
+      <span class="v5-brand-mark">KA</span>
+      <span class="v5-brand-copy">
+        <strong>Focal</strong>
+        <small>Sales Performance OS</small>
+      </span>
+    </a>
+
+    <nav class="v5-nav" aria-label="V5 navigation">
+      <p class="v5-nav-group">Core</p>
+      <a routerLink="/v5/dashboard" routerLinkActive="active">
+        <span class="v5-nav-ico">DB</span>
+        <span>Dashboard</span>
+      </a>
+      <a routerLink="/v5/pipeline" routerLinkActive="active">
+        <span class="v5-nav-ico">PL</span>
+        <span>Pipeline</span>
+      </a>
+      <a routerLink="/v5/contacts" routerLinkActive="active">
+        <span class="v5-nav-ico">CT</span>
+        <span>Contacts</span>
+      </a>
+      <a routerLink="/v5/tasks" routerLinkActive="active">
+        <span class="v5-nav-ico">TS</span>
+        <span>Tasks</span>
+      </a>
+
+      <p class="v5-nav-group">Execution</p>
+      <a routerLink="/v5/notifications" routerLinkActive="active">
+        <span class="v5-nav-ico">NT</span>
+        <span>Notifications</span>
+      </a>
+      <a routerLink="/v5/forms" routerLinkActive="active">
+        <span class="v5-nav-ico">FM</span>
+        <span>Smart Forms</span>
+      </a>
+
+      <p class="v5-nav-group">System</p>
+      <a routerLink="/v5/design-system" routerLinkActive="active">
+        <span class="v5-nav-ico">DS</span>
+        <span>Design System</span>
+      </a>
+      <a routerLink="/v3/home">
+        <span class="v5-nav-ico">V3</span>
+        <span>Back to V3</span>
+      </a>
+    </nav>
+
+    <footer class="v5-side-footer">
+      <div class="v5-user-name">{{ auth.getUserName() || 'User' }}</div>
+      <div class="v5-user-role">{{ auth.getNormalizedRole() || 'AGENT' }}</div>
+    </footer>
+  </aside>
+
+  <div class="v5-main">
+    <header class="v5-topbar">
+      <div class="v5-topbar-title">
+        <small>CRM V5</small>
+        <strong>Conversion-first workspace</strong>
+      </div>
+
+      <form class="v5-search" (submit)="runQuickSearch($event)">
+        <input
+          type="search"
+          class="v5-input"
+          [(ngModel)]="quickSearch"
+          name="quickSearch"
+          placeholder="Search contact, company, ticket, activity"
+          autocomplete="off"
+        />
+      </form>
+
+      <div class="v5-top-actions">
+        <button type="button" class="v5-btn ghost" routerLink="/v5/forms">New Lead</button>
+        <button type="button" class="v5-btn primary" routerLink="/v5/pipeline">Follow Up</button>
+        <button type="button" class="v5-btn" (click)="logout()">Logout</button>
+      </div>
+    </header>
+
+    <main class="v5-content-frame">
+      <section class="v5-content-route" #routeHost>
+        <router-outlet (activate)="onRouteActivate()"></router-outlet>
+      </section>
+    </main>
+  </div>
+</div>
+
+

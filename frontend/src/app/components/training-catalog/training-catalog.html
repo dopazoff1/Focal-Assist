@@ -1,0 +1,72 @@
+<section class="catalog">
+  <header class="catalog-head">
+    <div class="title">
+      <a class="back" [routerLink]="['../']">Academy</a>
+      <h1>Catalog</h1>
+      <p>Browse published trainings. Self-enroll where allowed.</p>
+    </div>
+
+    <div class="filters">
+      <input type="search" [(ngModel)]="search" (ngModelChange)="bump()" placeholder="Search catalog..." autocomplete="off" />
+
+      <select [(ngModel)]="difficulty" (ngModelChange)="bump()">
+        <option value="ALL">All levels</option>
+        <option value="BEGINNER">Beginner</option>
+        <option value="INTERMEDIATE">Intermediate</option>
+        <option value="ADVANCED">Advanced</option>
+      </select>
+
+      <select [(ngModel)]="status" (ngModelChange)="bump()" *ngIf="canManageTraining">
+        <option value="ALL">All statuses</option>
+        <option value="PUBLISHED">Published</option>
+        <option value="DRAFT">Draft</option>
+        <option value="ARCHIVED">Archived</option>
+      </select>
+
+      <button type="button" class="ghost" *ngIf="search" (click)="search = ''; bump()">Clear</button>
+    </div>
+  </header>
+
+  <section class="grid" *ngIf="courses$ | async as courses">
+    <div class="empty" *ngIf="courses.length === 0">
+      <strong>No trainings found.</strong>
+      <span>Try changing the filters.</span>
+    </div>
+
+    <article class="card" *ngFor="let c of courses">
+      <div class="card-top">
+        <div class="ico" [attr.data-difficulty]="c.difficulty">{{ c.difficulty[0] }}</div>
+        <div class="meta">
+          <strong>{{ c.title }}</strong>
+          <span class="muted">{{ c.subtitle || c.description }}</span>
+          <div class="tags" *ngIf="c.tags.length">
+            <span class="tag" *ngFor="let t of c.tags.slice(0, 4)">{{ t }}</span>
+          </div>
+        </div>
+        <div class="badges">
+          <span class="pill" [attr.data-status]="c.status">{{ c.status }}</span>
+          <span class="pill enrolled" *ngIf="isAssigned(c.id)">ENROLLED</span>
+        </div>
+      </div>
+
+      <div class="card-foot">
+        <div class="facts">
+          <span>{{ c.estimatedMinutes }} min</span>
+          <span>{{ c.difficulty }}</span>
+        </div>
+        <div class="actions">
+          <a class="btn ghost" [routerLink]="['../course', c.id]">Preview</a>
+          <button
+            type="button"
+            class="btn"
+            *ngIf="c.status === 'PUBLISHED' && c.allowSelfEnroll && !isAssigned(c.id)"
+            (click)="selfEnroll(c.id)"
+          >
+            Enroll
+          </button>
+          <a class="btn" *ngIf="canManageTraining" [routerLink]="['../studio/course', c.id]">Edit</a>
+        </div>
+      </div>
+    </article>
+  </section>
+</section>

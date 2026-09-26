@@ -1,0 +1,65 @@
+<section class="tree-builder-page">
+  <aside class="tree-sidebar">
+    <div class="sidebar-card">
+      <h2>Validation Chain Builder</h2>
+      <p class="muted">Set the review sequence used by every KB article before publication.</p>
+
+      <div class="toolbar">
+        <button type="button" class="ghost" (click)="load()" [disabled]="loading || saving">Reload Existing</button>
+        <button type="button" [disabled]="loading || saving" (click)="save()">
+          {{ saving ? 'Saving...' : 'Save to DB' }}
+        </button>
+      </div>
+
+      <p class="muted" *ngIf="loading">Loading validation chain...</p>
+      <p class="muted" *ngIf="!loading">{{ selectedUserIds.length }} reviewer{{ selectedUserIds.length === 1 ? '' : 's' }} configured.</p>
+    </div>
+
+    <div class="sidebar-card">
+      <h3>How it works</h3>
+      <p class="muted">This is one global chain. Authors do not choose reviewers inside individual articles.</p>
+      <p class="muted">New submissions copy this order into their revision. Reviews already in progress keep their original chain.</p>
+    </div>
+
+    <div class="sidebar-card">
+      <h3>Eligible reviewers</h3>
+      <p class="muted">Only active users with KB Article Validation access are available on the canvas.</p>
+      <div class="reviewer-list" *ngIf="availableUsers.length; else noReviewers">
+        <button type="button" class="reviewer-option" *ngFor="let user of availableUsers" (click)="addReviewer(user.id)">
+          <span><strong>{{ user.name }}</strong><small>{{ user.role }} - {{ user.email }}</small></span>
+          <span class="add-mark">+</span>
+        </button>
+      </div>
+      <ng-template #noReviewers><p class="muted">All eligible reviewers have been added.</p></ng-template>
+      <a routerLink="/v3/role-access-map" class="ghost role-access-link">Open Role Access Map</a>
+    </div>
+
+    <div class="sidebar-card" *ngIf="selectedUsers.length">
+      <h3>Configured order</h3>
+      <button type="button" class="configured-reviewer" *ngFor="let user of selectedUsers; let index = index" (click)="removeReviewer(user.id)" title="Remove reviewer">
+        <span><strong>STEP {{ index + 1 }} - {{ user.name }}</strong><small>{{ user.role }}</small></span>
+        <span class="remove-mark">&times;</span>
+      </button>
+    </div>
+
+    <p class="status">{{ errorMessage || statusMessage }}</p>
+  </aside>
+
+  <div class="tree-canvas-wrap" *ngIf="!loading; else loadingTpl">
+    <div class="tree-canvas validation-canvas">
+      <main class="validation-canvas-content">
+        <app-article-validation-chain
+          [users]="users"
+          [selectedUserIds]="selectedUserIds"
+          (selectedUserIdsChange)="selectedUserIds = $event"
+        ></app-article-validation-chain>
+      </main>
+    </div>
+  </div>
+
+  <ng-template #loadingTpl>
+    <div class="tree-canvas-wrap">
+      <div class="tree-canvas validation-loading">Loading validation policy...</div>
+    </div>
+  </ng-template>
+</section>

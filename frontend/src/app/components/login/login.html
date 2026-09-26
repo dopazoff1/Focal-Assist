@@ -1,0 +1,141 @@
+<main class="auth-page" focalVisibleMotion [class.is-exiting]="isExiting">
+  <section class="auth-shell" aria-label="Focal secure access">
+    <aside class="auth-trust">
+      <focal-login-scene />
+      <div class="auth-brand">
+        <img src="logo.jpg" alt="Credit+" />
+        <span>
+          <strong>Focal</strong>
+          <small>Customer operations</small>
+        </span>
+      </div>
+
+      <div class="trust-message">
+        <p class="context-label">Credit+ / Customer operations</p>
+        <h2>A connected workspace.<br />A clear next step.</h2>
+        <p>Support, knowledge and team workflows. Together in Focal.</p>
+      </div>
+
+      <p class="trust-foot">
+        Focal <span aria-hidden="true">/</span> Credit+
+      </p>
+    </aside>
+
+    <section class="auth-form-panel" aria-labelledby="login-title">
+      <div class="auth-form-wrap">
+        <div class="auth-form-brand">
+          <img src="logo.jpg" alt="" />
+          <strong>Focal</strong>
+        </div>
+
+        <header class="form-heading">
+          <h1 id="login-title">Sign in to your workspace</h1>
+          <p>Enter your Credit+ username and password.</p>
+        </header>
+
+        <form class="login-form" (ngSubmit)="login()" #loginForm="ngForm">
+          <label class="field" for="login-email">Username</label>
+          <div
+            class="input-shell"
+            [class.is-invalid]="emailInput.invalid && emailInput.touched"
+          >
+            <svg lucideUserRound [size]="18" aria-hidden="true"></svg>
+            <input
+              id="login-email"
+              type="text"
+              name="email"
+              placeholder="Enter your username"
+              class="login-input"
+              [(ngModel)]="email"
+              #emailInput="ngModel"
+              autocomplete="username"
+              [disabled]="isLoggingIn"
+              [attr.aria-invalid]="emailInput.invalid && emailInput.touched ? 'true' : null"
+              [attr.aria-describedby]="emailInput.invalid && emailInput.touched ? 'email-error' : null"
+              required
+            />
+          </div>
+          <p class="field-feedback" aria-live="polite">
+            <span id="email-error" *ngIf="emailInput.invalid && emailInput.touched">
+              Please enter your username.
+            </span>
+          </p>
+
+          <label class="field" for="login-password">Password</label>
+          <div
+            class="input-shell password-shell"
+            [class.is-invalid]="passwordInput.invalid && passwordInput.touched"
+          >
+            <svg lucideLockKeyhole [size]="18" aria-hidden="true"></svg>
+            <input
+              id="login-password"
+              [type]="passwordVisible ? 'text' : 'password'"
+              name="password"
+              placeholder="Enter your password"
+              class="login-input"
+              [(ngModel)]="password"
+              #passwordInput="ngModel"
+              autocomplete="current-password"
+              [disabled]="isLoggingIn"
+              [attr.aria-invalid]="passwordInput.invalid && passwordInput.touched ? 'true' : null"
+              [attr.aria-describedby]="passwordInput.invalid && passwordInput.touched ? 'password-error' : null"
+              required
+            />
+            <button
+              type="button"
+              class="password-toggle"
+              (click)="togglePasswordVisibility()"
+              [disabled]="isLoggingIn"
+              [attr.aria-label]="passwordVisible ? 'Hide password' : 'Show password'"
+              [attr.title]="passwordVisible ? 'Hide password' : 'Show password'"
+            >
+              <svg *ngIf="!passwordVisible" lucideEye [size]="18" aria-hidden="true"></svg>
+              <svg *ngIf="passwordVisible" lucideEyeOff [size]="18" aria-hidden="true"></svg>
+            </button>
+          </div>
+          <p class="field-feedback" aria-live="polite">
+            <span id="password-error" *ngIf="passwordInput.invalid && passwordInput.touched">
+              Please enter your password.
+            </span>
+          </p>
+
+          <button
+            type="submit"
+            class="login-btn"
+            [class.is-loading]="isLoggingIn"
+            [disabled]="loginForm.invalid || isLoggingIn"
+            [attr.aria-busy]="isLoggingIn"
+          >
+            <span>{{ isLoggingIn ? 'Signing in...' : 'Sign in' }}</span>
+            <svg
+              *ngIf="!isLoggingIn"
+              lucideArrowRight
+              [size]="18"
+              aria-hidden="true"
+            ></svg>
+            <svg
+              *ngIf="isLoggingIn"
+              lucideLoaderCircle
+              class="button-spinner"
+              [size]="18"
+              aria-hidden="true"
+            ></svg>
+          </button>
+
+          <div class="login-loading" *ngIf="isLoggingIn" role="status" aria-live="polite">
+            Checking your credentials...
+          </div>
+
+          <div class="login-error" *ngIf="loginError" role="alert" aria-live="assertive">
+            {{ loginError }}
+          </div>
+        </form>
+
+        <footer class="form-foot">
+          <svg lucideLockKeyhole [size]="14" aria-hidden="true"></svg>
+          Need access? Contact your administrator.
+        </footer>
+      </div>
+    </section>
+  </section>
+</main>

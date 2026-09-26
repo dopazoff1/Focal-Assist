@@ -1,0 +1,104 @@
+<section class="v4-page v4-fade-in">
+  <header class="v4-page-header">
+    <div>
+      <h1 class="v4-page-title">Contact Intelligence</h1>
+      <p class="v4-page-copy">
+        Keep every account context-rich. Prioritize outreach based on customer health and revenue impact.
+      </p>
+    </div>
+    <div class="v4-actions">
+      <button type="button" class="v4-btn ghost">Import Contacts</button>
+      <button type="button" class="v4-btn primary">Add Contact</button>
+    </div>
+  </header>
+
+  <section class="contact-layout">
+    <article class="v4-surface contact-list">
+      <header class="v4-surface-header">
+        <div>
+          <h3 class="v4-surface-title">Accounts</h3>
+          <p class="v4-surface-subtitle">Search by company, name, email, or segment.</p>
+        </div>
+      </header>
+      <div class="v4-surface-body">
+        <label class="v4-label search-field">
+          <span>Search</span>
+          <input class="v4-input" [(ngModel)]="search" placeholder="Type name or company" />
+        </label>
+
+        <div class="list-stack" *ngIf="filteredContacts.length > 0; else noContacts">
+          <button
+            type="button"
+            class="contact-row"
+            *ngFor="let c of filteredContacts"
+            [class.active]="c.id === selectedId"
+            (click)="selectContact(c.id)"
+          >
+            <strong>{{ c.name }}</strong>
+            <span>{{ c.company }} · {{ c.segment }}</span>
+            <small>{{ c.email }}</small>
+          </button>
+        </div>
+
+        <ng-template #noContacts>
+          <div class="v4-empty">
+            <strong>No contacts found</strong>
+            <p>Try another search term or add a new contact.</p>
+          </div>
+        </ng-template>
+      </div>
+    </article>
+
+    <article class="v4-surface contact-profile" *ngIf="selectedContact as c">
+      <header class="v4-surface-header">
+        <div>
+          <h3 class="v4-surface-title">{{ c.name }}</h3>
+          <p class="v4-surface-subtitle">{{ c.title }} · {{ c.company }}</p>
+        </div>
+        <span class="v4-badge" [ngClass]="{success: c.health === 'Healthy', warning: c.health === 'Watch', danger: c.health === 'Risk'}">
+          {{ c.health }}
+        </span>
+      </header>
+
+      <div class="v4-surface-body profile-grid">
+        <section class="profile-meta">
+          <div>
+            <small>Email</small>
+            <strong>{{ c.email }}</strong>
+          </div>
+          <div>
+            <small>Phone</small>
+            <strong>{{ c.phone }}</strong>
+          </div>
+          <div>
+            <small>ARR</small>
+            <strong>{{ c.arr }}</strong>
+          </div>
+          <div>
+            <small>Open deals</small>
+            <strong>{{ c.openDeals }}</strong>
+          </div>
+        </section>
+
+        <section class="profile-notes">
+          <h4>Account Notes</h4>
+          <p>{{ c.notes }}</p>
+          <div class="v4-actions">
+            <button type="button" class="v4-btn">Log Activity</button>
+            <button type="button" class="v4-btn primary">Schedule Follow-up</button>
+          </div>
+        </section>
+
+        <section class="profile-timeline">
+          <h4>Timeline</h4>
+          <ul>
+            <li *ngFor="let item of c.timeline">
+              <span>{{ item.date }}</span>
+              <p>{{ item.text }}</p>
+            </li>
+          </ul>
+        </section>
+      </div>
+    </article>
+  </section>
+</section>

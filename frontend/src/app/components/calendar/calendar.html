@@ -1,0 +1,459 @@
+<div class="orbit-page">
+  <aside class="orbit-sidebar">
+    <section class="orbit-card orbit-card-hero">
+      <h1>Calendar</h1>
+      <div class="orbit-hero-actions">
+        <button type="button" class="orbit-primary" (click)="prepareNewEvent(selectedDate)">New event</button>
+        <button type="button" class="orbit-ghost" (click)="jumpToToday()">Today</button>
+      </div>
+    </section>
+
+    <section class="orbit-card">
+      <div class="orbit-card-head">
+        <strong>Mini month</strong>
+        <span>{{ anchorDate | date:'MMMM y' }}</span>
+      </div>
+      <div class="orbit-mini-weekdays">
+        <span *ngFor="let label of weekdayLabelsMini">{{ label }}</span>
+      </div>
+      <div class="orbit-mini-grid">
+        <button
+          type="button"
+          class="orbit-mini-day"
+          *ngFor="let cell of miniMonthCells; trackBy: trackByIso"
+          [class.outside]="!cell.inMonth"
+          [class.today]="cell.isToday"
+          [class.selected]="cell.isSelected"
+          (click)="jumpToDate(cell.date)"
+        >
+          <span>{{ cell.dayNumber }}</span>
+          <small *ngIf="cell.events.length">{{ cell.events.length }}</small>
+        </button>
+      </div>
+    </section>
+
+    <section class="orbit-card">
+      <div class="orbit-card-head">
+        <strong>Quick templates</strong>
+      </div>
+      <button
+        type="button"
+        class="orbit-template"
+        *ngFor="let template of templates"
+        (click)="applyTemplate(template)"
+      >
+        <strong>{{ template.label }}</strong>
+        <span>{{ template.subtitle }}</span>
+      </button>
+    </section>
+
+    <section class="orbit-card">
+      <div class="orbit-card-head">
+        <strong>Calendar layers</strong>
+        <button type="button" class="orbit-inline-link" (click)="clearFilters()">Reset</button>
+      </div>
+      <label class="orbit-calendar-toggle" *ngFor="let calendar of calendarDefs">
+        <input
+          type="checkbox"
+          [checked]="calendarFilter[calendar.id] !== false"
+          (change)="toggleCalendarFilter(calendar.id)"
+        />
+        <span class="swatch" [style.background]="calendar.color"></span>
+        <span class="copy">
+          <strong>{{ calendar.label }}</strong>
+          <small>{{ calendar.description }}</small>
+        </span>
+      </label>
+    </section>
+
+    <section class="orbit-card" *ngIf="invitationInbox.length">
+      <div class="orbit-card-head">
+        <strong>Invitation inbox</strong>
+        <span>{{ invitationInbox.length }} pending</span>
+      </div>
+      <button
+        type="button"
+        class="orbit-invite-row"
+        *ngFor="let event of invitationInbox; trackBy: trackByEventId"
+        (click)="selectEvent(event)"
+      >
+        <strong>{{ event.title }}</strong>
+        <span>{{ formatEventDateTime(event) }}</span>
+      </button>
+    </section>
+  </aside>
+
+  <section class="orbit-main">
+    <header class="orbit-toolbar orbit-card">
+      <div class="orbit-toolbar-row">
+        <div class="orbit-nav">
+          <button type="button" class="orbit-square" (click)="shiftWindow(-1)" aria-label="Previous period" title="Previous period"><svg lucideChevronLeft [size]="16" aria-hidden="true"></svg></button>
+          <button type="button" class="orbit-square" (click)="jumpToToday()">Today</button>
+          <button type="button" class="orbit-square" (click)="shiftWindow(1)" aria-label="Next period" title="Next period"><svg lucideChevronRight [size]="16" aria-hidden="true"></svg></button>
+        </div>
+
+        <div class="orbit-range">{{ rangeLabel }}</div>
+
+        <div class="orbit-view-switch">
+          <button
+            type="button"
+            *ngFor="let mode of viewModes"
+            [class.active]="viewMode === mode"
+            (click)="setView(mode)"
+          >
+            {{ mode }}
+          </button>
+        </div>
+      </div>
+
+      <div class="orbit-toolbar-row orbit-toolbar-filters">
+        <label class="orbit-search">
+          <span>Search</span>
+          <input type="search" [(ngModel)]="searchQuery" placeholder="Events, locations, attendees..." />
+        </label>
+        <label class="orbit-check">
+          <input type="checkbox" [(ngModel)]="onlyMyInvites" />
+          <span>Only events that invite me</span>
+        </label>
+        <div class="orbit-status-pill" *ngIf="dataMessage">{{ dataMessage }}</div>
+      </div>
+    </header>
+
+    <section class="orbit-surface orbit-card orbit-month-surface" *ngIf="viewMode === 'month'">
+      <div class="orbit-month-grid orbit-month-head">
+        <div *ngFor="let label of weekdayLabelsLong">{{ label }}</div>
+      </div>
+
+      <div class="orbit-month-grid orbit-month-body">
+        <div
+          role="group"
+          [attr.aria-label]="cell.date | date:'fullDate'"
+          class="orbit-month-cell"
+          *ngFor="let cell of monthCells; trackBy: trackByIso"
+          [class.outside]="!cell.inMonth"
+          [class.selected]="cell.isSelected"
+          [class.today]="cell.isToday"
+          (click)="selectDate(cell.date)"
+        >
+          <div class="orbit-month-cell-head">
+            <button type="button" class="orbit-day-select" [attr.aria-label]="cell.date | date:'fullDate'">{{ cell.dayNumber }}</button>
+            <button type="button" class="orbit-plus" [attr.aria-label]="'New event on ' + (cell.date | date:'fullDate')" (click)="prepareNewEvent(cell.date); $event.stopPropagation()">+</button>
+          </div>
+
+          <div class="orbit-month-events">
+            <button
+              type="button"
+              class="orbit-pill-event"
+              [attr.title]="event.title"
+              *ngFor="let event of cell.events; trackBy: trackByEventId"
+              [style.--event-color]="event.color"
+              (click)="selectEvent(event); $event.stopPropagation()"
+            >
+              <span class="time">{{ event.allDay ? 'All day' : (event.startAt | date:'HH:mm') }}</span>
+              <strong>{{ event.title }}</strong>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="orbit-surface orbit-card orbit-timeline-shell" *ngIf="viewMode === 'week' || viewMode === 'day'">
+      <div class="orbit-hours">
+        <div class="orbit-hour-label" *ngFor="let hour of timelineHours">
+          {{ formatHour(hour) }}
+        </div>
+      </div>
+
+      <div class="orbit-timeline-grid" [class.day-view]="viewMode === 'day'">
+        <div class="orbit-timeline-col" *ngFor="let column of weekColumns; trackBy: trackByIso">
+          <div class="orbit-timeline-head" [class.today]="column.isToday" (click)="selectDate(column.date)">
+            <strong>{{ column.label }}</strong>
+            <button type="button" class="orbit-plus" (click)="prepareNewEvent(column.date); $event.stopPropagation()">+</button>
+          </div>
+
+          <div class="orbit-all-day" *ngIf="column.allDayEvents.length">
+            <button
+              type="button"
+              class="orbit-all-day-event"
+              *ngFor="let event of column.allDayEvents; trackBy: trackByEventId"
+              [style.--event-color]="event.color"
+              (click)="selectEvent(event)"
+            >
+              {{ event.title }}
+            </button>
+          </div>
+
+          <div class="orbit-track" [style.height.px]="timelineHeight">
+            <div
+              class="orbit-track-line"
+              *ngFor="let hour of timelineHours; let idx = index"
+              [style.top.px]="idx * pxPerHour"
+            ></div>
+
+            <button
+              type="button"
+              class="orbit-timeline-event"
+              *ngFor="let item of column.timedEvents; trackBy: trackByEventId"
+              [style.top.px]="item.top"
+              [style.height.px]="item.height"
+              [style.--event-color]="item.source.color"
+              (click)="selectEvent(item.source)"
+            >
+              <strong>{{ item.source.title }}</strong>
+              <span>{{ item.timeLabel }}</span>
+              <small *ngIf="item.source.location">{{ item.source.location }}</small>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="orbit-surface orbit-card orbit-agenda orbit-agenda-surface" *ngIf="viewMode === 'agenda'">
+      <section class="orbit-agenda-group" *ngFor="let group of agendaGroups">
+        <header>
+          <strong>{{ group.label }}</strong>
+          <span>{{ group.events.length }} events</span>
+        </header>
+
+        <button
+          type="button"
+          class="orbit-agenda-event"
+          *ngFor="let event of group.events; trackBy: trackByEventId"
+          (click)="selectEvent(event)"
+        >
+          <span class="swatch" [style.background]="event.color"></span>
+          <div class="copy">
+            <strong>{{ event.title }}</strong>
+            <span>{{ formatEventDateTime(event) }}</span>
+          </div>
+          <small>{{ event.location || getCalendarLabel(event.calendarId) }}</small>
+        </button>
+      </section>
+    </section>
+  </section>
+
+  <aside class="orbit-inspector">
+    <section class="orbit-card orbit-focus-card" *ngIf="selectedEvent as activeEvent; else emptySelection">
+      <div class="orbit-card-head">
+        <span class="orbit-tag" [style.background]="activeEvent.color">{{ getCalendarLabel(activeEvent.calendarId) }}</span>
+        <div class="orbit-event-actions">
+          <button type="button" class="orbit-inline-link" (click)="duplicateSelectedEvent()">Duplicate</button>
+          <button type="button" class="orbit-inline-link danger" (click)="deleteSelectedEvent()">Delete</button>
+        </div>
+      </div>
+
+      <h2>{{ activeEvent.title }}</h2>
+      <p class="orbit-muted" *ngIf="activeEvent.description">{{ activeEvent.description }}</p>
+
+      <div class="orbit-detail-list">
+        <div>
+          <small>When</small>
+          <strong>{{ formatEventDateTime(activeEvent) }}</strong>
+        </div>
+        <div>
+          <small>Where</small>
+          <strong>{{ activeEvent.location || 'No location' }}</strong>
+        </div>
+        <div>
+          <small>Visibility</small>
+          <strong>{{ activeEvent.visibility }}</strong>
+        </div>
+        <div>
+          <small>Recurrence</small>
+          <strong>{{ activeEvent.recurrence }}</strong>
+        </div>
+      </div>
+
+      <a class="orbit-inline-anchor" *ngIf="activeEvent.meetingLink" [href]="activeEvent.meetingLink" target="_blank" rel="noreferrer">
+        Open meeting link
+      </a>
+
+      <div class="orbit-attendees">
+        <div class="orbit-card-head">
+          <strong>Guests</strong>
+          <span>{{ activeEvent.attendees.length }}</span>
+        </div>
+        <div class="orbit-attendee-row" *ngFor="let attendee of activeEvent.attendees">
+          <div class="identity">
+            <strong>{{ attendee.name }}</strong>
+            <span>{{ attendee.email || attendee.role }}</span>
+          </div>
+          <div class="state" [attr.data-state]="attendee.status">{{ attendee.status }}</div>
+        </div>
+      </div>
+
+      <div class="orbit-rsvp" *ngIf="selectedEventStatusForCurrentUser">
+        <small>Your response</small>
+        <div class="orbit-rsvp-actions">
+          <button type="button" [class.active]="selectedEventStatusForCurrentUser === 'accepted'" (click)="respondToInvite('accepted')">Accept</button>
+          <button type="button" [class.active]="selectedEventStatusForCurrentUser === 'tentative'" (click)="respondToInvite('tentative')">Tentative</button>
+          <button type="button" [class.active]="selectedEventStatusForCurrentUser === 'declined'" (click)="respondToInvite('declined')">Decline</button>
+        </div>
+      </div>
+    </section>
+
+    <ng-template #emptySelection>
+      <section class="orbit-card orbit-focus-card empty">
+        <div class="orbit-card-kicker">Selected event</div>
+        <h2>No event selected</h2>
+        <p>Select an event from the grid or create a new one from the editor below.</p>
+      </section>
+    </ng-template>
+
+    <section class="orbit-card orbit-editor">
+      <div class="orbit-card-head">
+        <div>
+          <strong>{{ editorMode === 'edit' ? 'Edit event' : 'Create event' }}</strong>
+        </div>
+        <button type="button" class="orbit-inline-link" (click)="prepareNewEvent(selectedDate)">Fresh draft</button>
+      </div>
+
+      <form class="orbit-editor-form" (ngSubmit)="saveDraft()">
+        <label>
+          <span>Title</span>
+          <input type="text" [(ngModel)]="draft.title" name="title" required />
+        </label>
+
+        <div class="orbit-form-grid">
+          <label>
+            <span>Calendar</span>
+            <select [(ngModel)]="draft.calendarId" name="calendarId">
+              <option *ngFor="let calendar of calendarDefs" [value]="calendar.id">{{ calendar.label }}</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Kind</span>
+            <select [(ngModel)]="draft.kind" name="kind">
+              <option *ngFor="let kind of kindOptions" [value]="kind.value">{{ kind.label }}</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Start</span>
+            <input type="datetime-local" [(ngModel)]="draft.startAtLocal" name="startAtLocal" required />
+          </label>
+
+          <label>
+            <span>End</span>
+            <input type="datetime-local" [(ngModel)]="draft.endAtLocal" name="endAtLocal" required />
+          </label>
+
+          <label>
+            <span>Visibility</span>
+            <select [(ngModel)]="draft.visibility" name="visibility">
+              <option *ngFor="let item of visibilityOptions" [value]="item.value">{{ item.label }}</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Recurrence</span>
+            <select [(ngModel)]="draft.recurrence" name="recurrence">
+              <option *ngFor="let item of recurrenceOptions" [value]="item.value">{{ item.label }}</option>
+            </select>
+          </label>
+        </div>
+
+        <label *ngIf="draft.recurrence !== 'none'">
+          <span>Number of occurrences</span>
+          <input type="number" min="1" max="20" [(ngModel)]="draft.recurrenceCount" name="recurrenceCount" />
+        </label>
+
+        <label>
+          <span>Location</span>
+          <input type="text" [(ngModel)]="draft.location" name="location" placeholder="Room, office, city..." />
+        </label>
+
+        <label>
+          <span>Meeting link</span>
+          <input type="url" [(ngModel)]="draft.meetingLink" name="meetingLink" placeholder="https://meet.google.com/..." />
+        </label>
+
+        <label>
+          <span>Description</span>
+          <textarea rows="3" [(ngModel)]="draft.description" name="description"></textarea>
+        </label>
+
+        <div class="orbit-form-grid two-up">
+          <label>
+            <span>Agenda</span>
+            <textarea rows="4" [(ngModel)]="draft.agenda" name="agenda"></textarea>
+          </label>
+          <label>
+            <span>Notes</span>
+            <textarea rows="4" [(ngModel)]="draft.notes" name="notes"></textarea>
+          </label>
+        </div>
+
+        <div class="orbit-chip-group">
+          <span>Reminders</span>
+          <button
+            type="button"
+            class="orbit-chip-button"
+            *ngFor="let reminder of reminderOptions"
+            [class.active]="draft.reminders.includes(reminder)"
+            (click)="toggleReminder(reminder)"
+          >
+            {{ reminder }}
+          </button>
+        </div>
+
+        <div class="orbit-attendee-picker">
+          <div class="orbit-card-head">
+            <strong>Invite people</strong>
+            <span *ngIf="directoryLoading">Loading users...</span>
+          </div>
+
+          <label class="orbit-search compact">
+            <span>Search people</span>
+            <input type="search" [(ngModel)]="attendeeSearch" name="attendeeSearch" placeholder="Name, email, role..." />
+          </label>
+
+          <div class="orbit-selected-people" *ngIf="draft.attendeeIds.length">
+            <div class="orbit-person-chip" *ngFor="let userId of draft.attendeeIds">
+              <span>{{ getPersonName(userId) }}</span>
+              <button type="button" class="orbit-inline-link" (click)="toggleDraftOptional(userId)">
+                {{ isDraftOptional(userId) ? 'Optional' : 'Required' }}
+              </button>
+              <button type="button" class="orbit-inline-link danger" (click)="toggleDraftAttendee(userId)">Remove</button>
+            </div>
+          </div>
+
+          <div class="orbit-directory">
+            <label class="orbit-directory-row" *ngFor="let person of filteredDirectory">
+              <input type="checkbox" [checked]="isDraftAttendee(person.id)" (change)="toggleDraftAttendee(person.id)" />
+              <div class="copy">
+                <strong>{{ person.name }}</strong>
+                <span>{{ person.email || person.role }}</span>
+              </div>
+              <small>{{ person.status }}</small>
+            </label>
+          </div>
+        </div>
+
+        <div class="orbit-suggestions" *ngIf="suggestedSlots.length">
+          <div class="orbit-card-head">
+            <strong>Suggested slots</strong>
+            <span>Least attendee conflict</span>
+          </div>
+          <button
+            type="button"
+            class="orbit-suggestion"
+            *ngFor="let slot of suggestedSlots"
+            (click)="useSuggestedSlot(slot)"
+          >
+            <strong>{{ slot.label }}</strong>
+            <span>{{ slot.freeAttendees }} free / {{ slot.conflictCount }} conflicts</span>
+          </button>
+        </div>
+
+        <div class="orbit-editor-actions">
+          <button type="button" class="orbit-ghost" (click)="prepareNewEvent(selectedDate)">Reset</button>
+          <button type="submit" class="orbit-primary" [class.saved]="saveState === 'saved'">
+            {{ editorMode === 'edit' ? 'Save event' : 'Create event' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  </aside>
+</div>

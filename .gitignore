@@ -1,0 +1,55 @@
+# Local secrets and environment files
+.env
+.env.*
+!.env.example
+!.env.*.example
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.*.example
+
+# Private or generated project copies
+Kiwi.js/
+c*Users*
+.claude/
+
+# Database exports can contain customer data, credentials, and message history.
+backend/db/*.sql
+**/*.sql
+
+# Runtime data and logs
+**/*.log
+backend/data/
+frontend/data/
+frontend/cloudflared-public.log
+
+# Dependencies and build output
+**/node_modules/
+**/dist/
+**/target/
+**/.angular/
+**/.next/
+**/.cache/
+**/coverage/
+**/.run/
+**/out-tsc/
+
+# Local tooling and binaries
+frontend/tools/
+**/*.exe
+**/*.dll
+**/*.node
+
+# IDE and operating-system files
+.idea/
+.vscode/
+**/.idea/
+**/.vscode/
+**/.DS_Store
+**/Thumbs.db
+
+# Generated archives, reports, and presentations
+**/*.zip
+**/*.pptx
+**/*.docx
+**/tmp_*

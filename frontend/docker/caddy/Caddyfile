@@ -1,0 +1,4 @@
+focal.focal.cx:443 {
+  tls /etc/caddy/certs/domain.cert.pem /etc/caddy/certs/private.key.pem
+  reverse_proxy focal-web:80
+}

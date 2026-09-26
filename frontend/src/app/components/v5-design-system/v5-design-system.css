@@ -1,0 +1,76 @@
+.token-grid {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.token-grid article {
+  border: 1px solid var(--v5-border-subtle);
+  border-radius: 10px;
+  background: #fff;
+  padding: 0.55rem 0.6rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.56rem;
+  align-items: center;
+}
+
+.swatch {
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 7px;
+  border: 1px solid var(--v5-border);
+}
+
+.token-grid strong {
+  font-size: 0.81rem;
+}
+
+.token-grid p {
+  margin: 0.14rem 0 0;
+  color: var(--v5-text-3);
+  font-size: 0.74rem;
+}
+
+.demo-stack {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.sample-title {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.sample-copy {
+  margin: 0;
+  color: var(--v5-text-2);
+  font-size: 0.84rem;
+}
+
+.spacing-list {
+  display: grid;
+  gap: 0.46rem;
+}
+
+.spacing-list > div {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 0.7rem;
+  align-items: center;
+}
+
+.spacing-list span {
+  font-size: 0.76rem;
+  color: var(--v5-text-2);
+  font-weight: 700;
+}
+
+.spacing-list i {
+  display: inline-block;
+  height: 0.72rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--v5-primary) 24%, #dbeafe);
+  border: 1px solid color-mix(in srgb, var(--v5-primary) 24%, var(--v5-border));
+}
+
+

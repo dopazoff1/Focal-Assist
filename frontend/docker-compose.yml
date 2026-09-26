@@ -1,0 +1,22 @@
+services:
+  focalassist-web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    image: focalassist-web:latest
+    environment:
+      BACKEND_UPSTREAM: ${BACKEND_UPSTREAM:-http://host.docker.internal:8080}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "${WEB_PORT:-4200}:80"
+    restart: unless-stopped
+
+  focalassist-ssr:
+    build:
+      context: .
+      dockerfile: Dockerfile.ssr
+    image: focalassist-ssr:latest
+    ports:
+      - "${SSR_PORT:-4000}:4000"
+    restart: unless-stopped

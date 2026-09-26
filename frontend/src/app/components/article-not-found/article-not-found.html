@@ -1,0 +1,26 @@
+<section class="article-not-found-page">
+  <div class="article-not-found-card">
+    <p class="code">404</p>
+    <h1>Article not found</h1>
+    <p class="message">
+      The requested article does not exist, was deleted, or you no longer have access to it.
+    </p>
+
+    <div class="meta">
+      <p *ngIf="articleId !== null">
+        <span>Article ID</span>
+        <code>#{{ articleId }}</code>
+      </p>
+      <p *ngIf="source">
+        <span>Source</span>
+        <code>{{ source }}</code>
+      </p>
+    </div>
+
+    <div class="actions">
+      <a class="primary" [routerLink]="knowledgeBaseLink">Go to Knowledge Base</a>
+      <a class="ghost" [routerLink]="homeLink">Go to home</a>
+    </div>
+  </div>
+</section>
+

@@ -1,0 +1,182 @@
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.95rem 1.25rem;
+
+  background: var(--panel-1);
+  border: var(--border-size) var(--border-style) var(--panel-border);
+  border-radius: 0 0 var(--radius-card) var(--radius-card);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  box-shadow: var(--panel-shadow);
+}
+
+.left-section {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.brand-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--text-1);
+  font-size: 1rem;
+}
+
+.left-section .logo-img {
+  height: 56px;
+  width: auto;
+  border-radius: 10px;
+  border: var(--border-size) var(--border-style) var(--panel-border);
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.main-nav a {
+  text-decoration: none;
+  color: var(--text-2);
+  font-weight: var(--nav-weight);
+  padding: 0.42rem 0.78rem;
+  border-radius: var(--radius-button);
+  border: var(--border-size) var(--border-style) transparent;
+  transition: all 0.2s ease;
+}
+
+.main-nav a:hover {
+  color: var(--text-1);
+  border-color: var(--panel-border);
+  background: var(--panel-2);
+  transform: translateY(-1px);
+}
+
+.user-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.theme-funnel {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 0.3rem 0.4rem;
+  border: var(--border-size) var(--border-style) var(--panel-border);
+  border-radius: var(--radius-button);
+  background: color-mix(in srgb, var(--panel-2) 72%, transparent);
+}
+
+.theme-step {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 200px;
+}
+
+.user-name {
+  color: var(--text-2);
+  font-size: 0.92rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius-button);
+  background: color-mix(in srgb, var(--panel-2) 75%, transparent);
+}
+
+.theme-picker-label {
+  color: var(--text-2);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.theme-picker {
+  border: var(--border-size) var(--border-style) var(--panel-border);
+  background: var(--panel-2);
+  color: var(--text-1);
+  border-radius: var(--radius-button);
+  padding: 0.4rem 0.65rem;
+  font-family: inherit;
+  font-weight: 700;
+  max-width: 260px;
+}
+
+.funnel-btn {
+  border: var(--border-size) var(--border-style) var(--panel-border);
+  background: var(--panel-2);
+  color: var(--text-1);
+  border-radius: var(--radius-button);
+  padding: 0.38rem 0.62rem;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.current-theme {
+  font-size: 0.8rem;
+  color: var(--text-2);
+  font-weight: 700;
+  align-self: center;
+  padding: 0.25rem 0.45rem;
+  border-radius: var(--radius-button);
+  background: color-mix(in srgb, var(--panel-1) 82%, transparent);
+}
+
+.logout {
+  border: var(--border-size) var(--border-style) transparent;
+  background: var(--danger);
+  color: #fff;
+  border-radius: var(--radius-button);
+  padding: 0.44rem 0.85rem;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 800;
+  transition: transform 0.15s ease, filter 0.2s ease;
+}
+
+.logout:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 900px) {
+  .site-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .left-section {
+    justify-content: space-between;
+  }
+
+  .main-nav {
+    justify-content: center;
+  }
+
+  .user-actions {
+    justify-content: center;
+  }
+
+  .theme-funnel {
+    justify-content: center;
+  }
+
+  .theme-step {
+    min-width: 160px;
+  }
+
+  .theme-picker {
+    max-width: 220px;
+  }
+}

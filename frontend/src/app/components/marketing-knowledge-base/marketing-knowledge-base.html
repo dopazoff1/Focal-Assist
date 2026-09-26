@@ -1,0 +1,102 @@
+<section class="pkb-page">
+  <header class="pkb-hero">
+    <div class="pkb-hero-copy">
+      <p class="kicker">Public Knowledge Base</p>
+      <h1>Answers, SOPs, and Guides In One Searchable Space</h1>
+      <p>
+        A clean self-service experience inspired by modern help centers. Fast search, clear categories, and readable
+        article layout.
+      </p>
+    </div>
+
+    <div class="pkb-hero-search">
+      <label for="pkb-search">Search help articles</label>
+      <div class="pkb-search-wrap">
+        <input
+          id="pkb-search"
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Search by keyword, process, or issue"
+        />
+        <button type="button" *ngIf="searchTerm" (click)="clearSearch()" aria-label="Clear search">&times;</button>
+      </div>
+
+      <div class="pkb-meta">
+        <span>{{ categoryList.length }} categories</span>
+        <span>{{ totalArticles }} articles</span>
+        <span *ngIf="usingDemoContent">Demo content mode</span>
+      </div>
+    </div>
+  </header>
+
+  <section class="pkb-body">
+    <div class="pkb-loading" *ngIf="loading" aria-live="polite">
+      <div class="pkb-spinner" aria-hidden="true"></div>
+      <p>Loading public help center...</p>
+    </div>
+
+    <ng-container *ngIf="!loading">
+      <aside class="pkb-categories">
+        <h2>Browse Categories</h2>
+
+        <button
+          type="button"
+          class="pkb-category"
+          *ngFor="let category of categoryList; let i = index"
+          [class.active]="selectedCategoryId === category.id"
+          [style.--pkb-delay]="(i * 55) + 'ms'"
+          (click)="selectCategory(category.id)"
+        >
+          <span>{{ category.name }}</span>
+          <strong>{{ getCategoryCount(category.id) }}</strong>
+        </button>
+      </aside>
+
+      <div class="pkb-articles">
+        <h2>Articles</h2>
+
+        <div class="pkb-article-list" *ngIf="selectedCategoryArticles.length > 0; else noArticles">
+          <article
+            class="pkb-article-card"
+            *ngFor="let article of selectedCategoryArticles; let i = index"
+            [class.active]="selectedArticle?.id === article.id"
+            [style.--pkb-delay]="(i * 46) + 'ms'"
+          >
+            <button type="button" class="pkb-article-title" (click)="openArticle(article)">
+              {{ article.title }}
+            </button>
+
+            <p>{{ getArticlePreview(article.content || '') }}</p>
+
+            <div class="pkb-article-actions">
+              <button type="button" class="ghost" (click)="openArticle(article)">Read</button>
+              <button type="button" class="ghost" (click)="copyArticleLink(article)">Copy Link</button>
+            </div>
+          </article>
+        </div>
+
+        <ng-template #noArticles>
+          <div class="pkb-empty">
+            <p>No articles match your search in this category.</p>
+          </div>
+        </ng-template>
+      </div>
+
+      <article class="pkb-preview" *ngIf="selectedArticle as article; else noPreview">
+        <div class="pkb-preview-head">
+          <p class="kicker">Article</p>
+          <h2>{{ article.title }}</h2>
+        </div>
+
+        <div class="pkb-preview-content" [innerHTML]="article.content"></div>
+      </article>
+
+      <ng-template #noPreview>
+        <article class="pkb-preview pkb-preview-empty">
+          <h2>Select an article</h2>
+          <p>Choose a category and open any article to read details.</p>
+        </article>
+      </ng-template>
+    </ng-container>
+  </section>
+</section>

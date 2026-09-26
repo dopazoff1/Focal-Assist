@@ -1,0 +1,240 @@
+<div class="kb-container">
+
+  <div class="kb-sidebar">
+    <div class="kb-search-wrap">
+      <input
+        type="text"
+        class="kb-search"
+        placeholder="Search documents..."
+        [(ngModel)]="searchTerm"
+      />
+      <button
+        type="button"
+        class="kb-search-clear"
+        *ngIf="searchTerm"
+        (click)="clearSearch()"
+        aria-label="Clear search"
+        title="Clear search"
+      >
+        &times;
+      </button>
+    </div>
+
+    <div class="kb-list-loading" *ngIf="loading" aria-live="polite">
+      <div class="kb-list-spinner" aria-hidden="true"></div>
+      <span>Loading articles...</span>
+    </div>
+
+    <ul class="kb-list" *ngIf="!loading">
+      <li class="kb-item" *ngFor="let category of visibleCategories; let categoryIndex = index">
+        <span class="category">{{ category.name }}</span>
+
+        <ul class="sub-list">
+          <li
+            class="article-item"
+            *ngFor="let article of getFilteredArticles(category.id); let articleIndex = index"
+            [class.active]="selectedArticle?.id === article.id"
+            [style.--kb-article-delay]="((categoryIndex * 70) + (articleIndex * 36)) + 'ms'"
+          >
+            <button type="button" class="article-title article-action-btn" (click)="selectArticle(article)">
+              {{ article.title }}
+            </button>
+
+            <button
+              type="button"
+              class="article-copy-btn article-action-btn"
+              (click)="copyShareUrl(article)"
+              title="Copy shareable link"
+              aria-label="Copy shareable link"
+            >
+              Copy
+            </button>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <div class="kb-content">
+    <div class="kb-loading-chip" *ngIf="loading">Loading...</div>
+
+    <ng-container *ngIf="selectedArticle; else emptyState">
+      <div class="article-header-row">
+        <h1>{{ selectedArticle.title }}</h1>
+        <div class="article-actions">
+          <button type="button" class="copy-link-btn ghost" (click)="showContentView()">Content</button>
+          <button
+            *ngIf="hasMap(selectedArticle.id)"
+            type="button"
+            class="copy-link-btn ghost"
+            (click)="showMapView()"
+          >
+            Map / SOP
+          </button>
+          <button type="button" class="copy-link-btn" (click)="copyShareUrl(selectedArticle)">Copy Link</button>
+        </div>
+      </div>
+
+      <section class="kb-feedback">
+        <div class="kb-feedback-row">
+          <p class="kb-feedback-title">Was this article helpful?</p>
+          <div class="kb-feedback-actions">
+            <button
+              type="button"
+              class="kb-feedback-btn"
+              [class.active]="feedbackBubbleOpen && feedbackDraftSentiment === 'LIKE'"
+              (click)="openFeedbackBubble('LIKE')"
+            >
+              Like
+            </button>
+            <button
+              type="button"
+              class="kb-feedback-btn"
+              [class.active]="feedbackBubbleOpen && feedbackDraftSentiment === 'DISLIKE'"
+              (click)="openFeedbackBubble('DISLIKE')"
+            >
+              Dislike
+            </button>
+          </div>
+        </div>
+
+        <section class="kb-feedback-bubble" *ngIf="feedbackBubbleOpen">
+          <p class="kb-feedback-bubble-title">
+            {{ feedbackDraftSentiment === 'LIKE' ? 'Tell us what worked well.' : 'Tell us what should be improved.' }}
+          </p>
+          <textarea
+            class="kb-feedback-textarea"
+            placeholder="Add a short comment (optional)"
+            rows="3"
+            [(ngModel)]="feedbackDraftComment"
+          ></textarea>
+          <div class="kb-feedback-bubble-actions">
+            <button type="button" class="kb-feedback-cancel" (click)="cancelFeedbackBubble()">Cancel</button>
+            <button type="button" class="kb-feedback-submit" [disabled]="feedbackSubmitting" (click)="submitFeedback()">
+              {{ feedbackSubmitting ? 'Sending...' : 'Send feedback' }}
+            </button>
+          </div>
+        </section>
+
+        <p
+          class="kb-feedback-status"
+          *ngIf="feedbackInfo"
+          [class.success]="feedbackInfoTone === 'success'"
+          [class.error]="feedbackInfoTone === 'error'"
+        >
+          {{ feedbackInfo }}
+        </p>
+      </section>
+
+      <p *ngIf="mapError" class="kb-map-error">{{ mapError }}</p>
+
+      <ng-container *ngIf="viewMode === 'content'; else mapView">
+        <div class="kb-article-content" appMermaidContent [mermaidContent]="selectedArticle.content" [innerHTML]="selectedArticle.content"></div>
+      </ng-container>
+
+      <ng-template #mapView>
+        <div class="kb-map-loading" *ngIf="mapLoading">Loading map...</div>
+
+        <div class="tree-canvas-wrap kb-map-readonly" *ngIf="!mapLoading && mapNodes.length > 0">
+          <div
+            #mapCanvasRef
+            class="tree-canvas map-view-only"
+            [class.panning]="isPanningMap"
+            (mousedown)="onMapCanvasMouseDown($event)"
+            (mousemove)="onMapCanvasMouseMove($event)"
+            (mouseup)="onMapCanvasMouseUp()"
+            (mouseleave)="onMapCanvasMouseUp()"
+          >
+            <div class="canvas-grid"></div>
+
+            <div
+              class="canvas-world"
+              #mapWorldRef
+              [style.width.px]="getMapWorldWidth()"
+              [style.height.px]="getMapWorldHeight()"
+              [style.transform]="getMapWorldTransform()"
+            >
+              <svg class="links" aria-hidden="true">
+                <g *ngFor="let source of mapNodes">
+                  <path
+                    *ngFor="let choice of source.choices; let choiceIndex = index"
+                    [attr.d]="getMapChoiceConnectionPath(source.id, choiceIndex, choice.targetNodeId)"
+                    class="link-path"
+                  ></path>
+                </g>
+              </svg>
+
+              <article
+                *ngFor="let node of mapNodes"
+                #mapNodeRef
+                class="node-card kb-map-node-card"
+                [class.active]="selectedMapNode?.id === node.id"
+                [class.has-info]="node.hasInfo"
+                [class.no-info]="!node.hasInfo"
+                [attr.data-node-id]="node.id"
+                [style.left.px]="node.x"
+                [style.top.px]="node.y"
+                tabindex="0"
+                [attr.aria-label]="node.title + (node.hasInfo ? ', open step details' : '')"
+                (click)="onMapNodeClick(node.id)"
+                (keydown.enter)="onMapNodeKeydown(node, $event)"
+                (keydown.space)="onMapNodeKeydown(node, $event)"
+              >
+                <h3 class="kb-map-node-title">{{ node.title }}</h3>
+                <span class="kb-node-info-badge" *ngIf="node.hasInfo" title="Has step details">i</span>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <p class="kb-map-empty" *ngIf="!mapLoading && mapNodes.length === 0">
+          No steps are available in this map.
+        </p>
+      </ng-template>
+    </ng-container>
+
+    <ng-template #emptyState>
+      <h1>Knowledge Base</h1>
+      <p>Select a document from the left panel to view its content.</p>
+    </ng-template>
+  </div>
+
+  <div class="kb-step-overlay" *ngIf="selectedMapNode as node" (click)="closeStepOverlay()">
+    <div class="kb-step-shade" aria-hidden="true"></div>
+    <aside class="kb-step-drawer" role="dialog" aria-modal="true" [attr.aria-labelledby]="'kb-step-title-' + node.id" (click)="$event.stopPropagation()">
+      <header class="kb-step-drawer-header">
+        <div>
+          <p class="kb-step-kicker">Step Details</p>
+          <h2 [id]="'kb-step-title-' + node.id">{{ node.title }}</h2>
+        </div>
+        <button
+          #stepCloseButton
+          type="button"
+          class="kb-step-close"
+          (click)="closeStepOverlay()"
+          aria-label="Close step details"
+        >
+          &times;
+        </button>
+      </header>
+
+      <div class="kb-step-drawer-body">
+        <div class="kb-step-content" appMermaidContent [mermaidContent]="getStepOverlayContent(node)" [innerHTML]="getStepOverlayContent(node)"></div>
+
+        <div class="kb-step-options" *ngIf="node.choices.length > 0">
+          <h3>Continue from this step</h3>
+          <button
+            type="button"
+            class="kb-step-option-btn"
+            *ngFor="let choice of node.choices"
+            (click)="onMapChoiceClick(node.id, choice, $event)"
+          >
+            <span>{{ choice.label }}</span>
+            <small>{{ choice.targetTitle }}</small>
+          </button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+</div>

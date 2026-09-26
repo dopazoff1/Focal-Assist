@@ -1,0 +1,187 @@
+<section class="tree-builder-page prompt-map-page">
+  <aside class="tree-sidebar">
+    <div class="sidebar-card">
+      <h2>Prompt Map Builder</h2>
+      <p class="muted">Create prompt types and link them to account roles using map-style connections.</p>
+
+      <div class="toolbar">
+        <button type="button" (click)="addPromptType()" [disabled]="saving">Add Prompt Type</button>
+        <button type="button" class="ghost" (click)="autoLayout()" [disabled]="!profiles.length">Auto Layout</button>
+        <button type="button" class="ghost" (click)="loadMap()" [disabled]="loading || saving">Reload</button>
+        <button type="button" (click)="saveToDatabase()" [disabled]="loading || saving">
+          {{ saving ? 'Saving...' : 'Save to DB' }}
+        </button>
+        <button type="button" class="danger" (click)="deleteSelectedPrompt()" [disabled]="!selectedProfileId || saving">
+          Delete Prompt
+        </button>
+      </div>
+
+      <p class="muted" *ngIf="loading">Loading current prompt map...</p>
+      <p class="muted" *ngIf="!loading">Prompt types: {{ profiles.length }} | Links: {{ links.length }}</p>
+    </div>
+
+    <div class="sidebar-card">
+      <h3>Role Mapping</h3>
+      <ul class="choice-list role-summary">
+        <li *ngFor="let roleNode of roleNodes">
+          <div>
+            <strong>{{ labelForRole(roleNode.role) }}</strong>
+            <small>
+              <ng-container *ngIf="getLinkedProfiles(roleNode.role).length; else noRoleLinks">
+                {{ getLinkedProfiles(roleNode.role).length }} linked prompt(s)
+              </ng-container>
+              <ng-template #noRoleLinks>No links</ng-template>
+            </small>
+          </div>
+          <button type="button" class="danger ghost" (click)="clearRole(roleNode.role)">Clear</button>
+        </li>
+      </ul>
+    </div>
+
+    <div class="sidebar-card" *ngIf="selectedProfile as p">
+      <h3>Prompt Type #{{ p.id }}</h3>
+      <label>
+        <span>Name</span>
+        <input type="text" [(ngModel)]="p.name" (ngModelChange)="onProfileEdited()" />
+      </label>
+      <label>
+        <span>Model</span>
+        <input type="text" [(ngModel)]="p.model" (ngModelChange)="onProfileEdited()" placeholder="gpt-4o-mini" />
+      </label>
+      <label>
+        <span>OpenAI API key</span>
+        <input type="password" [(ngModel)]="p.apiKey" (ngModelChange)="onProfileEdited()" placeholder="sk-..." autocomplete="off" />
+      </label>
+
+      <div class="split">
+        <label>
+          <span>Temperature</span>
+          <input type="number" min="0" max="2" step="0.05" [(ngModel)]="p.temperature" (ngModelChange)="onProfileEdited()" />
+        </label>
+        <label>
+          <span>Max tokens</span>
+          <input type="number" min="128" max="4096" step="1" [(ngModel)]="p.maxTokens" (ngModelChange)="onProfileEdited()" />
+        </label>
+      </div>
+
+      <label class="checkbox">
+        <input type="checkbox" [(ngModel)]="p.active" (ngModelChange)="onProfileEdited()" />
+        <span>Active</span>
+      </label>
+
+      <label>
+        <span>System prompt</span>
+        <textarea rows="10" [(ngModel)]="p.systemPrompt" (ngModelChange)="onProfileEdited()"></textarea>
+      </label>
+    </div>
+
+    <div class="sidebar-card">
+      <h3>Prompt Types</h3>
+      <ul class="choice-list">
+        <li
+          *ngFor="let profile of profiles"
+          class="prompt-list-item"
+          [class.active]="profile.id === selectedProfileId"
+          (click)="selectProfile(profile.id)"
+        >
+          <div>
+            <strong>{{ profile.name }}</strong>
+            <small>{{ profile.active ? 'Active' : 'Inactive' }} | {{ profile.model }}</small>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <p class="status">{{ statusMessage }}</p>
+    <details class="error-details" *ngIf="lastSaveErrorDetails">
+      <summary>Save Error Details</summary>
+      <pre>{{ lastSaveErrorDetails }}</pre>
+    </details>
+  </aside>
+
+  <div class="tree-canvas-wrap">
+    <div
+      class="tree-canvas"
+      [class.panning]="isPanningCanvas"
+      #canvasRef
+      (mousedown)="onCanvasMouseDown($event)"
+      (mousemove)="onCanvasMouseMove($event)"
+      (mouseup)="onCanvasMouseUp()"
+      (wheel)="onCanvasWheel($event)"
+    >
+      <div
+        class="canvas-grid"
+        [style.background-size]="getCanvasBackgroundSize()"
+        [style.background-position]="getCanvasBackgroundPosition()"
+      ></div>
+
+      <div class="canvas-world" [style.transform]="getCanvasTransform()">
+        <svg class="links" aria-hidden="true">
+          <path
+            *ngFor="let link of links"
+            [attr.d]="getRoleConnectionPath(link)"
+            class="link-path role-link"
+          ></path>
+          <path *ngIf="wireFromRole" [attr.d]="getLiveWirePath()" class="link-path live"></path>
+        </svg>
+
+        <article
+          *ngFor="let roleNode of roleNodes"
+          class="node-card role-card"
+          [style.left.px]="roleNode.x"
+          [style.top.px]="roleNode.y"
+        >
+          <header>
+            <span>Role</span>
+            <strong>{{ labelForRole(roleNode.role) }}</strong>
+          </header>
+
+          <div class="map-choices" *ngIf="getLinkedProfiles(roleNode.role).length > 0">
+            <div class="map-choice" *ngFor="let linked of getLinkedProfiles(roleNode.role)">
+              <span class="choice-label" [title]="linked.name">{{ linked.name }}</span>
+              <button
+                type="button"
+                class="danger ghost inline-remove"
+                (click)="removeRoleLink(roleNode.role, linked.id)"
+              >
+                x
+              </button>
+            </div>
+          </div>
+          <p class="meta" *ngIf="getLinkedProfiles(roleNode.role).length === 0">No linked prompts</p>
+
+          <button
+            type="button"
+            class="choice-wire role-wire"
+            title="Drag to prompt type"
+            (mousedown)="startWire($event, roleNode.role)"
+          >
+            +
+          </button>
+        </article>
+
+        <article
+          *ngFor="let profile of profiles"
+          class="node-card prompt-card"
+          [class.active]="profile.id === selectedProfileId"
+          [class.inactive]="!profile.active"
+          [style.left.px]="profile.xPos"
+          [style.top.px]="profile.yPos"
+          (mousedown)="startDragProfile($event, profile)"
+          (mouseup)="completeWire($event, profile)"
+          (click)="selectProfile(profile.id)"
+        >
+          <header>
+            <span>#{{ profile.id }}</span>
+            <strong>{{ profile.name }}</strong>
+          </header>
+          <p class="meta">
+            {{ profile.model }} | temp {{ profile.temperature }} | max {{ profile.maxTokens }} | key {{ profile.apiKey ? 'set' : 'missing' }}
+          </p>
+          <p class="meta" *ngIf="!profile.active">Inactive</p>
+          <p class="meta" *ngIf="profile.active">Active</p>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>

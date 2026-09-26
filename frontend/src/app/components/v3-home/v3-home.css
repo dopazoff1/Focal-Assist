@@ -1,0 +1,55 @@
+/* Focal operational directory. Shared controls and tokens live at the V3 scope. */
+:host { display: block; }
+.v3-home, .module-directory, .module-group, .home-context-copy { min-width: 0; }
+.home-context { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: center; padding: 4px 0 20px; border-bottom: 1px solid var(--color-rule); }
+.home-context h1 { margin: 0; font: 600 24px/1.25 var(--font-display); overflow-wrap: anywhere; }
+.session-context { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(112px, auto); margin: 0; }
+.session-context > div { min-width: 0; padding: 8px 12px; }
+.session-context > div + div { border-left: 1px solid var(--color-rule); }
+.session-context dt { margin-bottom: 8px; color: var(--color-muted); font-size: 11px; line-height: 1; }
+.session-context dd { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 12px; line-height: 1.3; color: var(--color-ink-2); }
+.session-context svg { flex-shrink: 0; color: var(--color-muted); }
+.session-context .status-value, .session-context .status-value svg { color: var(--color-success); }
+.home-workbench { display: grid; grid-template-columns: minmax(0, 1fr) 216px; gap: 24px; align-items: start; padding-top: 24px; }
+.directory-head, .home-actions > header { display: flex; align-items: center; min-height: 36px; padding-bottom: 16px; border-bottom: 1px solid var(--color-rule-2); }
+.directory-head h2, .home-actions h2 { margin: 0; font: 600 14px/1.3 var(--font-display); }
+.module-groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; row-gap: 12px; }
+.group-head { padding: 24px 0 12px; }
+.group-head h3 { margin: 0; font: 600 14px/1.3 var(--font-display); color: var(--color-ink); }
+.module-list { border-top: 1px solid var(--color-rule); }
+.module-row { display: grid; min-width: 0; min-height: 48px; grid-template-columns: 20px minmax(0, 1fr) 16px; gap: 12px; align-items: center; padding: 10px 8px; border-bottom: 1px solid var(--color-rule); color: var(--color-ink); text-decoration: none; transition: background-color var(--dur-micro) var(--ease-out); }
+.module-icon { display: grid; width: 20px; height: 20px; place-items: center; color: var(--color-muted); }
+.module-copy { min-width: 0; }
+.module-copy strong { font-size: 14px; font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
+.module-cta { display: flex; width: 16px; align-items: center; font-size: 0; color: var(--color-muted); }
+.module-cta svg { flex: 0 0 16px; }
+.module-row:hover, .quick-list a:hover { background: var(--color-surface); }
+.module-row:active, .quick-list a:active { background: var(--color-paper-3); }
+.module-row:focus-visible, .quick-list a:focus-visible { position: relative; outline: 2px solid var(--color-focus); outline-offset: -2px; }
+.home-actions { position: sticky; top: 0; min-width: 0; }
+.quick-list a { display: grid; min-height: 44px; grid-template-columns: 20px minmax(0, 1fr) 16px; gap: 12px; align-items: center; padding: 10px 8px; border-bottom: 1px solid var(--color-rule); color: var(--color-ink-2); font-size: 14px; line-height: 1.4; text-decoration: none; transition: background-color var(--dur-micro) var(--ease-out); }
+.quick-list a > span { min-width: 0; overflow-wrap: anywhere; }
+.quick-list a > svg:first-child { color: var(--color-accent); }
+.quick-list a > svg:last-child { color: var(--color-muted); }
+@media (max-width: 1200px) {
+  .home-workbench { grid-template-columns: minmax(0, 1fr); }
+  .home-actions { position: static; }
+  .quick-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; }
+}
+@media (max-width: 900px) {
+  .home-context { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .session-context { grid-auto-columns: minmax(0, 1fr); }
+  .module-groups { grid-template-columns: minmax(0, 1fr); gap: 0; }
+}
+@media (max-width: 600px) {
+  .session-context { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .session-context > div:nth-child(3) { grid-column: 1 / -1; border-top: 1px solid var(--color-rule); border-left: 0; }
+  .quick-list { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 380px) {
+  .session-context { grid-template-columns: minmax(0, 1fr); }
+  .session-context > div + div { border-left: 0; border-top: 1px solid var(--color-rule); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .module-row, .quick-list a { transition: none; }
+}

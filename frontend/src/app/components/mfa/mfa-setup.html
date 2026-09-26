@@ -1,0 +1,70 @@
+<main class="mfa-page" [class.is-exiting]="isExiting" aria-labelledby="mfa-setup-title">
+  <aside class="mfa-rail">
+    <focal-login-scene />
+    <div class="mfa-rail-mark">
+      <img src="logo.jpg" alt="Credit+" />
+      <span><strong>Focal</strong><small>Customer operations</small></span>
+    </div>
+    <div class="mfa-rail-copy">
+      <p class="eyebrow">Account protection</p>
+      <h1>One more layer for your workspace.</h1>
+      <p>Your authenticator app will be required each time you sign in.</p>
+    </div>
+    <p class="mfa-rail-foot">Focal / Credit+</p>
+  </aside>
+
+  <section class="mfa-main">
+    <div class="mfa-panel">
+      <ng-container *ngIf="!isComplete; else backupPanel">
+        <header class="mfa-panel-header">
+          <p class="eyebrow">Authenticator setup</p>
+          <h2 id="mfa-setup-title">Connect Google Authenticator</h2>
+          <p>Scan the QR code, then confirm one code to finish securing your account.</p>
+        </header>
+
+        <p class="mfa-status" *ngIf="isLoading">Preparing your secure setup...</p>
+        <p class="mfa-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</p>
+
+        <div class="mfa-grid" *ngIf="setup">
+          <div class="qr-frame"><img [src]="setup.qrCodeDataUrl" alt="QR code for Google Authenticator setup" /></div>
+          <div class="mfa-details">
+            <p class="mfa-step">1. Scan this code</p>
+            <p class="mfa-muted">In Google Authenticator, add an account and scan the code.</p>
+            <span class="secret-label">Can’t scan? Use this key</span>
+            <code class="secret-value">{{ setup.secret }}</code>
+            <div class="mfa-field">
+              <label for="mfa-setup-code">2. Confirm the six-digit code</label>
+              <input id="mfa-setup-code" class="mfa-input" [(ngModel)]="code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000" [disabled]="isSubmitting" />
+            </div>
+            <div class="mfa-actions">
+              <button class="mfa-primary" type="button" (click)="confirm()" [disabled]="isSubmitting">
+                <span>{{ isSubmitting ? 'Checking code...' : 'Confirm authenticator' }}</span>
+                <svg *ngIf="!isSubmitting" lucideArrowRight [size]="17" aria-hidden="true"></svg>
+                <svg *ngIf="isSubmitting" class="mfa-icon-spin" lucideLoaderCircle [size]="17" aria-hidden="true"></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-template #backupPanel>
+        <header class="mfa-panel-header">
+          <p class="eyebrow">Setup complete</p>
+          <h2 id="mfa-setup-title">Save your backup codes</h2>
+          <p>Each code works once if you lose access to your authenticator. They will not be shown again.</p>
+        </header>
+        <section class="mfa-backup" aria-label="Backup codes">
+          <h3>Recovery codes</h3>
+          <p>Store these somewhere private before continuing.</p>
+          <ol class="backup-list"><li *ngFor="let backupCode of backupCodes">{{ backupCode }}</li></ol>
+          <div class="mfa-actions">
+            <button type="button" class="mfa-secondary" (click)="copyBackupCodes()"><svg *ngIf="!copied" lucideClipboard [size]="16" aria-hidden="true"></svg><svg *ngIf="copied" lucideCheck [size]="16" aria-hidden="true"></svg>{{ copied ? 'Copied' : 'Copy codes' }}</button>
+            <button type="button" class="mfa-secondary" (click)="downloadBackupCodes()"><svg lucideDownload [size]="16" aria-hidden="true"></svg>Download</button>
+          </div>
+          <label class="mfa-check"><input type="checkbox" [(ngModel)]="backupCodesSaved" /> <span>I have saved my backup codes in a secure place.</span></label>
+          <button type="button" class="mfa-primary" (click)="continueToWorkspace()" [disabled]="!backupCodesSaved"><span>Continue to Focal</span><svg lucideArrowRight [size]="17" aria-hidden="true"></svg></button>
+        </section>
+      </ng-template>
+    </div>
+  </section>
+</main>

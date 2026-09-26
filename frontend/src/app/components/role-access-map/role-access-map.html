@@ -1,0 +1,131 @@
+<section class="tree-builder-page role-access-page">
+  <aside class="tree-sidebar">
+    <div class="sidebar-card">
+      <h2>Role Access Map</h2>
+      <p class="muted">Create account types and map each one to allowed features using drag-and-wire links.</p>
+      <div class="toolbar">
+        <button type="button" class="ghost" (click)="autoLayout()">Auto Layout</button>
+        <button type="button" class="ghost" (click)="load(true)" [disabled]="loading || saving">Reload Existing</button>
+        <button type="button" (click)="saveToDatabase()" [disabled]="loading || saving">{{ saving ? 'Saving...' : 'Save to DB' }}</button>
+      </div>
+      <p class="muted" *ngIf="loading">Loading role access map...</p>
+      <p class="muted" *ngIf="!loading">Roles: {{ roles.length }} - Features: {{ features.length }} - Links: {{ visibleLinks.length }}</p>
+      <p class="muted" *ngIf="invalidLinks.length">Invalid links skipped: {{ invalidLinks.length }}</p>
+    </div>
+
+    <div class="sidebar-card">
+      <h3>Create Account Type</h3>
+      <input [(ngModel)]="newRoleName" placeholder="Role name (ex: KB_MANAGER)" />
+      <input [(ngModel)]="newRoleDescription" placeholder="Description" />
+      <div class="toolbar">
+        <button type="button" (click)="createRole()">Create Role</button>
+      </div>
+      <p class="muted">Use uppercase with underscores for best compatibility with API role fields.</p>
+    </div>
+
+    <div class="sidebar-card" *ngIf="selectedRoleNode as roleNode">
+      <h3>Role: {{ roleNode.roleName }}</h3>
+      <p class="muted"><strong>{{ roleNode.label }}</strong></p>
+      <p class="muted">{{ roleNode.meta }}</p>
+      <p class="muted">Linked features: <strong>{{ getRoleFeatureCount(roleNode.roleName || '') }}</strong></p>
+
+      <div class="toolbar">
+        <button type="button" class="ghost" (click)="clearSelectedRoleLinks()">Clear Links</button>
+        <button type="button" class="ghost danger" (click)="deleteSelectedCustomRole()" [disabled]="roleNode.system">Delete Role</button>
+      </div>
+
+      <label>Allowed Features</label>
+      <div class="channel-checks feature-checks">
+        <label *ngFor="let feature of features">
+          <input
+            type="checkbox"
+            [checked]="isRoleLinked(roleNode.roleName || '', feature.key)"
+            (change)="toggleSelectedRoleFeature(feature.key)"
+          />
+          <span>{{ feature.label }}</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="sidebar-card" *ngIf="selectedFeatureNode as featureNode">
+      <h3>Feature: {{ featureNode.label }}</h3>
+      <p class="muted">{{ featureNode.meta }}</p>
+      <p class="muted">Route: <strong>{{ getFeatureRoute(featureNode.featureKey) }}</strong></p>
+      <p class="muted">Assigned roles: <strong>{{ getFeatureRoleCount(featureNode.featureKey || '') }}</strong></p>
+    </div>
+
+    <div class="sidebar-card" *ngIf="errorMessage">
+      <h3>Error</h3>
+      <p class="muted">{{ errorMessage }}</p>
+    </div>
+
+    <p class="status">{{ statusMessage }}</p>
+  </aside>
+
+  <div class="tree-canvas-wrap">
+    <div
+      class="tree-canvas"
+      [class.panning]="isPanningCanvas"
+      #canvasRef
+      (mousedown)="onCanvasMouseDown($event)"
+      (mousemove)="onCanvasMouseMove($event)"
+      (mouseup)="onCanvasMouseUp()"
+      (wheel)="onCanvasWheel($event)"
+    >
+      <div
+        class="canvas-grid"
+        [style.background-size]="getCanvasBackgroundSize()"
+        [style.background-position]="getCanvasBackgroundPosition()"
+      ></div>
+
+      <div class="canvas-world" [style.transform]="getCanvasTransform()" [style.width.px]="worldWidth" [style.height.px]="worldHeight">
+        <svg class="links" aria-hidden="true">
+          <path
+            *ngFor="let link of visibleLinks; trackBy: trackLink"
+            [attr.d]="getConnectionPath(link.roleName, link.featureKey)"
+            class="link-path role-link"
+          ></path>
+          <path *ngIf="wireFromRole" [attr.d]="getLiveWirePath()" class="link-path live"></path>
+        </svg>
+
+        <article
+          *ngFor="let node of nodes; trackBy: trackNode"
+          class="node-card"
+          [class.active]="node.id === selectedNodeId"
+          [class.role-user]="node.kind === 'ROLE'"
+          [class.role-channel]="node.kind === 'FEATURE'"
+          [class.system-role]="node.kind === 'ROLE' && node.system"
+          [style.left.px]="node.x"
+          [style.top.px]="node.y"
+          (mousedown)="startDrag($event, node)"
+          (click)="selectNode(node.id)"
+          (mouseup)="completeWire($event, node)"
+        >
+          <header>
+            <span>{{ node.kind }}</span>
+            <strong>{{ node.label }}</strong>
+          </header>
+          <p class="tag" *ngIf="node.kind === 'ROLE'">{{ node.system ? 'SYSTEM' : 'CUSTOM' }}</p>
+          <p class="meta" [attr.title]="node.meta">{{ node.meta }}</p>
+
+          <div class="map-choices" *ngIf="node.kind === 'ROLE' && node.roleName">
+            <div class="map-choice" (mousedown)="$event.stopPropagation()">
+              <span class="choice-label">Feature Access</span>
+              <span class="choice-target">{{ getRoleFeatureCount(node.roleName) }} linked</span>
+              <button
+                type="button"
+                class="choice-wire"
+                title="Drag to feature node"
+                (mousedown)="startWire($event, node.roleName)"
+              >
+                +
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+

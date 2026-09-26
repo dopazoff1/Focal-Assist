@@ -1,0 +1,48 @@
+﻿<section class="sprints-page" *ngIf="(sprints$ | async) as sprints">
+  <header class="page-head">
+    <h1>FlowDesk Sprints</h1>
+  </header>
+
+  <section class="create-panel">
+    <input [(ngModel)]="sprintName" placeholder="Sprint name">
+    <input [(ngModel)]="sprintGoal" placeholder="Goal">
+    <input type="date" [(ngModel)]="sprintStart">
+    <input type="date" [(ngModel)]="sprintEnd">
+    <button type="button" (click)="createSprint()">Create Sprint</button>
+  </section>
+
+  <section class="sprint-grid" *ngIf="(issues$ | async) as issues">
+    <article class="sprint-card" *ngFor="let sprint of sprints">
+      <header>
+        <div>
+          <h3>{{ sprint.name }}</h3>
+          <p>{{ sprint.goal || 'No goal defined' }}</p>
+        </div>
+        <span class="state" [attr.data-state]="sprint.state">{{ sprint.state }}</span>
+      </header>
+
+      <div class="meta-row">
+        <span>{{ sprint.startDate }} → {{ sprint.endDate }}</span>
+        <span>{{ issuesFor(issues, sprint.id).length }} issues</span>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-bar" [style.width.%]="progress(issues, sprint.id)"></div>
+      </div>
+      <small>{{ progress(issues, sprint.id) }}% complete</small>
+
+      <div class="actions">
+        <button type="button" (click)="setState(sprint.id, 'planned')">Planned</button>
+        <button type="button" (click)="setState(sprint.id, 'active')">Active</button>
+        <button type="button" (click)="setState(sprint.id, 'closed')">Closed</button>
+      </div>
+
+      <div class="issue-list">
+        <label *ngFor="let issue of issuesFor(issues, sprint.id)">
+          <span>{{ issue.key }} • {{ issue.title }}</span>
+          <button type="button" (click)="assign(issue.id, null)">Remove</button>
+        </label>
+      </div>
+    </article>
+  </section>
+</section>

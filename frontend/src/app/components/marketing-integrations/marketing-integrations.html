@@ -1,0 +1,27 @@
+<div class="integrations-page">
+  <section class="panel intro">
+    <p class="kicker">Integrations</p>
+    <h1>Connect Your Existing Stack Without Rebuilding Operations</h1>
+    <p>
+      Focal plugs into the tools your teams already use, so rollout is fast and adoption is frictionless.
+    </p>
+  </section>
+
+  <section class="group-grid">
+    <article class="panel group" *ngFor="let group of groups">
+      <h2>{{ group.title }}</h2>
+      <div class="chips">
+        <span *ngFor="let tool of group.tools">{{ tool }}</span>
+      </div>
+    </article>
+  </section>
+
+  <section class="panel capability">
+    <p class="kicker">Integration Operations</p>
+    <h2>Built For Reliability, Governance, and Scale</h2>
+    <ul>
+      <li *ngFor="let capability of capabilities">{{ capability }}</li>
+    </ul>
+  </section>
+</div>
+

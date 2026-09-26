@@ -1,0 +1,132 @@
+<section class="astra-dash">
+  <header class="dash-head">
+    <div>
+      <h2>Executive KB Command</h2>
+      <p>Track article usage, customer sentiment, and support pressure in one operating view.</p>
+    </div>
+    <div class="head-actions">
+      <label>
+        Period
+        <select [(ngModel)]="days" (change)="reload()">
+          <option [ngValue]="7">7 days</option>
+          <option [ngValue]="14">14 days</option>
+          <option [ngValue]="30">30 days</option>
+          <option [ngValue]="90">90 days</option>
+        </select>
+      </label>
+      <button type="button" (click)="reload()" [disabled]="loading">{{ loading ? 'Refreshing...' : 'Refresh' }}</button>
+    </div>
+  </header>
+
+  <p class="error" *ngIf="error">{{ error }}</p>
+
+  <div class="loader" *ngIf="loading">
+    <span></span><span></span><span></span>
+  </div>
+
+  <ng-container *ngIf="!loading && data as d">
+    <div class="kpis">
+      <article>
+        <small>Total Views</small>
+        <strong>{{ d.totals.views }}</strong>
+      </article>
+      <article>
+        <small>Unique Viewers</small>
+        <strong>{{ d.totals.uniqueViewers }}</strong>
+      </article>
+      <article>
+        <small>Feedback Entries</small>
+        <strong>{{ d.totals.feedbackCount }}</strong>
+      </article>
+      <article>
+        <small>Public Tickets</small>
+        <strong>{{ d.totals.publicTickets }}</strong>
+      </article>
+      <article>
+        <small>Likes / Dislikes</small>
+        <strong>{{ d.totals.likes }} / {{ d.totals.dislikes }}</strong>
+      </article>
+      <article>
+        <small>Open + Pending</small>
+        <strong>{{ d.totals.openTickets + d.totals.pendingTickets }}</strong>
+      </article>
+    </div>
+
+    <div class="grid">
+      <section class="panel">
+        <div class="panel-head">
+          <h3>Top Articles by Traffic</h3>
+          <small>Viewer behavior by article</small>
+        </div>
+        <div class="rows">
+          <article class="row" *ngFor="let item of d.topArticles">
+            <div class="meta">
+              <strong>{{ item.title }}</strong>
+              <small>{{ item.category }}</small>
+            </div>
+            <div class="bar">
+              <span [style.width.%]="viewRatio(item.views)"></span>
+            </div>
+            <div class="vals">
+              <b>{{ item.views }}</b>
+              <small>Likes {{ item.likes }} · Dislikes {{ item.dislikes }}</small>
+            </div>
+          </article>
+          <p class="empty" *ngIf="d.topArticles.length === 0">No tracked views yet.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h3>Recent Feedback</h3>
+          <small>Quality signal from end users</small>
+        </div>
+        <div class="list">
+          <article *ngFor="let item of d.recentFeedback">
+            <div>
+              <strong>{{ item.articleTitle || ('Article #' + item.articleId) }}</strong>
+              <small>{{ item.createdAt | date:'medium' }}</small>
+            </div>
+            <span class="badge" [class.neg]="item.sentiment === 'DISLIKE'">{{ item.sentiment }}</span>
+            <p>{{ item.feedbackText || 'No comment provided.' }}</p>
+          </article>
+          <p class="empty" *ngIf="d.recentFeedback.length === 0">No feedback yet.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h3>Recent Viewers</h3>
+          <small>Who consumed your SOP content</small>
+        </div>
+        <div class="list compact">
+          <article *ngFor="let item of d.recentViewers">
+            <div>
+              <strong>{{ item.viewer }}</strong>
+              <small>{{ item.email || 'Unknown email' }}</small>
+            </div>
+            <span>{{ item.source }}</span>
+          </article>
+          <p class="empty" *ngIf="d.recentViewers.length === 0">No viewer events yet.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h3>Public Ticket Pulse</h3>
+          <small>Requests opened from public knowledge base</small>
+        </div>
+        <div class="list compact">
+          <article *ngFor="let t of d.tickets">
+            <div>
+              <strong>{{ t.ticketKey }}</strong>
+              <small>{{ t.subject }}</small>
+            </div>
+            <span class="ticket-state">{{ t.status }}</span>
+          </article>
+          <p class="empty" *ngIf="d.tickets.length === 0">No public tickets yet.</p>
+        </div>
+      </section>
+    </div>
+  </ng-container>
+</section>

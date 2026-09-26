@@ -1,0 +1,112 @@
+<section class="academy-page">
+  <header class="academy-head">
+    <div class="academy-title">
+      <h1>Academy</h1>
+      <p>Trainings, SOPs, and quizzes. Built for speed and consistency.</p>
+      <div class="academy-chips">
+        <span class="chip">Role: {{ roleLabel }}</span>
+        <span class="chip">TZ: {{ auth.getTimeZone() || 'System' }}</span>
+      </div>
+    </div>
+
+    <div class="academy-actions">
+      <div class="search">
+        <input
+          type="search"
+          [(ngModel)]="search"
+          (ngModelChange)="onSearchChange()"
+          placeholder="Search courses, tags, SOPs..."
+          autocomplete="off"
+        />
+        <button type="button" *ngIf="search" class="ghost" (click)="search = ''; onSearchChange()">Clear</button>
+      </div>
+
+      <div class="quick-links">
+        <a class="btn" routerLink="./catalog">Open catalog</a>
+        <a class="btn ghost" routerLink="./studio" *ngIf="canManageTraining">Training studio</a>
+        <a class="btn ghost" routerLink="./analytics" *ngIf="canManageTraining">Analytics</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="academy-grid">
+    <article class="panel">
+      <header class="panel-head">
+        <div>
+          <strong>My trainings</strong>
+          <small>Assigned courses and due dates.</small>
+        </div>
+      </header>
+
+      <ng-container *ngIf="myCourses$ | async as rows">
+        <div class="empty" *ngIf="rows.length === 0">
+          <strong>No trainings assigned yet.</strong>
+          <span>Browse the catalog or ask OPS to assign onboarding.</span>
+          <a class="btn" routerLink="./catalog">Browse catalog</a>
+        </div>
+
+        <div class="cards" *ngIf="rows.length > 0">
+          <a class="course-card" *ngFor="let row of rows" [routerLink]="['./course', row.course.id]">
+            <div class="course-top">
+              <div class="course-ico" [attr.data-difficulty]="row.course.difficulty">{{ row.course.difficulty[0] }}</div>
+              <div class="course-meta">
+                <strong>{{ row.course.title }}</strong>
+                <span class="muted">{{ row.course.subtitle || row.course.description }}</span>
+              </div>
+              <span class="pill" [attr.data-status]="row.course.status">{{ row.course.status }}</span>
+            </div>
+
+            <div class="course-tags" *ngIf="row.course.tags.length">
+              <span class="tag" *ngFor="let t of row.course.tags.slice(0, 4)">{{ t }}</span>
+              <span class="tag muted" *ngIf="row.course.tags.length > 4">+{{ row.course.tags.length - 4 }}</span>
+            </div>
+
+            <div class="course-progress">
+              <div class="bar">
+                <span [style.width.%]="row.progressPercent"></span>
+              </div>
+              <div class="course-progress-meta">
+                <span>{{ row.progressPercent }}%</span>
+                <span class="muted">{{ row.completedLessons }}/{{ row.totalLessons }} lessons</span>
+                <span class="muted" *ngIf="row.assignment?.dueAt">Due {{ row.assignment?.dueAt | date:'mediumDate' }}</span>
+                <span class="danger" *ngIf="row.isOverdue">Overdue</span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </ng-container>
+    </article>
+
+    <article class="panel">
+      <header class="panel-head">
+        <div>
+          <strong>Recommended</strong>
+          <small>Self-enroll courses (published).</small>
+        </div>
+      </header>
+
+      <ng-container *ngIf="recommended$ | async as rec">
+        <div class="empty" *ngIf="rec.length === 0">
+          <strong>No recommendations available.</strong>
+          <span>Try the catalog to browse all published courses.</span>
+        </div>
+
+        <div class="cards" *ngIf="rec.length > 0">
+          <div class="course-card compact" *ngFor="let c of rec">
+            <div class="course-top">
+              <div class="course-ico" [attr.data-difficulty]="c.difficulty">{{ c.difficulty[0] }}</div>
+              <div class="course-meta">
+                <strong>{{ c.title }}</strong>
+                <span class="muted">{{ c.subtitle || c.description }}</span>
+              </div>
+            </div>
+            <div class="course-actions">
+              <a class="btn ghost" [routerLink]="['./course', c.id]">Preview</a>
+              <button type="button" class="btn" (click)="selfEnroll(c.id)">Enroll</button>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </article>
+  </section>
+</section>

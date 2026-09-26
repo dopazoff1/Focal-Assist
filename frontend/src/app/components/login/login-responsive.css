@@ -1,0 +1,22 @@
+@media (max-width: 1000px) {
+  .auth-shell { grid-template-columns: minmax(25rem, 1fr) minmax(0, 0.8fr); }
+  .auth-form-panel { padding: 32px; }
+  .auth-trust { padding: 28px; }
+  .trust-message h2 { font-size: 26px; }
+}
+@media (max-width: 760px) {
+  .auth-shell { display: flex; flex-direction: column; }
+  .auth-trust { order: 0; min-height: 224px; padding: 24px; }
+  .auth-trust focal-login-scene { inset: 0; }
+  .auth-brand, .trust-foot { position: relative; z-index: 1; }
+  .trust-message { display: none; }
+  .trust-foot { margin-top: auto; padding-top: 12px; border-top: 1px solid #3b4b44; }
+  .auth-form-panel { order: 1; min-height: calc(100svh - 224px); padding: 36px 24px 40px; place-items: start center; }
+  .auth-form-brand { margin-bottom: 40px; }
+  .form-heading h1 { font-size: 24px; }
+  .login-input { font-size: 16px; }
+  .auth-trust focal-login-scene { inset: 0 0 30%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-page *, .auth-page *::before, .auth-page *::after { animation: none !important; transition: none !important; }
+}

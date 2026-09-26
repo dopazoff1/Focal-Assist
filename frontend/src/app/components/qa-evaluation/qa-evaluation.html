@@ -1,0 +1,67 @@
+﻿<div class="qa-eval-page">
+  <aside class="qa-left">
+    <h3>Agents</h3>
+    <p class="muted" *ngIf="loadingAgents">Loading agents...</p>
+    <button
+      type="button"
+      class="agent-item"
+      *ngFor="let a of agents"
+      [class.active]="selectedAgentId === a.id"
+      (click)="selectAgent(a.id)">
+      {{ a.firstName }} {{ a.lastName }}
+    </button>
+  </aside>
+
+  <section class="qa-middle">
+    <h3>Assigned Tickets</h3>
+    <p class="muted" *ngIf="loadingTickets">Loading tickets...</p>
+    <div class="ticket-list">
+      <button
+        type="button"
+        class="ticket-item"
+        *ngFor="let t of tickets"
+        [class.active]="selectedTicketId === t.id"
+        (click)="selectTicket(t.id)">
+        #{{ t.id }} - {{ t.subject }}
+      </button>
+    </div>
+
+    <section class="thread-card" *ngIf="selectedTicket as current">
+      <h4>Conversation - Ticket #{{ current.id }}</h4>
+      <p class="muted" *ngIf="loadingThread">Loading thread...</p>
+      <div class="thread-list" *ngIf="selectedThread as thread">
+        <article class="thread-message" *ngFor="let m of thread.messages">
+          <div class="thread-meta">
+            <strong>{{ m.from }}</strong>
+            <span>{{ m.date }}</span>
+          </div>
+          <h5>{{ m.subject }}</h5>
+          <div class="thread-body" [innerHTML]="m.body"></div>
+        </article>
+      </div>
+    </section>
+  </section>
+
+  <aside class="qa-right" *ngIf="selectedTicket as current">
+    <h3>QA Form</h3>
+    <p class="muted">Evaluating {{ current.assignedTo }}</p>
+    <div class="error" *ngIf="error">{{ error }}</div>
+    <div class="info" *ngIf="info">{{ info }}</div>
+
+    <label>Score <input type="number" min="0" max="100" [(ngModel)]="score"></label>
+    <label>Strengths <textarea rows="2" [(ngModel)]="strengths"></textarea></label>
+    <label>Improvements <textarea rows="2" [(ngModel)]="improvements"></textarea></label>
+    <label>Comment <textarea rows="2" [(ngModel)]="comment"></textarea></label>
+    <button class="primary-btn" [disabled]="saving" (click)="createEvaluation()">{{ saving ? 'Saving...' : 'Create Evaluation' }}</button>
+
+    <h4>Previous evaluations</h4>
+    <p class="muted" *ngIf="loadingEvaluations">Loading...</p>
+    <div class="eval-list">
+      <article class="eval-item" *ngFor="let ev of evaluations">
+        <strong>{{ ev.score }}/100</strong>
+        <span>{{ ev.createdAt }}</span>
+        <p>{{ ev.comment }}</p>
+      </article>
+    </div>
+  </aside>
+</div>

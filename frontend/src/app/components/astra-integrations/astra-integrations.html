@@ -1,0 +1,76 @@
+<section class="astra-ai">
+  <header class="head">
+    <div>
+      <h2>Astra AI Integration Control</h2>
+      <p>Centralize model vendors, endpoints, and API credentials for knowledge operations.</p>
+    </div>
+    <button type="button" (click)="load()" [disabled]="loading">{{ loading ? 'Refreshing...' : 'Refresh' }}</button>
+  </header>
+
+  <p class="error" *ngIf="error">{{ error }}</p>
+  <p class="success" *ngIf="success">{{ success }}</p>
+
+  <div class="loader" *ngIf="loading">
+    <span></span><span></span><span></span>
+  </div>
+
+  <div class="cards" *ngIf="!loading">
+    <article class="card" *ngFor="let item of integrations" [class.editing]="isEditing(item)">
+      <header>
+        <div>
+          <h3>{{ item.providerName }}</h3>
+          <small>{{ item.providerCode }}</small>
+        </div>
+        <span class="state" [class.on]="item.enabled">{{ item.enabled ? 'Enabled' : 'Disabled' }}</span>
+      </header>
+
+      <ng-container *ngIf="!isEditing(item)">
+        <dl>
+          <dt>Model</dt><dd>{{ item.modelName || 'Not set' }}</dd>
+          <dt>Endpoint</dt><dd>{{ item.endpointUrl || 'Not set' }}</dd>
+          <dt>API key</dt><dd>{{ item.apiKeyMasked || 'Not set' }}</dd>
+        </dl>
+        <p class="notes">{{ item.notes || 'No operational notes.' }}</p>
+        <div class="actions">
+          <button type="button" (click)="startEdit(item)">Edit</button>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="isEditing(item)">
+        <label class="check"><input type="checkbox" [(ngModel)]="edit.enabled" /> Enabled</label>
+
+        <label>
+          Provider name
+          <input [(ngModel)]="edit.providerName" />
+        </label>
+
+        <label>
+          Model name
+          <input [(ngModel)]="edit.modelName" placeholder="gpt-4.1-mini / claude / gemini etc." />
+        </label>
+
+        <label>
+          Endpoint URL
+          <input [(ngModel)]="edit.endpointUrl" placeholder="https://..." />
+        </label>
+
+        <label>
+          API key
+          <input [(ngModel)]="edit.apiKey" placeholder="Leave empty to keep existing key" />
+        </label>
+
+        <label>
+          Notes
+          <textarea [(ngModel)]="edit.notes" placeholder="Use case, routing rules, cost controls..."></textarea>
+        </label>
+
+        <div class="actions">
+          <button type="button" class="ghost" (click)="cancelEdit()" [disabled]="savingCode === item.providerCode">Cancel</button>
+          <button type="button" class="primary" (click)="save()" [disabled]="savingCode === item.providerCode">
+            {{ savingCode === item.providerCode ? 'Saving...' : 'Save' }}
+          </button>
+        </div>
+      </ng-container>
+    </article>
+  </div>
+</section>

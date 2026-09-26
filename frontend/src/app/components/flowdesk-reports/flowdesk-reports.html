@@ -1,0 +1,60 @@
+﻿<section class="reports-page" *ngIf="issues$ | async as issues">
+  <header>
+    <h1>FlowDesk Reports</h1>
+    <p>Operational analytics for the Jira-like workspace.</p>
+  </header>
+
+  <section class="kpis">
+    <article>
+      <strong>{{ issues.length }}</strong>
+      <span>Total Issues</span>
+    </article>
+    <article>
+      <strong>{{ statusCount(issues, 'done') }}</strong>
+      <span>Done</span>
+    </article>
+    <article>
+      <strong>{{ statusCount(issues, 'in_progress') + statusCount(issues, 'in_review') }}</strong>
+      <span>In Execution</span>
+    </article>
+    <article>
+      <strong>{{ priorityCount(issues, 'critical') }}</strong>
+      <span>Critical</span>
+    </article>
+  </section>
+
+  <section class="grid">
+    <article class="panel">
+      <h3>Status Distribution</h3>
+      <div class="metric-row">
+        <span>To Do</span>
+        <div class="bar"><i [style.width.%]="percent(statusCount(issues,'todo'), issues.length)"></i></div>
+        <b>{{ statusCount(issues,'todo') }}</b>
+      </div>
+      <div class="metric-row">
+        <span>In Progress</span>
+        <div class="bar"><i [style.width.%]="percent(statusCount(issues,'in_progress'), issues.length)"></i></div>
+        <b>{{ statusCount(issues,'in_progress') }}</b>
+      </div>
+      <div class="metric-row">
+        <span>In Review</span>
+        <div class="bar"><i [style.width.%]="percent(statusCount(issues,'in_review'), issues.length)"></i></div>
+        <b>{{ statusCount(issues,'in_review') }}</b>
+      </div>
+      <div class="metric-row">
+        <span>Done</span>
+        <div class="bar"><i [style.width.%]="percent(statusCount(issues,'done'), issues.length)"></i></div>
+        <b>{{ statusCount(issues,'done') }}</b>
+      </div>
+    </article>
+
+    <article class="panel">
+      <h3>Workload by Assignee</h3>
+      <div class="metric-row" *ngFor="let item of assigneeLoad(issues)">
+        <span>{{ item.assignee }}</span>
+        <div class="bar"><i [style.width.%]="percent(item.count, issues.length)"></i></div>
+        <b>{{ item.count }}</b>
+      </div>
+    </article>
+  </section>
+</section>

@@ -1,0 +1,182 @@
+<section class="kb-analytics-page">
+  <header class="kb-analytics-hero">
+    <div>
+      <h1>Knowledge Base Analytics</h1>
+      <p>Track article consumption by agent, time spent per document, and recent engagement flow.</p>
+    </div>
+
+    <div class="kb-analytics-filters">
+      <label>
+        Period
+        <select [(ngModel)]="periodPreset" (change)="onPresetChange()">
+          <option value="7d">Last 7 days</option>
+          <option value="30d">Last 30 days</option>
+          <option value="90d">Last 90 days</option>
+          <option value="custom">Custom</option>
+        </select>
+      </label>
+
+      <label *ngIf="periodPreset === 'custom'">
+        Start
+        <input type="date" [(ngModel)]="customStart" />
+      </label>
+
+      <label *ngIf="periodPreset === 'custom'">
+        End
+        <input type="date" [(ngModel)]="customEnd" />
+      </label>
+
+      <button type="button" (click)="reload()" [disabled]="loading">{{ loading ? 'Loading...' : 'Refresh' }}</button>
+    </div>
+  </header>
+
+  <p class="error" *ngIf="error">{{ error }}</p>
+
+  <section class="kpi-grid" *ngIf="dashboard">
+    <article class="kpi-card">
+      <h3>Total Reading Time</h3>
+      <p class="kpi-value">{{ totalHours | number:'1.0-1' }}h</p>
+      <small>{{ trackedEvents }} tracked reading events</small>
+    </article>
+
+    <article class="kpi-card">
+      <h3>Active Agents</h3>
+      <p class="kpi-value">{{ uniqueUsers }}</p>
+      <small>Unique accounts with tracked article activity</small>
+    </article>
+
+    <article class="kpi-card">
+      <h3>Articles Accessed</h3>
+      <p class="kpi-value">{{ uniqueArticles }}</p>
+      <small>Documents read during selected period</small>
+    </article>
+
+    <article class="kpi-card">
+      <h3>Avg / Article</h3>
+      <p class="kpi-value">{{ avgMinutesPerArticle | number:'1.0-1' }}m</p>
+      <small>Average reading time per article</small>
+    </article>
+
+    <article class="kpi-card">
+      <h3>Avg / Agent</h3>
+      <p class="kpi-value">{{ avgMinutesPerUser | number:'1.0-1' }}m</p>
+      <small>Average reading time per active account</small>
+    </article>
+  </section>
+
+  <section class="kb-analytics-workbench" *ngIf="dashboard">
+    <aside class="panel panel-articles">
+      <header>
+        <h3>Articles</h3>
+        <small>{{ articles.length }} tracked</small>
+      </header>
+
+      <div class="article-list" *ngIf="articles.length; else noArticles">
+        <button
+          type="button"
+          class="article-row"
+          *ngFor="let article of articles"
+          [class.selected]="article.articleId === selectedArticleId"
+          (click)="selectArticle(article.articleId)"
+        >
+          <div class="article-top">
+            <strong>{{ article.title }}</strong>
+            <span>{{ article.totalHours | number:'1.0-1' }}h</span>
+          </div>
+          <div class="article-meta">
+            <span>{{ article.category }}</span>
+            <span>{{ article.viewers }} agents</span>
+          </div>
+          <div class="bar">
+            <div class="fill" [style.width.%]="articleBarPercent(article.totalSeconds)"></div>
+          </div>
+        </button>
+      </div>
+
+      <ng-template #noArticles>
+        <p class="empty">No article activity in this period.</p>
+      </ng-template>
+    </aside>
+
+    <main class="panel panel-focus">
+      <header class="focus-header" *ngIf="selectedArticle as article; else noSelection">
+        <div>
+          <h3>{{ article.title }}</h3>
+          <p>{{ article.category }} • {{ article.viewers }} agents • {{ article.eventCount }} events</p>
+        </div>
+        <div class="focus-kpis">
+          <span>{{ formatSeconds(article.totalSeconds) }}</span>
+          <small>Total time</small>
+        </div>
+      </header>
+
+      <ng-template #noSelection>
+        <header class="focus-header">
+          <div>
+            <h3>Select an article</h3>
+            <p>Choose one article from the left to inspect agent-level reading time.</p>
+          </div>
+        </header>
+      </ng-template>
+
+      <section class="focus-body">
+        <div class="focus-agents" *ngIf="selectedArticleAgentRows.length; else noArticleAgents">
+          <div class="focus-agent-row" *ngFor="let row of selectedArticleAgentRows">
+            <div>
+              <strong>{{ row.name }}</strong>
+              <p>{{ row.email || 'No email available' }}</p>
+            </div>
+            <span>{{ formatSeconds(row.seconds) }}</span>
+          </div>
+        </div>
+        <ng-template #noArticleAgents>
+          <p class="empty">No agent-level data for the selected article yet.</p>
+        </ng-template>
+      </section>
+
+      <section class="focus-recent">
+        <h4>Recent Article Access</h4>
+        <div class="recent-list" *ngIf="recent.length; else noRecent">
+          <div class="recent-row" *ngFor="let row of recent.slice(0, 28)">
+            <div>
+              <strong>{{ row.name }}</strong>
+              <p>{{ row.title }}</p>
+            </div>
+            <div class="recent-meta">
+              <span>{{ formatSeconds(row.seconds) }}</span>
+              <small>{{ row.trackedAt | date:'MMM d, HH:mm' }}</small>
+            </div>
+          </div>
+        </div>
+        <ng-template #noRecent>
+          <p class="empty">No recent access events.</p>
+        </ng-template>
+      </section>
+    </main>
+
+    <aside class="panel panel-agents">
+      <header>
+        <h3>Top Agents</h3>
+        <small>{{ agents.length }} active</small>
+      </header>
+
+      <div class="agent-list" *ngIf="agents.length; else noAgents">
+        <article class="agent-row" *ngFor="let agent of agents">
+          <div class="agent-top">
+            <strong>{{ agent.name }}</strong>
+            <span>{{ agent.totalHours | number:'1.0-1' }}h</span>
+          </div>
+          <p>{{ agent.email || 'No email available' }}</p>
+          <small>Top article: {{ agent.topArticleTitle || 'N/A' }}</small>
+          <div class="bar">
+            <div class="fill" [style.width.%]="agentBarPercent(agent.totalSeconds)"></div>
+          </div>
+        </article>
+      </div>
+
+      <ng-template #noAgents>
+        <p class="empty">No active agents in this period.</p>
+      </ng-template>
+    </aside>
+  </section>
+</section>

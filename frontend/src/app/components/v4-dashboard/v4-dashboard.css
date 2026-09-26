@@ -1,0 +1,144 @@
+.goal-card {
+  padding: 1rem;
+}
+
+.goal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.7rem;
+  margin-bottom: 0.72rem;
+}
+
+.goal-label {
+  margin: 0;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--v4-text-3);
+  font-weight: 700;
+}
+
+.goal-head h2 {
+  margin: 0.26rem 0 0;
+  font-size: 1.1rem;
+  line-height: 1.2;
+}
+
+.rev-bars {
+  height: 220px;
+  display: grid;
+  align-items: end;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 0.42rem;
+  padding-top: 0.5rem;
+}
+
+.rev-bar {
+  border-radius: 8px 8px 4px 4px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--v4-primary) 70%, #4f9cff), color-mix(in srgb, var(--v4-primary) 94%, #1d4ed8));
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--v4-primary) 22%, transparent);
+  animation: grow-bar 620ms var(--v4-ease) both;
+  transform-origin: bottom center;
+}
+
+.rev-bar:nth-child(odd) {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--v4-success) 58%, #6af2a1), color-mix(in srgb, var(--v4-success) 86%, #15803d));
+}
+
+.activity {
+  display: grid;
+  gap: 0.32rem;
+}
+
+.activity-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.58rem;
+}
+
+.activity strong {
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
+.activity p {
+  margin: 0;
+  color: var(--v4-text-2);
+  font-size: 0.8rem;
+}
+
+.v4-badge.deal {
+  border-color: color-mix(in srgb, var(--v4-primary) 34%, var(--v4-border));
+  background: color-mix(in srgb, var(--v4-primary) 9%, #fff);
+}
+
+.v4-badge.risk {
+  border-color: color-mix(in srgb, #ef4444 32%, var(--v4-border));
+  background: color-mix(in srgb, #ef4444 10%, #fff);
+}
+
+.v4-badge.task {
+  border-color: color-mix(in srgb, #6366f1 34%, var(--v4-border));
+  background: color-mix(in srgb, #6366f1 10%, #fff);
+}
+
+.v4-badge.win {
+  border-color: color-mix(in srgb, var(--v4-success) 36%, var(--v4-border));
+  background: color-mix(in srgb, var(--v4-success) 10%, #fff);
+}
+
+.nba-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.nba-grid article {
+  border: 1px solid var(--v4-border-subtle);
+  border-radius: 10px;
+  background: #fff;
+  padding: 0.64rem 0.7rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem;
+  align-items: start;
+}
+
+.nba-grid span {
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--v4-primary) 12%, #fff);
+  border: 1px solid color-mix(in srgb, var(--v4-primary) 26%, var(--v4-border));
+  color: color-mix(in srgb, var(--v4-primary) 84%, #132f6c);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.nba-grid p {
+  margin: 0;
+  color: var(--v4-text-2);
+  font-size: 0.83rem;
+  line-height: 1.45;
+}
+
+@keyframes grow-bar {
+  from {
+    transform: scaleY(0.12);
+    opacity: 0.35;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 900px) {
+  .nba-grid {
+    grid-template-columns: 1fr;
+  }
+}

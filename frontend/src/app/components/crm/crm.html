@@ -1,0 +1,1157 @@
+<div class="crm-page">
+  <div class="crm-toast-stack" aria-live="polite">
+    <article
+      *ngFor="let toast of toasts"
+      class="crm-toast"
+      [class.is-error]="toast.type === 'error'"
+      [attr.role]="toast.type === 'error' ? 'alert' : 'status'"
+    >
+      <span class="crm-toast-icon" aria-hidden="true">
+        {{ toast.type === 'error' ? '!' : 'i' }}
+      </span>
+      <div class="crm-toast-copy">
+        <strong>
+          {{ toast.type === 'error' ? 'Error' : 'Notification' }}
+        </strong>
+        <span>{{ toast.text }}</span>
+        <button
+          *ngIf="toast.action === 'gmail-oauth'"
+          type="button"
+          class="crm-toast-action"
+          (click)="handleToastAction(toast)"
+        >
+          Reconnect Gmail
+        </button>
+      </div>
+      <button
+        type="button"
+        class="crm-toast-dismiss"
+        (click)="dismissToast(toast.id)"
+        aria-label="Dismiss"
+      >
+        &times;
+      </button>
+    </article>
+  </div>
+
+  <!-- Attachment viewer (in-app preview + download) -->
+  <div class="crm-attachment-overlay" *ngIf="attachmentViewerOpen" (click)="closeAttachmentViewer()">
+    <div class="crm-attachment-modal" (click)="$event.stopPropagation()">
+      <header class="crm-attachment-header">
+        <div class="crm-attachment-title" *ngIf="activeAttachment as att">
+          <span class="crm-attachment-badge" [attr.data-kind]="attachmentKind(att)">{{ attachmentBadge(att) }}</span>
+          <div class="crm-attachment-title-text">
+            <strong [title]="att.filename || att.mimeType">{{ att.filename || att.mimeType }}</strong>
+            <span>{{ shortMime(att.mimeType) }} • {{ formatBytes(att.size) }} <ng-container *ngIf="att.inline">• inline</ng-container></span>
+          </div>
+        </div>
+
+        <div class="crm-attachment-actions">
+          <button type="button" class="crm-attachment-action primary" (click)="downloadActiveAttachment()">Download</button>
+          <a
+            *ngIf="activeAttachment?.downloadUrl"
+            class="crm-attachment-action ghost"
+            [attr.href]="activeAttachment?.downloadUrl"
+            target="_blank"
+            rel="noopener"
+          >
+            New tab
+          </a>
+          <button type="button" class="crm-attachment-action icon" (click)="closeAttachmentViewer()" aria-label="Close">
+            &times;
+          </button>
+        </div>
+      </header>
+
+      <div class="crm-attachment-preview" *ngIf="activeAttachment as att">
+        <ng-container [ngSwitch]="attachmentKind(att)">
+          <ng-container *ngSwitchCase="'img'">
+            <img class="crm-attachment-img" [src]="att.downloadUrl" [alt]="att.filename || 'Image attachment'">
+          </ng-container>
+
+          <ng-container *ngSwitchCase="'pdf'">
+            <iframe
+              *ngIf="activeAttachmentSafeUrl; else noAttachmentPreview"
+              class="crm-attachment-frame"
+              [src]="activeAttachmentSafeUrl"
+              title="Attachment preview"
+            ></iframe>
+          </ng-container>
+
+          <ng-container *ngSwitchDefault>
+            <ng-container *ngTemplateOutlet="noAttachmentPreview"></ng-container>
+          </ng-container>
+        </ng-container>
+
+        <ng-template #noAttachmentPreview>
+          <div class="crm-attachment-fallback">
+            <div class="crm-attachment-fallback-badge">{{ attachmentBadge(att) }}</div>
+            <p>Preview is not available for this file type.</p>
+            <div class="crm-attachment-fallback-actions">
+              <button type="button" class="crm-attachment-action primary" (click)="downloadActiveAttachment()">Download</button>
+              <a class="crm-attachment-action ghost" [attr.href]="att.downloadUrl" target="_blank" rel="noopener">Open in new tab</a>
+            </div>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+  <aside class="crm-sidebar">
+    <h2>CRM</h2>
+    <p class="crm-subtitle">Choose a working view</p>
+
+    <div class="choice-list">
+      <button
+        type="button"
+        class="choice-item"
+        [class.active]="selectedChoice === 'my-playlist'"
+        (click)="selectChoice('my-playlist')"
+      >
+        <span class="choice-title">My Playlist</span>
+        <small>Auto-assign + submit and move next</small>
+      </button>
+
+      <button
+        type="button"
+        class="choice-item"
+        [class.active]="selectedChoice === 'my-cases'"
+        (click)="selectChoice('my-cases')"
+      >
+        <span class="choice-title">My Cases</span>
+        <small>Tickets assigned to me</small>
+      </button>
+
+      <button
+        type="button"
+        class="choice-item"
+        [class.active]="selectedChoice === 'open-cases'"
+        (click)="selectChoice('open-cases')"
+      >
+        <span class="choice-title">Open Cases</span>
+        <small>Assigned open tickets by queue</small>
+      </button>
+
+      <button
+        type="button"
+        class="choice-item"
+        [class.active]="selectedChoice === 'all-cases'"
+        (click)="selectChoice('all-cases')"
+      >
+        <span class="choice-title">All Cases</span>
+        <small>All conversations from inbox</small>
+      </button>
+
+      <button
+        type="button"
+        class="choice-item"
+        [class.active]="selectedChoice === 'my-chats'"
+        (click)="selectChoice('my-chats')"
+      >
+        <span class="choice-title">My Chats</span>
+        <small>WhatsApp Business + Instagram inbox</small>
+      </button>
+    </div>
+  </aside>
+
+  <section class="crm-main">
+    <ng-container *ngIf="selectedChoice === 'my-playlist'">
+      <div class="panel ticket-layout" style="grid-template-rows: 1fr;">
+        <div class="ticket-main-grid single-pane">
+
+          <div class="ticket-workspace-pane" style="grid-template-rows: auto minmax(0,1fr) auto;">
+            <section
+              class="highlight-card"
+              *ngIf="myPlaylist.oldestCase as oldest; else noOldest"
+              style="display:grid;gap:.34rem;padding:.62rem .72rem;border-left:4px solid var(--brand);background:linear-gradient(180deg,color-mix(in srgb,var(--panel-1) 88%,var(--brand) 12%),var(--panel-1));"
+            >
+              <small style="margin:0;color:#6b7280;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;">Ticket Summary</small>
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.55rem;">
+                <h3 style="margin:0;color:var(--text-1);font-size:.96rem;line-height:1.3;">#{{ oldest.id }} - {{ oldest.subject }}</h3>
+                <div class="summary-status-stack" style="display:flex;align-items:center;justify-content:flex-end;gap:.22rem;flex-wrap:wrap;">
+                  <span class="badge" style="font-weight:700;white-space:nowrap;">{{ oldest.status }}</span>
+                  <ng-container *ngFor="let tag of getTagPillsForCase(oldest)">
+                    <span
+                      class="badge case-tag-pill"
+                      [title]="tag.tooltip"
+                      style="background:color-mix(in srgb,var(--brand) 14%,#ffffff);border-color:color-mix(in srgb,var(--brand) 38%,var(--panel-border) 62%);color:#1f2937;font-weight:700;"
+                    >
+                      {{ tag.label }}
+                    </span>
+                  </ng-container>
+                </div>
+              </div>
+              <p style="margin:0;color:#475569;font-size:.8rem;">{{ oldest.contactName }} - {{ oldest.contactEmail }}</p>
+              <div class="badges">
+                <span class="badge">{{ oldest.priority }}</span>
+                <span class="badge">{{ oldest.queueName || '-' }}</span>
+                <span class="badge">{{ oldest.lastMessageAt || '-' }}</span>
+              </div>
+            </section>
+
+            <section class="thread-card thread-grow" *ngIf="playlistThread as thread">
+              <div class="thread-list" #playlistThreadList>
+                <article
+                  class="thread-message"
+                  [style.background]="isInternalNoteMessage(m) ? 'rgba(148, 163, 184, 0.08)' : '#ffffff'"
+                  [style.borderColor]="'var(--panel-border, #d1d5db)'"
+                  [style.borderLeft]="isInternalNoteMessage(m) ? '4px solid rgba(107, 114, 128, 0.90)' : (isCustomerMessage(m.from, m.to, myPlaylist.oldestCase?.contactEmail, myPlaylist.oldestCase?.contactName) ? '4px solid rgba(148, 163, 184, 0.95)' : '1px solid var(--panel-border, #d1d5db)')"
+                  [style.borderRight]="isInternalNoteMessage(m) ? '1px solid var(--panel-border, #d1d5db)' : (isOwnMessage(m.from, m.to, myPlaylist.oldestCase?.contactEmail, myPlaylist.oldestCase?.contactName) ? '4px solid rgba(59, 130, 246, 0.90)' : '1px solid var(--panel-border, #d1d5db)')"
+                  *ngFor="let m of thread.messages"
+                >
+                  <div class="thread-meta">
+                    <strong>{{ messageAuthorLabel(m, myPlaylist.oldestCase?.contactEmail, myPlaylist.oldestCase?.contactName) }}</strong>
+                    <span class="badge" style="background:rgba(107,114,128,.14);border-color:rgba(107,114,128,.28);color:#475569;" *ngIf="isInternalNoteMessage(m)">Internal</span>
+                    <span [title]="m.date">{{ formatEmailHeaderDate(m.date) }}</span>
+                  </div>
+                  <h4>{{ m.subject }}</h4>
+                  <div class="thread-body" [innerHTML]="m.body"></div>
+                  <div class="thread-attachments" *ngIf="m.attachments?.length">
+                    <div class="thread-attachments-head">
+                      <span class="thread-attachments-title">Attachments</span>
+                      <span class="thread-attachments-count">{{ m.attachments?.length }}</span>
+                    </div>
+                    <div class="attachment-grid">
+                      <a
+                        class="attachment-card"
+                        *ngFor="let att of m.attachments"
+                        [attr.href]="att.downloadUrl"
+                        rel="noopener"
+                        (click)="openAttachment(att, $event)"
+                        [class.inline]="att.inline"
+                        [attr.data-kind]="attachmentKind(att)"
+                        [title]="att.filename || att.mimeType"
+                      >
+                        <span class="attachment-icon" aria-hidden="true">{{ attachmentBadge(att) }}</span>
+                        <span class="attachment-main">
+                          <span class="attachment-name">{{ att.filename || att.mimeType }}</span>
+                          <span class="attachment-meta">
+                            <span class="attachment-mime" [title]="att.mimeType">{{ shortMime(att.mimeType) }}</span>
+                            <span class="attachment-dot" aria-hidden="true">•</span>
+                            <span class="attachment-size">{{ formatBytes(att.size) }}</span>
+                            <ng-container *ngIf="att.inline">
+                              <span class="attachment-dot" aria-hidden="true">•</span>
+                              <span class="attachment-inline">inline</span>
+                            </ng-container>
+                          </span>
+                        </span>
+                        <span class="attachment-open" aria-hidden="true">Open</span>
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <section class="composer-card" style="position:sticky;bottom:0;z-index:2;" *ngIf="myPlaylist.oldestCase as caseItem">
+              <div class="composer-mode-switch" style="display:inline-flex;align-items:center;gap:.2rem;padding:.18rem;border:1px solid var(--panel-border,#d1d5db);border-radius:999px;background:var(--panel-2,#f5f7fb);width:fit-content;">
+                <button type="button" [style.background]="playlistComposerMode === 'email' ? '#fff' : 'transparent'" [style.color]="playlistComposerMode === 'email' ? 'var(--text-1,#111827)' : '#475569'" [style.boxShadow]="playlistComposerMode === 'email' ? '0 1px 2px rgba(15,23,42,.08)' : 'none'" style="border:0;border-radius:999px;padding:.22rem .55rem;font:inherit;font-size:.76rem;font-weight:700;cursor:pointer;" (click)="setComposerMode('playlist', 'email')">Email</button>
+                <button type="button" [style.background]="playlistComposerMode === 'internal' ? '#fff' : 'transparent'" [style.color]="playlistComposerMode === 'internal' ? 'var(--text-1,#111827)' : '#475569'" [style.boxShadow]="playlistComposerMode === 'internal' ? '0 1px 2px rgba(15,23,42,.08)' : 'none'" style="border:0;border-radius:999px;padding:.22rem .55rem;font:inherit;font-size:.76rem;font-weight:700;cursor:pointer;" (click)="setComposerMode('playlist', 'internal')">Internal Note</button>
+              </div>
+              <p class="composer-mode-hint" style="margin:0;font-size:.74rem;color:#64748b;" *ngIf="playlistComposerMode === 'internal'">This note is private and will not be sent to the customer.</p>
+              <div class="editor-toolbar">
+                <button type="button" (mousedown)="$event.preventDefault()" (click)="formatReply('playlist', 'bold')"><b>B</b></button>
+                <button type="button" (mousedown)="$event.preventDefault()" (click)="formatReply('playlist', 'italic')"><i>I</i></button>
+                <button type="button" (mousedown)="$event.preventDefault()" (click)="formatReply('playlist', 'underline')"><u>U</u></button>
+                <button type="button" (mousedown)="$event.preventDefault()" (click)="formatReply('playlist', 'insertUnorderedList')">List</button>
+                <button type="button" (mousedown)="$event.preventDefault()" (click)="formatReply('playlist', 'insertOrderedList')">Numbered</button>
+                <button type="button" (mousedown)="$event.preventDefault()" (click)="formatReply('playlist', 'createLink')">Link</button>
+                <button type="button" (mousedown)="$event.preventDefault()" (click)="triggerImagePicker('playlist')">Image</button>
+                <input #playlistImageInput type="file" accept="image/*" style="display:none" (change)="onImageFileChosen('playlist', $event)">
+              </div>
+              <div class="composer-image-controls" *ngIf="activeImageTarget === 'playlist'">
+                <strong>Image</strong>
+                <button type="button" (click)="setActiveImagePreset('sm')">S</button>
+                <button type="button" (click)="setActiveImagePreset('md')">M</button>
+                <button type="button" (click)="setActiveImagePreset('lg')">L</button>
+                <button type="button" (click)="setActiveImagePreset('fit')">Fit</button>
+                <button type="button" (click)="setActiveImagePreset('orig')">Original</button>
+                <span class="muted">{{ activeImageWidthLabel || 'Resize…' }}</span>
+                <button type="button" class="danger" (click)="removeActiveImage()">Remove</button>
+              </div>
+              <div
+                id="playlist-editor"
+                #playlistEditor
+                class="rich-editor"
+                [style.background]="playlistComposerMode === 'internal' ? 'rgba(148, 163, 184, 0.14)' : '#ffffff'"
+                dir="ltr"
+                contenteditable="true"
+                (focus)="onEditorFocus('playlist', $event)"
+                (click)="onEditorClick('playlist', $event)"
+                (paste)="onEditorPaste('playlist', $event)"
+                (input)="onEditorInput('playlist', $event)"
+                (keyup)="onEditorKeyup('playlist', $event)"
+              ></div>
+              <div class="tag-picker" style="margin-top:.45rem;border:1px solid var(--panel-border);border-radius:10px;background:#fff;overflow:hidden;" *ngIf="isCaseTagPickerOpen(caseItem.id)">
+                <div class="tag-picker-head" style="display:flex;align-items:center;justify-content:space-between;gap:.4rem;padding:.35rem .45rem;background:var(--panel-2);border-bottom:1px solid var(--panel-border);">
+                  <button
+                    type="button"
+                    class="primary-btn"
+                    style="background:#fff;color:#111827;border-color:var(--panel-border);padding:.18rem .5rem;font-size:.72rem;border-radius:999px;min-width:auto;height:auto;"
+                    [disabled]="!activeTagPickerPath.length"
+                    (click)="tagPickerBack()"
+                  >
+                    Back
+                  </button>
+                  <div class="tag-breadcrumb" style="display:flex;align-items:center;gap:.25rem;flex-wrap:wrap;justify-content:flex-end;min-width:0;">
+                    <button type="button" class="crumb" style="border:0;background:transparent;color:#0f62fe;font-size:.72rem;font-weight:800;cursor:pointer;padding:0;" (click)="tagPickerGoTo(-1)">Root</button>
+                    <ng-container *ngFor="let crumb of tagPickerBreadcrumb(); let idx=index">
+                      <span style="color:#94a3b8;font-size:.72rem;">/</span>
+                      <button type="button" class="crumb" style="border:0;background:transparent;color:#0f62fe;font-size:.72rem;font-weight:800;cursor:pointer;padding:0;" (click)="tagPickerGoTo(idx)">{{ crumb.label }}</button>
+                    </ng-container>
+                  </div>
+                </div>
+
+                <p class="muted" style="margin:0;padding:.35rem .55rem;font-size:.72rem;color:#b42318;background:color-mix(in srgb,#b42318 6%,#fff);border-bottom:1px solid var(--panel-border);" *ngIf="tagPickerHint">{{ tagPickerHint }}</p>
+
+                <div class="tag-picker-list" style="display:grid;max-height:220px;overflow:auto;">
+                  <button
+                    type="button"
+                    class="tag-option"
+                    style="display:flex;align-items:flex-start;justify-content:space-between;gap:.55rem;padding:.45rem .55rem;border:0;background:transparent;cursor:pointer;text-align:left;border-bottom:1px solid color-mix(in srgb,var(--panel-border) 55%,transparent);"
+                    *ngFor="let option of tagPickerItems()"
+                    (click)="tagPickerSelect(caseItem.id, option)"
+                  >
+                    <div style="display:grid;gap:.12rem;min-width:0;">
+                      <strong style="font-size:.8rem;color:#0f172a;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ option.label }}</strong>
+                      <small *ngIf="option.content" style="color:#64748b;font-size:.72rem;line-height:1.2;max-width:52ch;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ option.content }}</small>
+                    </div>
+                    <span style="color:#64748b;font-size:.72rem;white-space:nowrap;display:flex;align-items:center;gap:.2rem;">
+                      <ng-container *ngIf="option.children.length; else leafMarker">
+                        {{ tagPickerOptionActionLabel(option) }} <span style="font-size:1rem;line-height:1;">›</span>
+                      </ng-container>
+                      <ng-template #leafMarker>
+                        {{ tagPickerOptionActionLabel(option) }}
+                      </ng-template>
+                    </span>
+                  </button>
+                </div>
+              </div>
+              <div class="editor-actions">
+                <div style="display:flex;align-items:center;gap:.25rem;flex-wrap:wrap;min-width:0;">
+                  <select [(ngModel)]="playlistStatus">
+                    <option value="open">open</option>
+                    <option value="pending">pending</option>
+                    <option value="resolved">resolved</option>
+                    <option value="closed">closed</option>
+                  </select>
+                  <button
+                    type="button"
+                    class="primary-btn"
+                    style="background:var(--panel-2);color:var(--text-1);border-color:var(--panel-border);padding:.18rem .5rem;font-size:.72rem;border-radius:999px;min-width:auto;height:auto;"
+                    [disabled]="!tagTreeLoaded || !!tagTreeError || !tagTree.length"
+                    (click)="isCaseTagPickerOpen(caseItem.id) ? closeCaseTagPicker() : openCaseTagPicker(caseItem.id)"
+                  >
+                    {{
+                      isCaseTagPickerOpen(caseItem.id)
+                        ? 'Close'
+                        : (getTagLabelsForCase(caseItem).length ? 'Change' : 'Choose')
+                    }}
+                  </button>
+                  <button
+                    type="button"
+                    class="primary-btn"
+                    style="background:transparent;color:#b42318;border-color:color-mix(in srgb,#b42318 45%,var(--panel-border) 55%);padding:.18rem .5rem;font-size:.72rem;border-radius:999px;min-width:auto;height:auto;"
+                    [disabled]="submitting"
+                    *ngIf="getTagLabelsForCase(caseItem).length"
+                    (click)="clearCaseTags(caseItem.id)"
+                  >
+                    Clear
+                  </button>
+                  <span class="muted" style="margin-left:.1rem;font-size:.72rem;" *ngIf="!tagTreeLoaded">Loading tags...</span>
+                  <span class="muted" style="margin-left:.1rem;font-size:.72rem;color:#b42318;" *ngIf="tagTreeLoaded && tagTreeError">{{ tagTreeError }}</span>
+                  <ng-container *ngFor="let tag of getTagPillsForCase(caseItem)">
+                    <span
+                      class="badge case-tag-pill"
+                      [title]="tag.tooltip"
+                      style="background:color-mix(in srgb,var(--brand) 12%,#ffffff);border-color:color-mix(in srgb,var(--brand) 32%,var(--panel-border) 68%);color:#334155;font-weight:700;"
+                    >
+                      {{ tag.label }}
+                    </span>
+                  </ng-container>
+                </div>
+                <div class="editor-actions-buttons">
+                  <button type="button" class="primary-btn" style="background:var(--panel-2);color:var(--text-1);border-color:var(--panel-border);" [disabled]="submitting" (click)="executePlaylistPrimaryAction()">
+                    {{ submitting ? 'Saving...' : (playlistComposerMode === 'internal' ? 'Add Internal Note' : 'Submit') }}
+                  </button>
+                  <button type="button" class="primary-btn" [disabled]="submitting || playlistComposerMode === 'internal'" (click)="submitPlaylistAndNext()">
+                    {{ submitting ? 'Moving...' : 'Next' }}
+                  </button>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <ng-template #noOldest>
+          <p class="muted">No ticket selected.</p>
+        </ng-template>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="selectedChoice === 'my-cases'">
+      <div class="panel ticket-layout" style="grid-template-rows: 1fr;">
+        <div class="ticket-main-grid">
+          <aside class="ticket-nav-pane">
+            <h3>My Tickets</h3>
+            <div class="queue-list">
+              <section class="queue-card">
+                <h4>Assigned to me</h4>
+                <article
+                  class="case-card clickable"
+                  [class.selected]="selectedMyCase?.id === item.id"
+                  *ngFor="let item of myCases"
+                  (click)="selectMyCase(item)"
+                >
+                  <h4>{{ item.subject }}</h4>
+                  <p>{{ item.contactName }} - {{ item.contactEmail }}</p>
+                  <a class="item-link" [attr.href]="ticketLink(item.id)" (click)="$event.preventDefault(); openTicket('my-cases', item.id)">Open ticket</a>
+                  <a class="item-link" href="#" (click)="$event.preventDefault(); copyLink(ticketLink(item.id))">Copy ticket link</a>
+                  <div class="badges">
+                    <span class="badge">{{ item.status }}</span>
+                    <ng-container *ngFor="let tag of getTagPillsForCase(item)">
+                      <span
+                        class="badge case-tag-pill"
+                        [title]="tag.tooltip"
+                        style="background:color-mix(in srgb,var(--brand) 14%,#ffffff);border-color:color-mix(in srgb,var(--brand) 38%,var(--panel-border) 62%);color:#1f2937;font-weight:700;"
+                      >
+                        {{ tag.label }}
+                      </span>
+                    </ng-container>
+                    <span class="badge">{{ item.priority }}</span>
+                    <span class="badge">{{ item.lastMessageAt || '-' }}</span>
+                  </div>
+                </article>
+                <p class="muted" *ngIf="myCases.length === 0">No assigned tickets.</p>
+              </section>
+            </div>
+          </aside>
+
+          <div class="ticket-workspace-pane" style="grid-template-rows: auto minmax(0,1fr) auto;">
+            <section
+              class="highlight-card"
+              *ngIf="selectedMyCase as current"
+              style="display:grid;gap:.34rem;padding:.62rem .72rem;border-left:4px solid var(--brand);background:linear-gradient(180deg,color-mix(in srgb,var(--panel-1) 88%,var(--brand) 12%),var(--panel-1));"
+            >
+              <small style="margin:0;color:#6b7280;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;">Ticket Summary</small>
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.55rem;">
+                <h3 style="margin:0;color:var(--text-1);font-size:.96rem;line-height:1.3;">#{{ current.id }} - {{ current.subject }}</h3>
+                <div class="summary-status-stack" style="display:flex;align-items:center;justify-content:flex-end;gap:.22rem;flex-wrap:wrap;">
+                  <span class="badge" style="font-weight:700;white-space:nowrap;">{{ current.status }}</span>
+                  <ng-container *ngFor="let tag of getTagPillsForCase(current)">
+                    <span
+                      class="badge case-tag-pill"
+                      [title]="tag.tooltip"
+                      style="background:color-mix(in srgb,var(--brand) 14%,#ffffff);border-color:color-mix(in srgb,var(--brand) 38%,var(--panel-border) 62%);color:#1f2937;font-weight:700;"
+                    >
+                      {{ tag.label }}
+                    </span>
+                  </ng-container>
+                </div>
+              </div>
+              <p style="margin:0;color:#475569;font-size:.8rem;">{{ current.contactName }} - {{ current.contactEmail }}</p>
+              <div class="badges">
+                <span class="badge">{{ current.priority }}</span>
+                <span class="badge">{{ current.queueName || '-' }}</span>
+                <span class="badge">{{ current.lastMessageAt || '-' }}</span>
+              </div>
+            </section>
+
+            <section class="thread-card thread-grow" *ngIf="myCaseThread as thread">
+              <div class="thread-list" #myCaseThreadList>
+                <article
+                  class="thread-message"
+                  [style.background]="isInternalNoteMessage(m) ? 'rgba(148, 163, 184, 0.08)' : '#ffffff'"
+                  [style.borderColor]="'var(--panel-border, #d1d5db)'"
+                  [style.borderLeft]="isInternalNoteMessage(m) ? '4px solid rgba(107, 114, 128, 0.90)' : (isCustomerMessage(m.from, m.to, selectedMyCase?.contactEmail, selectedMyCase?.contactName) ? '4px solid rgba(148, 163, 184, 0.95)' : '1px solid var(--panel-border, #d1d5db)')"
+                  [style.borderRight]="isInternalNoteMessage(m) ? '1px solid var(--panel-border, #d1d5db)' : (isOwnMessage(m.from, m.to, selectedMyCase?.contactEmail, selectedMyCase?.contactName) ? '4px solid rgba(59, 130, 246, 0.90)' : '1px solid var(--panel-border, #d1d5db)')"
+                  *ngFor="let m of thread.messages"
+                >
+                <div class="thread-meta">
+                  <strong>{{ messageAuthorLabel(m, selectedMyCase?.contactEmail, selectedMyCase?.contactName) }}</strong>
+                  <span class="badge" style="background:rgba(107,114,128,.14);border-color:rgba(107,114,128,.28);color:#475569;" *ngIf="isInternalNoteMessage(m)">Internal</span>
+                  <span [title]="m.date">{{ formatEmailHeaderDate(m.date) }}</span>
+                </div>
+                  <h4>{{ m.subject }}</h4>
+                  <div class="thread-body" [innerHTML]="m.body"></div>
+                  <div class="thread-attachments" *ngIf="m.attachments?.length">
+                    <div class="thread-attachments-head">
+                      <span class="thread-attachments-title">Attachments</span>
+                      <span class="thread-attachments-count">{{ m.attachments?.length }}</span>
+                    </div>
+                    <div class="attachment-grid">
+                      <a
+                        class="attachment-card"
+                        *ngFor="let att of m.attachments"
+                        [attr.href]="att.downloadUrl"
+                        rel="noopener"
+                        (click)="openAttachment(att, $event)"
+                        [class.inline]="att.inline"
+                        [attr.data-kind]="attachmentKind(att)"
+                        [title]="att.filename || att.mimeType"
+                      >
+                        <span class="attachment-icon" aria-hidden="true">{{ attachmentBadge(att) }}</span>
+                        <span class="attachment-main">
+                          <span class="attachment-name">{{ att.filename || att.mimeType }}</span>
+                          <span class="attachment-meta">
+                            <span class="attachment-mime" [title]="att.mimeType">{{ shortMime(att.mimeType) }}</span>
+                            <span class="attachment-dot" aria-hidden="true">•</span>
+                            <span class="attachment-size">{{ formatBytes(att.size) }}</span>
+                            <ng-container *ngIf="att.inline">
+                              <span class="attachment-dot" aria-hidden="true">•</span>
+                              <span class="attachment-inline">inline</span>
+                            </ng-container>
+                          </span>
+                        </span>
+                        <span class="attachment-open" aria-hidden="true">Open</span>
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <section class="composer-card" style="position:sticky;bottom:0;z-index:2;" *ngIf="selectedMyCase as current">
+              <div class="composer-mode-switch" style="display:inline-flex;align-items:center;gap:.2rem;padding:.18rem;border:1px solid var(--panel-border,#d1d5db);border-radius:999px;background:var(--panel-2,#f5f7fb);width:fit-content;">
+                <button type="button" [style.background]="myCaseComposerMode === 'email' ? '#fff' : 'transparent'" [style.color]="myCaseComposerMode === 'email' ? 'var(--text-1,#111827)' : '#475569'" [style.boxShadow]="myCaseComposerMode === 'email' ? '0 1px 2px rgba(15,23,42,.08)' : 'none'" style="border:0;border-radius:999px;padding:.22rem .55rem;font:inherit;font-size:.76rem;font-weight:700;cursor:pointer;" (click)="setComposerMode('my-case', 'email')">Email</button>
+                <button type="button" [style.background]="myCaseComposerMode === 'internal' ? '#fff' : 'transparent'" [style.color]="myCaseComposerMode === 'internal' ? 'var(--text-1,#111827)' : '#475569'" [style.boxShadow]="myCaseComposerMode === 'internal' ? '0 1px 2px rgba(15,23,42,.08)' : 'none'" style="border:0;border-radius:999px;padding:.22rem .55rem;font:inherit;font-size:.76rem;font-weight:700;cursor:pointer;" (click)="setComposerMode('my-case', 'internal')">Internal Note</button>
+              </div>
+              <p class="composer-mode-hint" style="margin:0;font-size:.74rem;color:#64748b;" *ngIf="myCaseComposerMode === 'internal'">This note is private and will not be sent to the customer.</p>
+              <div class="editor-toolbar">
+                <button type="button" (mousedown)="$event.preventDefault()" (click)="formatReply('my-case', 'bold')"><b>B</b></button>
+                <button type="button" (mousedown)="$event.preventDefault()" (click)="formatReply('my-case', 'italic')"><i>I</i></button>
+                <button type="button" (mousedown)="$event.preventDefault()" (click)="formatReply('my-case', 'underline')"><u>U</u></button>
+                <button type="button" (mousedown)="$event.preventDefault()" (click)="formatReply('my-case', 'insertUnorderedList')">List</button>
+                <button type="button" (mousedown)="$event.preventDefault()" (click)="formatReply('my-case', 'insertOrderedList')">Numbered</button>
+                <button type="button" (mousedown)="$event.preventDefault()" (click)="formatReply('my-case', 'createLink')">Link</button>
+                <button type="button" (mousedown)="$event.preventDefault()" (click)="triggerImagePicker('my-case')">Image</button>
+                <input #myCaseImageInput type="file" accept="image/*" style="display:none" (change)="onImageFileChosen('my-case', $event)">
+              </div>
+              <div class="composer-image-controls" *ngIf="activeImageTarget === 'my-case'">
+                <strong>Image</strong>
+                <button type="button" (click)="setActiveImagePreset('sm')">S</button>
+                <button type="button" (click)="setActiveImagePreset('md')">M</button>
+                <button type="button" (click)="setActiveImagePreset('lg')">L</button>
+                <button type="button" (click)="setActiveImagePreset('fit')">Fit</button>
+                <button type="button" (click)="setActiveImagePreset('orig')">Original</button>
+                <span class="muted">{{ activeImageWidthLabel || 'Resize…' }}</span>
+                <button type="button" class="danger" (click)="removeActiveImage()">Remove</button>
+              </div>
+              <div
+                id="my-case-editor"
+                #myCaseEditor
+                class="rich-editor"
+                [style.background]="myCaseComposerMode === 'internal' ? 'rgba(148, 163, 184, 0.14)' : '#ffffff'"
+                dir="ltr"
+                contenteditable="true"
+                (focus)="onEditorFocus('my-case', $event)"
+                (click)="onEditorClick('my-case', $event)"
+                (paste)="onEditorPaste('my-case', $event)"
+                (input)="onEditorInput('my-case', $event)"
+                (keyup)="onEditorKeyup('my-case', $event)"
+              ></div>
+              <div class="tag-picker" style="margin-top:.45rem;border:1px solid var(--panel-border);border-radius:10px;background:#fff;overflow:hidden;" *ngIf="isCaseTagPickerOpen(current.id)">
+                <div class="tag-picker-head" style="display:flex;align-items:center;justify-content:space-between;gap:.4rem;padding:.35rem .45rem;background:var(--panel-2);border-bottom:1px solid var(--panel-border);">
+                  <button
+                    type="button"
+                    class="primary-btn"
+                    style="background:#fff;color:#111827;border-color:var(--panel-border);padding:.18rem .5rem;font-size:.72rem;border-radius:999px;min-width:auto;height:auto;"
+                    [disabled]="!activeTagPickerPath.length"
+                    (click)="tagPickerBack()"
+                  >
+                    Back
+                  </button>
+                  <div class="tag-breadcrumb" style="display:flex;align-items:center;gap:.25rem;flex-wrap:wrap;justify-content:flex-end;min-width:0;">
+                    <button type="button" class="crumb" style="border:0;background:transparent;color:#0f62fe;font-size:.72rem;font-weight:800;cursor:pointer;padding:0;" (click)="tagPickerGoTo(-1)">Root</button>
+                    <ng-container *ngFor="let crumb of tagPickerBreadcrumb(); let idx=index">
+                      <span style="color:#94a3b8;font-size:.72rem;">/</span>
+                      <button type="button" class="crumb" style="border:0;background:transparent;color:#0f62fe;font-size:.72rem;font-weight:800;cursor:pointer;padding:0;" (click)="tagPickerGoTo(idx)">{{ crumb.label }}</button>
+                    </ng-container>
+                  </div>
+                </div>
+
+                <p class="muted" style="margin:0;padding:.35rem .55rem;font-size:.72rem;color:#b42318;background:color-mix(in srgb,#b42318 6%,#fff);border-bottom:1px solid var(--panel-border);" *ngIf="tagPickerHint">{{ tagPickerHint }}</p>
+
+                <div class="tag-picker-list" style="display:grid;max-height:220px;overflow:auto;">
+                  <button
+                    type="button"
+                    class="tag-option"
+                    style="display:flex;align-items:flex-start;justify-content:space-between;gap:.55rem;padding:.45rem .55rem;border:0;background:transparent;cursor:pointer;text-align:left;border-bottom:1px solid color-mix(in srgb,var(--panel-border) 55%,transparent);"
+                    *ngFor="let option of tagPickerItems()"
+                    (click)="tagPickerSelect(current.id, option)"
+                  >
+                    <div style="display:grid;gap:.12rem;min-width:0;">
+                      <strong style="font-size:.8rem;color:#0f172a;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ option.label }}</strong>
+                      <small *ngIf="option.content" style="color:#64748b;font-size:.72rem;line-height:1.2;max-width:52ch;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ option.content }}</small>
+                    </div>
+                    <span style="color:#64748b;font-size:.72rem;white-space:nowrap;display:flex;align-items:center;gap:.2rem;">
+                      <ng-container *ngIf="option.children.length; else leafMarker">
+                        {{ tagPickerOptionActionLabel(option) }} <span style="font-size:1rem;line-height:1;">›</span>
+                      </ng-container>
+                      <ng-template #leafMarker>
+                        {{ tagPickerOptionActionLabel(option) }}
+                      </ng-template>
+                    </span>
+                  </button>
+                </div>
+              </div>
+              <div class="editor-actions">
+                <div style="display:flex;align-items:center;gap:.25rem;flex-wrap:wrap;min-width:0;">
+                  <select [(ngModel)]="myCaseStatus">
+                    <option value="open">open</option>
+                    <option value="pending">pending</option>
+                    <option value="resolved">resolved</option>
+                    <option value="closed">closed</option>
+                  </select>
+                  <button
+                    type="button"
+                    class="primary-btn"
+                    style="background:var(--panel-2);color:var(--text-1);border-color:var(--panel-border);padding:.18rem .5rem;font-size:.72rem;border-radius:999px;min-width:auto;height:auto;"
+                    [disabled]="!tagTreeLoaded || !!tagTreeError || !tagTree.length"
+                    (click)="isCaseTagPickerOpen(current.id) ? closeCaseTagPicker() : openCaseTagPicker(current.id)"
+                  >
+                    {{
+                      isCaseTagPickerOpen(current.id)
+                        ? 'Close'
+                        : (getTagLabelsForCase(current).length ? 'Change' : 'Choose')
+                    }}
+                  </button>
+                  <button
+                    type="button"
+                    class="primary-btn"
+                    style="background:transparent;color:#b42318;border-color:color-mix(in srgb,#b42318 45%,var(--panel-border) 55%);padding:.18rem .5rem;font-size:.72rem;border-radius:999px;min-width:auto;height:auto;"
+                    [disabled]="submitting"
+                    *ngIf="getTagLabelsForCase(current).length"
+                    (click)="clearCaseTags(current.id)"
+                  >
+                    Clear
+                  </button>
+                  <span class="muted" style="margin-left:.1rem;font-size:.72rem;" *ngIf="!tagTreeLoaded">Loading tags...</span>
+                  <span class="muted" style="margin-left:.1rem;font-size:.72rem;color:#b42318;" *ngIf="tagTreeLoaded && tagTreeError">{{ tagTreeError }}</span>
+                  <ng-container *ngFor="let tag of getTagPillsForCase(current)">
+                    <span
+                      class="badge case-tag-pill"
+                      [title]="tag.tooltip"
+                      style="background:color-mix(in srgb,var(--brand) 12%,#ffffff);border-color:color-mix(in srgb,var(--brand) 32%,var(--panel-border) 68%);color:#334155;font-weight:700;"
+                    >
+                      {{ tag.label }}
+                    </span>
+                  </ng-container>
+                </div>
+                <div class="editor-actions-buttons">
+                  <button type="button" class="primary-btn" [disabled]="submitting" (click)="executeMyCasePrimaryAction()">
+                    {{
+                      submitting
+                        ? 'Saving...'
+                        : (myCaseComposerMode === 'internal' ? 'Add Internal Note' : 'Send Reply + Update Ticket')
+                    }}
+                  </button>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="selectedChoice === 'open-cases'">
+      <div class="panel ticket-layout" style="grid-template-rows: 1fr;">
+        <div class="ticket-main-grid">
+          <aside class="ticket-nav-pane">
+            <h3>Open Tickets</h3>
+            <div class="queue-list">
+              <section class="queue-card" *ngFor="let queue of openCaseQueues">
+                <h4>{{ queue.queueName }}</h4>
+                <article
+                  class="case-card clickable"
+                  [class.selected]="selectedOpenCase?.id === item.id"
+                  *ngFor="let item of queue.tickets"
+                  (click)="selectOpenCase(item)"
+                >
+                  <h4>{{ item.subject }}</h4>
+                  <p>{{ item.contactName }} - {{ item.contactEmail }}</p>
+                  <a class="item-link" [attr.href]="ticketLink(item.id)" (click)="$event.preventDefault(); openTicket('open-cases', item.id)">Open ticket</a>
+                  <a class="item-link" href="#" (click)="$event.preventDefault(); copyLink(ticketLink(item.id))">Copy ticket link</a>
+                  <div class="badges">
+                    <span class="badge">{{ item.status }}</span>
+                    <ng-container *ngFor="let tag of getTagPillsForCase(item)">
+                      <span
+                        class="badge case-tag-pill"
+                        [title]="tag.tooltip"
+                        style="background:color-mix(in srgb,var(--brand) 14%,#ffffff);border-color:color-mix(in srgb,var(--brand) 38%,var(--panel-border) 62%);color:#1f2937;font-weight:700;"
+                      >
+                        {{ tag.label }}
+                      </span>
+                    </ng-container>
+                    <span class="badge">{{ item.priority }}</span>
+                    <span class="badge">{{ item.lastMessageAt || '-' }}</span>
+                  </div>
+                </article>
+              </section>
+            </div>
+          </aside>
+
+          <div class="ticket-workspace-pane" style="grid-template-rows: auto minmax(0,1fr) auto;">
+            <section
+              class="highlight-card"
+              *ngIf="selectedOpenCase as current"
+              style="display:grid;gap:.34rem;padding:.62rem .72rem;border-left:4px solid var(--brand);background:linear-gradient(180deg,color-mix(in srgb,var(--panel-1) 88%,var(--brand) 12%),var(--panel-1));"
+            >
+              <small style="margin:0;color:#6b7280;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;">Ticket Summary</small>
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.55rem;">
+                <h3 style="margin:0;color:var(--text-1);font-size:.96rem;line-height:1.3;">#{{ current.id }} - {{ current.subject }}</h3>
+                <div class="summary-status-stack" style="display:flex;align-items:center;justify-content:flex-end;gap:.22rem;flex-wrap:wrap;">
+                  <span class="badge" style="font-weight:700;white-space:nowrap;">{{ current.status }}</span>
+                  <ng-container *ngFor="let tag of getTagPillsForCase(current)">
+                    <span
+                      class="badge case-tag-pill"
+                      [title]="tag.tooltip"
+                      style="background:color-mix(in srgb,var(--brand) 14%,#ffffff);border-color:color-mix(in srgb,var(--brand) 38%,var(--panel-border) 62%);color:#1f2937;font-weight:700;"
+                    >
+                      {{ tag.label }}
+                    </span>
+                  </ng-container>
+                </div>
+              </div>
+              <p style="margin:0;color:#475569;font-size:.8rem;">{{ current.contactName }} - {{ current.contactEmail }}</p>
+              <div class="badges">
+                <span class="badge">{{ current.priority }}</span>
+                <span class="badge">{{ current.queueName || '-' }}</span>
+                <span class="badge">{{ current.lastMessageAt || '-' }}</span>
+              </div>
+            </section>
+
+            <section class="thread-card thread-grow" *ngIf="openCaseThread as thread">
+              <div class="thread-list" #openThreadList>
+                <article
+                  class="thread-message"
+                  [style.background]="isInternalNoteMessage(m) ? 'rgba(148, 163, 184, 0.08)' : '#ffffff'"
+                  [style.borderColor]="'var(--panel-border, #d1d5db)'"
+                  [style.borderLeft]="isInternalNoteMessage(m) ? '4px solid rgba(107, 114, 128, 0.90)' : (isCustomerMessage(m.from, m.to, selectedOpenCase?.contactEmail, selectedOpenCase?.contactName) ? '4px solid rgba(148, 163, 184, 0.95)' : '1px solid var(--panel-border, #d1d5db)')"
+                  [style.borderRight]="isInternalNoteMessage(m) ? '1px solid var(--panel-border, #d1d5db)' : (isOwnMessage(m.from, m.to, selectedOpenCase?.contactEmail, selectedOpenCase?.contactName) ? '4px solid rgba(59, 130, 246, 0.90)' : '1px solid var(--panel-border, #d1d5db)')"
+                  *ngFor="let m of thread.messages"
+                >
+                <div class="thread-meta">
+                  <strong>{{ messageAuthorLabel(m, selectedOpenCase?.contactEmail, selectedOpenCase?.contactName) }}</strong>
+                  <span class="badge" style="background:rgba(107,114,128,.14);border-color:rgba(107,114,128,.28);color:#475569;" *ngIf="isInternalNoteMessage(m)">Internal</span>
+                  <span [title]="m.date">{{ formatEmailHeaderDate(m.date) }}</span>
+                </div>
+                  <h4>{{ m.subject }}</h4>
+                  <div class="thread-body" [innerHTML]="m.body"></div>
+                  <div class="thread-attachments" *ngIf="m.attachments?.length">
+                    <div class="thread-attachments-head">
+                      <span class="thread-attachments-title">Attachments</span>
+                      <span class="thread-attachments-count">{{ m.attachments?.length }}</span>
+                    </div>
+                    <div class="attachment-grid">
+                      <a
+                        class="attachment-card"
+                        *ngFor="let att of m.attachments"
+                        [attr.href]="att.downloadUrl"
+                        rel="noopener"
+                        (click)="openAttachment(att, $event)"
+                        [class.inline]="att.inline"
+                        [attr.data-kind]="attachmentKind(att)"
+                        [title]="att.filename || att.mimeType"
+                      >
+                        <span class="attachment-icon" aria-hidden="true">{{ attachmentBadge(att) }}</span>
+                        <span class="attachment-main">
+                          <span class="attachment-name">{{ att.filename || att.mimeType }}</span>
+                          <span class="attachment-meta">
+                            <span class="attachment-mime" [title]="att.mimeType">{{ shortMime(att.mimeType) }}</span>
+                            <span class="attachment-dot" aria-hidden="true">•</span>
+                            <span class="attachment-size">{{ formatBytes(att.size) }}</span>
+                            <ng-container *ngIf="att.inline">
+                              <span class="attachment-dot" aria-hidden="true">•</span>
+                              <span class="attachment-inline">inline</span>
+                            </ng-container>
+                          </span>
+                        </span>
+                        <span class="attachment-open" aria-hidden="true">Open</span>
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <section class="composer-card" style="position:sticky;bottom:0;z-index:2;" *ngIf="selectedOpenCase as current">
+              <div class="composer-mode-switch" style="display:inline-flex;align-items:center;gap:.2rem;padding:.18rem;border:1px solid var(--panel-border,#d1d5db);border-radius:999px;background:var(--panel-2,#f5f7fb);width:fit-content;">
+                <button type="button" [style.background]="openCaseComposerMode === 'email' ? '#fff' : 'transparent'" [style.color]="openCaseComposerMode === 'email' ? 'var(--text-1,#111827)' : '#475569'" [style.boxShadow]="openCaseComposerMode === 'email' ? '0 1px 2px rgba(15,23,42,.08)' : 'none'" style="border:0;border-radius:999px;padding:.22rem .55rem;font:inherit;font-size:.76rem;font-weight:700;cursor:pointer;" (click)="setComposerMode('open', 'email')">Email</button>
+                <button type="button" [style.background]="openCaseComposerMode === 'internal' ? '#fff' : 'transparent'" [style.color]="openCaseComposerMode === 'internal' ? 'var(--text-1,#111827)' : '#475569'" [style.boxShadow]="openCaseComposerMode === 'internal' ? '0 1px 2px rgba(15,23,42,.08)' : 'none'" style="border:0;border-radius:999px;padding:.22rem .55rem;font:inherit;font-size:.76rem;font-weight:700;cursor:pointer;" (click)="setComposerMode('open', 'internal')">Internal Note</button>
+              </div>
+              <p class="composer-mode-hint" style="margin:0;font-size:.74rem;color:#64748b;" *ngIf="openCaseComposerMode === 'internal'">This note is private and will not be sent to the customer.</p>
+
+              <div class="editor-toolbar">
+                <button type="button" (mousedown)="$event.preventDefault()" (click)="formatReply('open', 'bold')"><b>B</b></button>
+                <button type="button" (mousedown)="$event.preventDefault()" (click)="formatReply('open', 'italic')"><i>I</i></button>
+                <button type="button" (mousedown)="$event.preventDefault()" (click)="formatReply('open', 'underline')"><u>U</u></button>
+                <button type="button" (mousedown)="$event.preventDefault()" (click)="formatReply('open', 'insertUnorderedList')">List</button>
+                <button type="button" (mousedown)="$event.preventDefault()" (click)="formatReply('open', 'insertOrderedList')">Numbered</button>
+                <button type="button" (mousedown)="$event.preventDefault()" (click)="formatReply('open', 'createLink')">Link</button>
+                <button type="button" (mousedown)="$event.preventDefault()" (click)="triggerImagePicker('open')">Image</button>
+                <input #openImageInput type="file" accept="image/*" style="display:none" (change)="onImageFileChosen('open', $event)">
+              </div>
+              <div class="composer-image-controls" *ngIf="activeImageTarget === 'open'">
+                <strong>Image</strong>
+                <button type="button" (click)="setActiveImagePreset('sm')">S</button>
+                <button type="button" (click)="setActiveImagePreset('md')">M</button>
+                <button type="button" (click)="setActiveImagePreset('lg')">L</button>
+                <button type="button" (click)="setActiveImagePreset('fit')">Fit</button>
+                <button type="button" (click)="setActiveImagePreset('orig')">Original</button>
+                <span class="muted">{{ activeImageWidthLabel || 'Resize…' }}</span>
+                <button type="button" class="danger" (click)="removeActiveImage()">Remove</button>
+              </div>
+              <div
+                id="open-editor"
+                #openEditor
+                class="rich-editor"
+                [style.background]="openCaseComposerMode === 'internal' ? 'rgba(148, 163, 184, 0.14)' : '#ffffff'"
+                dir="ltr"
+                contenteditable="true"
+                (focus)="onEditorFocus('open', $event)"
+                (click)="onEditorClick('open', $event)"
+                (paste)="onEditorPaste('open', $event)"
+                (input)="onEditorInput('open', $event)"
+                (keyup)="onEditorKeyup('open', $event)"
+              ></div>
+              <div class="tag-picker" style="margin-top:.4rem;border:1px solid var(--panel-border);border-radius:10px;background:#fff;overflow:hidden;" *ngIf="isCaseTagPickerOpen(current.id)">
+                <div class="tag-picker-head" style="display:flex;align-items:center;justify-content:space-between;gap:.4rem;padding:.35rem .45rem;background:var(--panel-2);border-bottom:1px solid var(--panel-border);">
+                  <button
+                    type="button"
+                    class="primary-btn"
+                    style="background:#fff;color:#111827;border-color:var(--panel-border);padding:.18rem .5rem;font-size:.72rem;border-radius:999px;min-width:auto;height:auto;"
+                    [disabled]="!activeTagPickerPath.length"
+                    (click)="tagPickerBack()"
+                  >
+                    Back
+                  </button>
+                  <div class="tag-breadcrumb" style="display:flex;align-items:center;gap:.25rem;flex-wrap:wrap;justify-content:flex-end;min-width:0;">
+                    <button type="button" class="crumb" style="border:0;background:transparent;color:#0f62fe;font-size:.72rem;font-weight:800;cursor:pointer;padding:0;" (click)="tagPickerGoTo(-1)">Root</button>
+                    <ng-container *ngFor="let crumb of tagPickerBreadcrumb(); let idx=index">
+                      <span style="color:#94a3b8;font-size:.72rem;">/</span>
+                      <button type="button" class="crumb" style="border:0;background:transparent;color:#0f62fe;font-size:.72rem;font-weight:800;cursor:pointer;padding:0;" (click)="tagPickerGoTo(idx)">{{ crumb.label }}</button>
+                    </ng-container>
+                  </div>
+                </div>
+
+                <p class="muted" style="margin:0;padding:.35rem .55rem;font-size:.72rem;color:#b42318;background:color-mix(in srgb,#b42318 6%,#fff);border-bottom:1px solid var(--panel-border);" *ngIf="tagPickerHint">{{ tagPickerHint }}</p>
+
+                <div class="tag-picker-list" style="display:grid;max-height:220px;overflow:auto;">
+                  <button
+                    type="button"
+                    class="tag-option"
+                    style="display:flex;align-items:flex-start;justify-content:space-between;gap:.55rem;padding:.45rem .55rem;border:0;background:transparent;cursor:pointer;text-align:left;border-bottom:1px solid color-mix(in srgb,var(--panel-border) 55%,transparent);"
+                    *ngFor="let option of tagPickerItems()"
+                    (click)="tagPickerSelect(current.id, option)"
+                  >
+                    <div style="display:grid;gap:.12rem;min-width:0;">
+                      <strong style="font-size:.8rem;color:#0f172a;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ option.label }}</strong>
+                      <small *ngIf="option.content" style="color:#64748b;font-size:.72rem;line-height:1.2;max-width:52ch;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ option.content }}</small>
+                    </div>
+                    <span style="color:#64748b;font-size:.72rem;white-space:nowrap;display:flex;align-items:center;gap:.2rem;">
+                      <ng-container *ngIf="option.children.length; else leafMarker">
+                        {{ tagPickerOptionActionLabel(option) }} <span style="font-size:1rem;line-height:1;">›</span>
+                      </ng-container>
+                      <ng-template #leafMarker>
+                        {{ tagPickerOptionActionLabel(option) }}
+                      </ng-template>
+                    </span>
+                  </button>
+                </div>
+              </div>
+              <div class="editor-actions">
+                <div style="display:flex;align-items:center;gap:.25rem;flex-wrap:wrap;min-width:0;">
+                  <select [(ngModel)]="openCaseStatus">
+                    <option value="open">open</option>
+                    <option value="pending">pending</option>
+                    <option value="resolved">resolved</option>
+                    <option value="closed">closed</option>
+                  </select>
+                  <button
+                    type="button"
+                    class="primary-btn"
+                    style="background:var(--panel-2);color:var(--text-1);border-color:var(--panel-border);padding:.18rem .5rem;font-size:.72rem;border-radius:999px;min-width:auto;height:auto;"
+                    [disabled]="!tagTreeLoaded || !!tagTreeError || !tagTree.length"
+                    (click)="isCaseTagPickerOpen(current.id) ? closeCaseTagPicker() : openCaseTagPicker(current.id)"
+                  >
+                    {{
+                      isCaseTagPickerOpen(current.id)
+                        ? 'Close'
+                        : (getTagLabelsForCase(current).length ? 'Change' : 'Choose')
+                    }}
+                  </button>
+                  <button
+                    type="button"
+                    class="primary-btn"
+                    style="background:transparent;color:#b42318;border-color:color-mix(in srgb,#b42318 45%,var(--panel-border) 55%);padding:.18rem .5rem;font-size:.72rem;border-radius:999px;min-width:auto;height:auto;"
+                    [disabled]="submitting"
+                    *ngIf="getTagLabelsForCase(current).length"
+                    (click)="clearCaseTags(current.id)"
+                  >
+                    Clear
+                  </button>
+                  <span class="muted" style="margin-left:.1rem;font-size:.72rem;" *ngIf="!tagTreeLoaded">Loading tags...</span>
+                  <span class="muted" style="margin-left:.1rem;font-size:.72rem;color:#b42318;" *ngIf="tagTreeLoaded && tagTreeError">{{ tagTreeError }}</span>
+                  <ng-container *ngFor="let tag of getTagPillsForCase(current)">
+                    <span
+                      class="badge case-tag-pill"
+                      [title]="tag.tooltip"
+                      style="background:color-mix(in srgb,var(--brand) 12%,#ffffff);border-color:color-mix(in srgb,var(--brand) 32%,var(--panel-border) 68%);color:#334155;font-weight:700;"
+                    >
+                      {{ tag.label }}
+                    </span>
+                  </ng-container>
+                </div>
+                <div class="editor-actions-buttons">
+                  <button type="button" class="primary-btn" [disabled]="submitting" (click)="executeOpenCasePrimaryAction()">
+                    {{
+                      submitting
+                        ? 'Saving...'
+                        : (openCaseComposerMode === 'internal' ? 'Add Internal Note' : 'Send Reply + Update Ticket')
+                    }}
+                  </button>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="selectedChoice === 'all-cases'">
+      <div class="panel ticket-layout">
+        <h1 *ngIf="!isTicketRoute">All Cases</h1>
+        <p class="muted" *ngIf="!isTicketRoute">Every conversation from inbox, assigned or unassigned.</p>
+        <button type="button" class="primary-btn" [disabled]="loading || syncing" (click)="refreshAllCases()" *ngIf="!isTicketRoute">
+          {{ syncing ? 'Syncing Gmail...' : 'Sync Inbox & Refresh' }}
+        </button>
+
+        <div class="all-case-layout" *ngIf="selectedAllCase as current; else allCasesTable">
+          <section class="thread-card">
+            <div class="editor-actions">
+              <h3>Ticket #{{ current.id }} - {{ current.subject }}</h3>
+              <button type="button" class="primary-btn" (click)="clearSelectedAllCase()" *ngIf="!isTicketRoute">Back To All Cases</button>
+            </div>
+            <p class="muted">{{ current.contactName }} - {{ current.contactEmail }}</p>
+            <div class="badges">
+              <span class="badge">{{ current.status }}</span>
+              <ng-container *ngFor="let tag of getTagPillsForCase(current)">
+                <span
+                  class="badge case-tag-pill"
+                  [title]="tag.tooltip"
+                  style="background:color-mix(in srgb,var(--brand) 14%,#ffffff);border-color:color-mix(in srgb,var(--brand) 38%,var(--panel-border) 62%);color:#1f2937;font-weight:700;"
+                >
+                  {{ tag.label }}
+                </span>
+              </ng-container>
+              <span class="badge">{{ current.priority }}</span>
+              <span class="badge">{{ current.queueName }}</span>
+            </div>
+            <div class="thread-list" #allCaseThreadList *ngIf="allCaseThread as thread">
+              <article
+                class="thread-message"
+                [style.background]="isInternalNoteMessage(m) ? 'rgba(148, 163, 184, 0.08)' : '#ffffff'"
+                [style.borderColor]="'var(--panel-border, #d1d5db)'"
+                [style.borderLeft]="isInternalNoteMessage(m) ? '4px solid rgba(107, 114, 128, 0.90)' : (isCustomerMessage(m.from, m.to, current.contactEmail, current.contactName) ? '4px solid rgba(148, 163, 184, 0.95)' : '1px solid var(--panel-border, #d1d5db)')"
+                [style.borderRight]="isInternalNoteMessage(m) ? '1px solid var(--panel-border, #d1d5db)' : (isOwnMessage(m.from, m.to, current.contactEmail, current.contactName) ? '4px solid rgba(59, 130, 246, 0.90)' : '1px solid var(--panel-border, #d1d5db)')"
+                *ngFor="let m of thread.messages"
+              >
+                 <div class="thread-meta">
+                   <strong>{{ messageAuthorLabel(m, current.contactEmail, current.contactName) }}</strong>
+                   <span class="badge" style="background:rgba(107,114,128,.14);border-color:rgba(107,114,128,.28);color:#475569;" *ngIf="isInternalNoteMessage(m)">Internal</span>
+                   <span [title]="m.date">{{ formatEmailHeaderDate(m.date) }}</span>
+                 </div>
+                <h4>{{ m.subject }}</h4>
+                <div class="thread-body" [innerHTML]="m.body"></div>
+              </article>
+            </div>
+            <p class="muted" *ngIf="!allCaseThreadLoading && !allCaseThread">Could not load thread details.</p>
+          </section>
+
+          <aside class="qa-side-panel">
+            <section class="qa-eval-panel">
+              <h3>QA Evaluations</h3>
+              <p class="muted">Agent: {{ current.assignedTo || 'Unassigned' }}</p>
+              <div class="error" *ngIf="evaluationsError">{{ evaluationsError }}</div>
+              <p class="muted" *ngIf="evaluationsLoading">Loading evaluations...</p>
+
+              <div class="qa-create-form" *ngIf="canCreateQaEvaluation">
+                <h4>Create evaluation</h4>
+                <div class="qa-grid">
+                  <label>
+                    Score (0-100)
+                    <input type="number" min="0" max="100" [(ngModel)]="qaScore">
+                  </label>
+                  <label>
+                    Strengths
+                    <textarea rows="2" [(ngModel)]="qaStrengths"></textarea>
+                  </label>
+                  <label>
+                    Improvements
+                    <textarea rows="2" [(ngModel)]="qaImprovements"></textarea>
+                  </label>
+                  <label>
+                    Comment
+                    <textarea rows="2" [(ngModel)]="qaComment"></textarea>
+                  </label>
+                </div>
+                <button type="button" class="primary-btn" [disabled]="qaSubmitting" (click)="createQaEvaluation()">
+                  {{ qaSubmitting ? 'Saving...' : 'Create Evaluation' }}
+                </button>
+              </div>
+
+              <div class="qa-list">
+                <article class="qa-item" *ngFor="let ev of allCaseEvaluations">
+                  <header>
+                    <strong>Score: {{ ev.score }}/100</strong>
+                    <span>{{ ev.createdAt }}</span>
+                  </header>
+                  <p><strong>Evaluator:</strong> {{ ev.evaluatorUserName }}</p>
+                  <p><strong>Evaluated Agent:</strong> {{ ev.evaluatedUserName }}</p>
+                  <p *ngIf="ev.strengths"><strong>Strengths:</strong> {{ ev.strengths }}</p>
+                  <p *ngIf="ev.improvements"><strong>Improvements:</strong> {{ ev.improvements }}</p>
+                  <p *ngIf="ev.comment"><strong>Comment:</strong> {{ ev.comment }}</p>
+                </article>
+                <p class="muted" *ngIf="!evaluationsLoading && allCaseEvaluations.length === 0">No evaluations yet.</p>
+              </div>
+            </section>
+          </aside>
+        </div>
+
+        <ng-template #allCasesTable>
+        <div class="table-wrap" *ngIf="!isTicketRoute">
+          <table>
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Queue</th>
+                <th>Assigned To</th>
+                <th>Created By</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of allCases">
+                <td>
+                  {{ item.subject }}
+                  <div>
+                    <a class="item-link" [attr.href]="ticketLink(item.id)" (click)="$event.preventDefault(); selectAllCase(item)">Open ticket</a>
+                    <a class="item-link" href="#" (click)="$event.preventDefault(); copyLink(ticketLink(item.id))">Copy ticket link</a>
+                  </div>
+                </td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:.25rem;flex-wrap:wrap;">
+                    <span>{{ item.status }}</span>
+                    <ng-container *ngFor="let tag of getTagPillsForCase(item)">
+                      <span
+                        class="badge case-tag-pill"
+                        [title]="tag.tooltip"
+                        style="background:color-mix(in srgb,var(--brand) 14%,#ffffff);border-color:color-mix(in srgb,var(--brand) 38%,var(--panel-border) 62%);color:#1f2937;font-weight:700;"
+                      >
+                        {{ tag.label }}
+                      </span>
+                    </ng-container>
+                  </div>
+                </td>
+                <td>{{ item.priority }}</td>
+                <td>{{ item.queueName }}</td>
+                <td>{{ item.assignedTo }}</td>
+                <td>{{ item.createdBy }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        </ng-template>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="selectedChoice === 'my-chats'">
+      <section class="panel ticket-layout chat-layout">
+        <section class="chat-main-grid">
+          <aside class="chat-thread-list-pane">
+            <div class="chat-thread-list-head">
+              <h3>Conversations</h3>
+              <input [(ngModel)]="chatSearch" placeholder="Search chats...">
+            </div>
+            <div class="chat-thread-list">
+              <p class="muted" *ngIf="chatLoading">Loading chats...</p>
+              <button
+                type="button"
+                class="chat-thread-item"
+                [class.selected]="selectedChatThreadId === thread.id"
+                *ngFor="let thread of getFilteredChatThreads()"
+                (click)="selectChatThread(thread)"
+              >
+                <div class="chat-thread-top">
+                  <strong>{{ thread.customerName }}</strong>
+                  <span class="badge">
+                    {{
+                      thread.channel === 'whatsapp'
+                        ? 'WhatsApp'
+                        : (thread.channel === 'instagram' ? 'Instagram' : 'Website Chat')
+                    }}
+                  </span>
+                </div>
+                <p>{{ thread.customerHandle }}</p>
+                <div class="chat-thread-meta">
+                  <span class="badge">{{ thread.status }}</span>
+                  <span *ngIf="thread.unread > 0" class="chat-unread">{{ thread.unread }}</span>
+                  <small>{{ thread.lastMessageAt | date:'HH:mm' }}</small>
+                </div>
+              </button>
+            </div>
+          </aside>
+
+          <section class="chat-thread-pane" *ngIf="selectedChatThread as thread; else noChatSelected">
+            <header class="chat-thread-header">
+              <div>
+                <h3>{{ thread.customerName }}</h3>
+                <p>
+                  {{ thread.customerHandle }} •
+                  {{
+                    thread.channel === 'whatsapp'
+                      ? 'WhatsApp Business'
+                      : (thread.channel === 'instagram' ? 'Instagram Messenger' : 'Website Chat')
+                  }}
+                </p>
+              </div>
+              <span class="badge">{{ thread.status }}</span>
+            </header>
+
+            <div class="chat-messages">
+              <article
+                class="chat-message"
+                *ngFor="let message of getSelectedChatMessages()"
+                [class.agent]="message.sender === 'agent'"
+                [class.customer]="message.sender === 'customer'"
+              >
+                <div class="chat-message-meta">
+                  <strong>{{ message.sender === 'agent' ? 'You' : thread.customerName }}</strong>
+                  <small>{{ message.at | date:'yyyy-MM-dd HH:mm' }}</small>
+                </div>
+                <p>{{ message.text }}</p>
+              </article>
+            </div>
+
+            <footer class="chat-composer">
+              <textarea [(ngModel)]="newChatReply" rows="3" placeholder="Write a reply..."></textarea>
+              <div class="chat-composer-actions">
+                <button type="button" class="primary-btn" (click)="sendChatReply()">Send reply</button>
+              </div>
+            </footer>
+          </section>
+
+          <ng-template #noChatSelected>
+            <section class="chat-thread-pane empty-chat">
+              <p>Select a chat conversation.</p>
+            </section>
+          </ng-template>
+        </section>
+      </section>
+    </ng-container>
+  </section>
+</div>
+
+

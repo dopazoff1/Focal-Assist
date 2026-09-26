@@ -1,0 +1,135 @@
+﻿<section class="tree-builder-page team-builder-page">
+  <aside class="tree-sidebar">
+    <div class="sidebar-card">
+      <h2>Team Map Builder</h2>
+      <p class="muted">TLs and QAs are on the left panel. Agents are on the left side of the map.</p>
+
+      <div class="toolbar">
+        <button type="button" class="ghost" (click)="autoLayout()">Auto Layout</button>
+        <button type="button" class="ghost" (click)="load()" [disabled]="loading || saving">Reload Existing</button>
+        <button type="button" (click)="saveToDatabase()" [disabled]="loading || saving">{{ saving ? 'Saving...' : 'Save to DB' }}</button>
+      </div>
+      <p class="muted" *ngIf="loading">Loading current team map...</p>
+    </div>
+
+    <div class="sidebar-card">
+      <h3>Team Leaders</h3>
+      <ul class="choice-list">
+        <li *ngFor="let tl of teamLeaders">
+          <div>
+            <strong>{{ tl.firstName }} {{ tl.lastName }}</strong>
+            <small>{{ tl.email }}</small>
+          </div>
+        </li>
+      </ul>
+
+      <h3>QAs</h3>
+      <ul class="choice-list">
+        <li *ngFor="let qa of qas">
+          <div>
+            <strong>{{ qa.firstName }} {{ qa.lastName }}</strong>
+            <small>{{ qa.email }}</small>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="sidebar-card" *ngIf="selectedNode as node">
+      <h3>Selected Node #{{ node.id }}</h3>
+      <p class="muted"><strong>{{ node.label }}</strong></p>
+      <p class="muted">Role: {{ node.role }}</p>
+      <p class="muted">{{ node.email }}</p>
+
+      <div *ngIf="node.role === 'AGENT'" class="assignment-view">
+        <p class="muted">TL: {{ getManagerLabel(getAgentAssignment(node.id).teamLeaderId, 'TEAM_LEADER') }}</p>
+        <p class="muted">QA: {{ getManagerLabel(getAgentAssignment(node.id).qaId, 'QA') }}</p>
+        <div class="toolbar">
+          <button type="button" class="ghost" (click)="clearLink(node.id, 'TL')">Clear TL</button>
+          <button type="button" class="ghost" (click)="clearLink(node.id, 'QA')">Clear QA</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="status">{{ statusMessage }}</p>
+  </aside>
+
+  <div class="tree-canvas-wrap">
+    <div
+      class="tree-canvas"
+      [class.panning]="isPanningCanvas"
+      #canvasRef
+      (mousedown)="onCanvasMouseDown($event)"
+      (mousemove)="onCanvasMouseMove($event)"
+      (mouseup)="onCanvasMouseUp()"
+      (wheel)="onCanvasWheel($event)"
+    >
+      <div
+        class="canvas-grid"
+        [style.background-size]="getCanvasBackgroundSize()"
+        [style.background-position]="getCanvasBackgroundPosition()"
+      ></div>
+
+      <div class="canvas-world" [style.transform]="getCanvasTransform()">
+        <svg class="links" aria-hidden="true">
+          <g *ngFor="let agent of nodes">
+            <path *ngIf="agent.role === 'AGENT'" [attr.d]="getConnectionPath(agent.id, 'TL')" class="link-path tl-link"></path>
+            <path *ngIf="agent.role === 'AGENT'" [attr.d]="getConnectionPath(agent.id, 'QA')" class="link-path qa-link"></path>
+          </g>
+          <path *ngIf="wireFrom" [attr.d]="getLiveWirePath()" class="link-path live"></path>
+        </svg>
+
+        <article
+          *ngFor="let node of nodes"
+          class="node-card"
+          [class.active]="node.id === selectedNodeId"
+          [class.role-agent]="node.role === 'AGENT'"
+          [class.role-tl]="node.role === 'TEAM_LEADER'"
+          [class.role-qa]="node.role === 'QA'"
+          [style.left.px]="node.x"
+          [style.top.px]="node.y"
+          (mousedown)="startDrag($event, node)"
+          (click)="selectNode(node.id)"
+          (mouseup)="completeWire($event, node)"
+        >
+          <header>
+            <span>#{{ node.id }}</span>
+            <strong>{{ node.label }}</strong>
+          </header>
+
+          <p class="tag">{{ node.role }}</p>
+          <p class="meta">{{ node.email }}</p>
+
+          <div class="map-choices" *ngIf="node.role === 'AGENT'">
+            <div class="map-choice" (mousedown)="$event.stopPropagation()">
+              <span class="choice-label">TL Link</span>
+              <span class="choice-target">{{ getManagerLabel(getAgentAssignment(node.id).teamLeaderId, 'TEAM_LEADER') }}</span>
+              <button
+                #wireBtn
+                type="button"
+                class="choice-wire"
+                title="Drag to Team Leader"
+                (mousedown)="startWire($event, node.id, 'TL')"
+              >
+                +
+              </button>
+            </div>
+
+            <div class="map-choice" (mousedown)="$event.stopPropagation()">
+              <span class="choice-label">QA Link</span>
+              <span class="choice-target">{{ getManagerLabel(getAgentAssignment(node.id).qaId, 'QA') }}</span>
+              <button
+                #wireBtn
+                type="button"
+                class="choice-wire"
+                title="Drag to QA"
+                (mousedown)="startWire($event, node.id, 'QA')"
+              >
+                +
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>

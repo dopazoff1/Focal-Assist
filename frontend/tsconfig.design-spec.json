@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.spec.json",
+  "include": ["src/app/components/login/login.spec.ts"],
+  "exclude": []
+}

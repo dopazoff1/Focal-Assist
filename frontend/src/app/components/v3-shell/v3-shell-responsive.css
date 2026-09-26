@@ -1,0 +1,177 @@
+/* Focal operational design system. See design.md. */
+
+@media (max-width: 1280px) {
+  .v3-topbar {
+    grid-template-columns: minmax(9rem, auto) minmax(10rem, 1fr) auto;
+  }
+
+  .v3-collab-chip span {
+    display: none;
+  }
+
+  .v3-timezone-select {
+    display: none;
+  }
+}
+
+@media (max-width: 980px) {
+  .v3-collapse { display: none; }
+  .v3-sidebar {
+    transform: translateX(-100%);
+    box-shadow: var(--shadow-popover);
+    transition: transform var(--dur-short) var(--ease-out);
+  }
+
+  .v3-layout.sidebar-open .v3-sidebar {
+    transform: translateX(0);
+  }
+
+  .v3-side-close,
+  .v3-burger {
+    display: grid;
+  }
+
+  .v3-main {
+    margin-left: 0;
+  }
+
+  .v3-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 35;
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: var(--color-overlay);
+    cursor: pointer;
+  }
+}
+
+@media (max-width: 700px) {
+  .v3-topbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-2xs);
+    padding: var(--space-2xs) var(--space-xs);
+  }
+
+  .v3-topbar-leading {
+    grid-row: 1;
+    grid-column: 1;
+  }
+
+  .v3-search {
+    grid-row: 2;
+    grid-column: 1 / -1;
+  }
+
+  .v3-top-actions {
+    grid-row: 1;
+    grid-column: 2;
+    max-width: 100%;
+    justify-content: flex-end;
+    overflow: visible;
+  }
+
+  .v3-collab-chip {
+    position: relative;
+    width: var(--icon-button-size);
+    padding: 0;
+    justify-content: center;
+  }
+
+  .v3-collab-chip span {
+    display: none;
+  }
+
+  .v3-collab-chip strong {
+    position: absolute;
+    inset: calc(var(--space-2xs) * -1) calc(var(--space-2xs) * -1) auto auto;
+    min-width: var(--space-md);
+  }
+
+  .v3-timezone-select {
+    display: grid;
+  }
+
+  .v3-select {
+    position: relative;
+    width: var(--icon-button-size);
+    flex: 0 0 auto;
+    grid-template-columns: minmax(0, 1fr);
+    place-items: center;
+    padding: 0;
+  }
+
+  .v3-select select,
+  .v3-language-select select,
+  .v3-timezone-select select,
+  .v3-status-select select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    opacity: 0;
+  }
+
+  .v3-content {
+    padding: var(--space-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .v3-sidebar {
+    width: min(var(--sidebar-width), calc(100vw - var(--space-xl)));
+  }
+
+  .v3-title strong {
+    max-width: 8rem;
+  }
+
+  .v3-title small,
+  .v3-collab-chip,
+  .v3-timezone-select {
+    display: none;
+  }
+
+  .v3-avatar-controls {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .v3-avatar-controls > label {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .v3-avatar-controls > button {
+    grid-column: 1;
+  }
+
+  .v3-avatar-controls > .v3-rotate-actions {
+    grid-column: 2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v3-layout *, .v3-layout *::before, .v3-layout *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .v3-sidebar {
+    transition: none;
+  }
+
+  .v3-avatar-btn:active,
+.v3-profile-edit:active,
+.v3-account-settings:active,
+.v3-burger:active,
+  .v3-logout:active,
+  .v3-side-close:active,
+  .v3-avatar-modal .close:active,
+  .v3-avatar-controls button:active,
+  .v3-avatar-modal > footer button:active:not(:disabled) {
+    transform: none;
+  }
+}

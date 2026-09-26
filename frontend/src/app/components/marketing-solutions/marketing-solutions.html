@@ -1,0 +1,35 @@
+<div class="solutions-page">
+  <section class="panel intro">
+    <p class="kicker">Solutions</p>
+    <h1>Built For Every Operational Layer In Modern Customer Support</h1>
+    <p>
+      Focal is designed for the entire support chain: frontline execution, leadership control, quality assurance,
+      and strategic operations.
+    </p>
+  </section>
+
+  <section class="persona-grid">
+    <article class="panel persona" *ngFor="let persona of personas">
+      <h2>{{ persona.role }}</h2>
+      <p class="goal">{{ persona.goal }}</p>
+      <ul>
+        <li *ngFor="let outcome of persona.outcomes">{{ outcome }}</li>
+      </ul>
+    </article>
+  </section>
+
+  <section class="panel industry-wrap">
+    <p class="kicker">Operational Contexts</p>
+    <h2>Deploy By Business Model, Not By Generic Template</h2>
+    <div class="industry-grid">
+      <article class="industry" *ngFor="let industry of industries">
+        <h3>{{ industry.title }}</h3>
+        <p>{{ industry.summary }}</p>
+        <ul>
+          <li *ngFor="let point of industry.points">{{ point }}</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+</div>
+

@@ -1,0 +1,69 @@
+<section class="v5-page v5-fade-in">
+  <header class="v5-page-header">
+    <div>
+      <h1 class="v5-page-title">V5 Design System</h1>
+      <p class="v5-page-copy">
+        Unified visual and interaction language for a high-conversion, enterprise CRM experience.
+      </p>
+    </div>
+  </header>
+
+  <section class="v5-grid cols-2">
+    <article class="v5-surface">
+      <header class="v5-surface-header">
+        <h3 class="v5-surface-title">Color Tokens</h3>
+      </header>
+      <div class="v5-surface-body token-grid">
+        <article *ngFor="let token of colorTokens">
+          <span class="swatch" [style.background]="token.value"></span>
+          <div>
+            <strong>{{ token.name }}</strong>
+            <p>{{ token.value }} · {{ token.role }}</p>
+          </div>
+        </article>
+      </div>
+    </article>
+
+    <article class="v5-surface">
+      <header class="v5-surface-header">
+        <h3 class="v5-surface-title">Typography & Radius</h3>
+      </header>
+      <div class="v5-surface-body demo-stack">
+        <h2 class="sample-title">Inter / 800 - Page title</h2>
+        <p class="sample-copy">Body text uses Inter with compact line-height for density and readability.</p>
+        <div class="v5-badge-row">
+          <span class="v5-badge">Radius 8px</span>
+          <span class="v5-badge">Radius 10px</span>
+          <span class="v5-badge">Radius 12px</span>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="v5-grid cols-2">
+    <article class="v5-surface">
+      <header class="v5-surface-header">
+        <h3 class="v5-surface-title">Spacing Scale</h3>
+      </header>
+      <div class="v5-surface-body spacing-list">
+        <div *ngFor="let s of spacing">
+          <span>{{ s }}</span>
+          <i [style.width]="s"></i>
+        </div>
+      </div>
+    </article>
+
+    <article class="v5-surface">
+      <header class="v5-surface-header">
+        <h3 class="v5-surface-title">Motion Guidelines</h3>
+      </header>
+      <div class="v5-surface-body">
+        <ul class="v5-list">
+          <li class="v5-list-item" *ngFor="let rule of motionRules">{{ rule }}</li>
+        </ul>
+      </div>
+    </article>
+  </section>
+</section>
+
+

@@ -1,0 +1,88 @@
+<div class="v4-layout" *ngIf="auth.isLoggedIn()">
+  <aside class="v4-sidebar">
+    <a class="v4-brand" [routerLink]="[routeBase, 'dashboard']">
+      <span class="v4-brand-mark">KA</span>
+      <span class="v4-brand-copy">
+        <strong>Focal</strong>
+        <small>Sales Performance OS</small>
+      </span>
+    </a>
+
+    <nav class="v4-nav" aria-label="V4 navigation">
+      <p class="v4-nav-group">Core</p>
+      <a [routerLink]="[routeBase, 'dashboard']" routerLinkActive="active">
+        <span class="v4-nav-ico">DB</span>
+        <span>Dashboard</span>
+      </a>
+      <a [routerLink]="[routeBase, 'pipeline']" routerLinkActive="active">
+        <span class="v4-nav-ico">PL</span>
+        <span>Pipeline</span>
+      </a>
+      <a [routerLink]="[routeBase, 'contacts']" routerLinkActive="active">
+        <span class="v4-nav-ico">CT</span>
+        <span>Contacts</span>
+      </a>
+      <a [routerLink]="[routeBase, 'tasks']" routerLinkActive="active">
+        <span class="v4-nav-ico">TS</span>
+        <span>Tasks</span>
+      </a>
+
+      <p class="v4-nav-group">Execution</p>
+      <a [routerLink]="[routeBase, 'notifications']" routerLinkActive="active">
+        <span class="v4-nav-ico">NT</span>
+        <span>Notifications</span>
+      </a>
+      <a [routerLink]="[routeBase, 'forms']" routerLinkActive="active">
+        <span class="v4-nav-ico">FM</span>
+        <span>Smart Forms</span>
+      </a>
+
+      <p class="v4-nav-group">System</p>
+      <a [routerLink]="[routeBase, 'design-system']" routerLinkActive="active">
+        <span class="v4-nav-ico">DS</span>
+        <span>Design System</span>
+      </a>
+      <a routerLink="/v3/home">
+        <span class="v4-nav-ico">V3</span>
+        <span>Back to V3</span>
+      </a>
+    </nav>
+
+    <footer class="v4-side-footer">
+      <div class="v4-user-name">{{ auth.getUserName() || 'User' }}</div>
+      <div class="v4-user-role">{{ auth.getNormalizedRole() || 'AGENT' }}</div>
+    </footer>
+  </aside>
+
+  <div class="v4-main">
+    <header class="v4-topbar">
+      <div class="v4-topbar-title">
+        <small>CRM V4</small>
+        <strong>Conversion-first workspace</strong>
+      </div>
+
+      <form class="v4-search" (submit)="runQuickSearch($event)">
+        <input
+          type="search"
+          class="v4-input"
+          [(ngModel)]="quickSearch"
+          name="quickSearch"
+          placeholder="Search contact, company, ticket, activity"
+          autocomplete="off"
+        />
+      </form>
+
+      <div class="v4-top-actions">
+        <button type="button" class="v4-btn ghost" [routerLink]="[routeBase, 'forms']">New Lead</button>
+        <button type="button" class="v4-btn primary" [routerLink]="[routeBase, 'pipeline']">Follow Up</button>
+        <button type="button" class="v4-btn" (click)="logout()">Logout</button>
+      </div>
+    </header>
+
+    <main class="v4-content-frame">
+      <section class="v4-content-route" #routeHost>
+        <router-outlet (activate)="onRouteActivate()"></router-outlet>
+      </section>
+    </main>
+  </div>
+</div>

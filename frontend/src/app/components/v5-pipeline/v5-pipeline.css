@@ -1,0 +1,118 @@
+.v5-board-wrap {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(220px, 1fr));
+  gap: 0.8rem;
+  min-height: 0;
+  overflow: auto;
+  padding-bottom: 0.2rem;
+}
+
+.v5-stage {
+  border: 1px solid var(--v5-border);
+  border-radius: 12px;
+  background: var(--v5-surface-2);
+  box-shadow: var(--v5-shadow-sm);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 280px;
+}
+
+.v5-stage-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.72rem 0.74rem;
+  border-bottom: 1px solid var(--v5-border-subtle);
+}
+
+.v5-stage-head h3 {
+  margin: 0;
+  font-size: 0.89rem;
+}
+
+.v5-stage-head small {
+  color: var(--v5-text-3);
+  font-size: 0.72rem;
+}
+
+.v5-stage-list {
+  padding: 0.66rem;
+  display: grid;
+  align-content: start;
+  gap: 0.6rem;
+}
+
+.v5-deal {
+  border: 1px solid var(--v5-border);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: var(--v5-shadow-sm);
+  padding: 0.55rem 0.58rem;
+  display: grid;
+  gap: 0.4rem;
+  transition: transform 180ms var(--v5-ease), box-shadow 180ms var(--v5-ease), border-color 180ms var(--v5-ease);
+}
+
+.v5-deal:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--v5-shadow-md);
+  border-color: color-mix(in srgb, var(--v5-primary) 24%, var(--v5-border));
+}
+
+.v5-deal strong {
+  font-size: 0.82rem;
+  line-height: 1.33;
+}
+
+.v5-deal p {
+  margin: 0;
+  color: var(--v5-text-2);
+  font-size: 0.78rem;
+}
+
+.v5-deal-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.42rem;
+  flex-wrap: wrap;
+}
+
+.v5-deal-meta span {
+  border-radius: 999px;
+  border: 1px solid var(--v5-border);
+  background: var(--v5-surface-2);
+  font-size: 0.67rem;
+  color: var(--v5-text-2);
+  padding: 0.14rem 0.42rem;
+  font-weight: 700;
+}
+
+.v5-deal-foot {
+  display: grid;
+  gap: 0.24rem;
+}
+
+.v5-deal-foot small {
+  color: var(--v5-text-3);
+  font-size: 0.68rem;
+}
+
+.v5-actions.compact .v5-btn {
+  font-size: 0.72rem;
+  padding: 0.38rem 0.54rem;
+}
+
+@media (max-width: 1450px) {
+  .v5-board-wrap {
+    grid-template-columns: repeat(3, minmax(240px, 1fr));
+  }
+}
+
+@media (max-width: 920px) {
+  .v5-board-wrap {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+}
+
+

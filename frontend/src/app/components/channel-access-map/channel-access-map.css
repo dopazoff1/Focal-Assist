@@ -1,0 +1,70 @@
+@import '../tree-builder/tree-builder.css';
+
+.channel-access-page .canvas-world {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.channel-access-page .links {
+  overflow: visible;
+}
+
+.channel-access-page .node-card.role-user {
+  border-color: color-mix(in srgb, #2563eb 30%, var(--panel-border) 70%);
+  background: color-mix(in srgb, #eff6ff 46%, var(--panel-2) 54%);
+}
+
+.channel-access-page .node-card.role-channel {
+  border-color: color-mix(in srgb, #16a34a 30%, var(--panel-border) 70%);
+  background: color-mix(in srgb, #ecfdf5 42%, var(--panel-2) 58%);
+}
+
+.channel-access-page .link-path.channel-link {
+  stroke: #2563eb;
+}
+
+.channel-access-page .channel-checks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-height: 320px;
+  overflow: auto;
+  border: 1px solid color-mix(in srgb, var(--panel-border) 75%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--panel-2) 86%, transparent);
+  padding: 0.5rem;
+}
+
+.channel-access-page .channel-checks label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  color: var(--text-2);
+}
+
+.channel-access-page .channel-checks input {
+  width: auto;
+  margin: 0;
+}
+
+.channel-access-page .linked-chip-list {
+  margin-top: 0.45rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.28rem;
+}
+
+.channel-access-page .linked-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.14rem 0.42rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-2);
+  border: 1px solid color-mix(in srgb, var(--panel-border) 70%, transparent);
+  background: color-mix(in srgb, var(--panel-1) 84%, transparent);
+}

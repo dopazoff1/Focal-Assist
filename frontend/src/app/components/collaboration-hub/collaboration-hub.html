@@ -1,0 +1,446 @@
+<section class="collab-page" [class.with-right]="canManageChannels && !!activeRoom">
+  <aside class="panel collab-left">
+    <div class="left-head">
+      <div class="mode-copy">
+        <p class="kicker">Collaboration</p>
+        <h2>focal Channels</h2>
+      </div>
+      <span class="mode-badge">Team workspace</span>
+    </div>
+
+    <div class="left-actions" [class.single]="!canManageChannels">
+      <button
+        type="button"
+        *ngIf="canManageChannels"
+        (click)="showCreateChannel = !showCreateChannel; showCreateDirect = false"
+      >
+        + Channel
+      </button>
+      <button type="button" (click)="showCreateDirect = !showCreateDirect; showCreateChannel = false">
+        + Direct
+      </button>
+    </div>
+
+    <div class="room-filter">
+      <input
+        type="search"
+        placeholder="Filter channels and DMs"
+        [(ngModel)]="roomFilter"
+      />
+    </div>
+
+    <section class="create-box" *ngIf="showCreateChannel && canManageChannels">
+      <h3>New Channel</h3>
+      <input type="text" placeholder="channel-name" [(ngModel)]="newChannelName" />
+      <input type="text" placeholder="Purpose / description" [(ngModel)]="newChannelDescription" />
+      <input type="text" placeholder="Topic" [(ngModel)]="newChannelTopic" />
+      <label class="check-row">
+        <input type="checkbox" [(ngModel)]="newChannelPrivate" />
+        <span>Private channel</span>
+      </label>
+      <div class="member-picker">
+        <p>Invite initial members</p>
+        <button
+          type="button"
+          *ngFor="let user of roomCreationCandidates"
+          [class.active]="newChannelMemberIds.includes(user.id)"
+          (click)="toggleChannelMember(user.id)"
+        >
+          {{ user.name }}
+        </button>
+      </div>
+      <button type="button" class="primary" [disabled]="!canCreateChannel || saving" (click)="createChannel()">
+        {{ saving ? 'Creating...' : 'Create Channel' }}
+      </button>
+    </section>
+
+    <section class="create-box" *ngIf="showCreateDirect">
+      <h3>Start Direct Chat</h3>
+      <select [(ngModel)]="selectedDirectUserId">
+        <option [ngValue]="null">Select teammate</option>
+        <option *ngFor="let user of roomCreationCandidates" [ngValue]="user.id">
+          {{ user.name }} (@{{ user.handle }})
+        </option>
+      </select>
+      <button type="button" class="primary" [disabled]="!selectedDirectUserId || saving" (click)="createDirectRoom()">
+        {{ saving ? 'Opening...' : 'Open Direct Chat' }}
+      </button>
+    </section>
+
+    <div class="room-list-wrap">
+      <section class="room-list-group">
+        <h3>Channels</h3>
+        <button
+          type="button"
+          class="room-item"
+          *ngFor="let room of channels; trackBy: trackRoom"
+          [class.active]="room.id === selectedRoomId"
+          (click)="openRoom(room.id)"
+        >
+          <span class="room-main">
+            <span class="room-name">
+              <span class="room-private" *ngIf="room.isPrivate">lock</span>
+              #{{ room.name }}
+            </span>
+            <span class="room-meta">{{ room.topic || room.description || 'No topic' }}</span>
+          </span>
+          <span class="room-end">
+            <span class="badge unread" *ngIf="unreadCount(room.id) > 0">{{ unreadCount(room.id) }}</span>
+            <button
+              type="button"
+              class="icon-btn"
+              [class.active]="isRoomStarred(room.id)"
+              (click)="toggleRoomStar(room, $event)"
+              title="Star room"
+            >
+              ★
+            </button>
+          </span>
+        </button>
+      </section>
+
+      <section class="room-list-group">
+        <h3>Direct Messages</h3>
+        <button
+          type="button"
+          class="room-item"
+          *ngFor="let room of directs; trackBy: trackRoom"
+          [class.active]="room.id === selectedRoomId"
+          (click)="openRoom(room.id)"
+        >
+          <span class="room-main">
+            <span class="room-name">@{{ directRoomName(room) }}</span>
+            <span class="room-meta">{{ room.memberIds.length }} members</span>
+          </span>
+          <span class="room-end">
+            <span class="badge unread" *ngIf="unreadCount(room.id) > 0">{{ unreadCount(room.id) }}</span>
+            <button
+              type="button"
+              class="icon-btn"
+              [class.active]="isRoomStarred(room.id)"
+              (click)="toggleRoomStar(room, $event)"
+              title="Star room"
+            >
+              ★
+            </button>
+          </span>
+        </button>
+      </section>
+
+      <section class="room-list-group mini">
+        <h3>Saved / Mentions</h3>
+        <div class="mini-row">
+          <span>Saved messages</span>
+          <strong>{{ savedMessages.length }}</strong>
+        </div>
+        <div class="mini-row">
+          <span>Mentions</span>
+          <strong>{{ mentionInbox.length }}</strong>
+        </div>
+      </section>
+    </div>
+  </aside>
+
+  <section class="panel collab-main">
+    <header class="main-head" *ngIf="activeRoom as room">
+      <div class="main-head-copy">
+        <p class="kicker">Room</p>
+        <h2>{{ formatRoomTitle(room) }}</h2>
+        <p class="room-sub" *ngIf="room.kind === 'CHANNEL'">{{ room.topic || room.description || 'No topic set yet.' }}</p>
+        <p class="room-sub" *ngIf="room.kind === 'DIRECT'">Private direct conversation with team member.</p>
+      </div>
+      <div class="main-head-actions">
+        <button type="button" [class.active]="isRoomStarred(room.id)" (click)="toggleRoomStar(room)">
+          {{ isRoomStarred(room.id) ? 'Starred' : 'Star' }}
+        </button>
+        <button type="button" [class.active]="isRoomMuted(room.id)" (click)="toggleRoomMute(room)">
+          {{ isRoomMuted(room.id) ? 'Muted' : 'Mute' }}
+        </button>
+      </div>
+    </header>
+
+    <div class="state-box" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Loading collaboration workspace...</p>
+    </div>
+
+    <div class="state-box error" *ngIf="!loading && errorMessage">
+      <p>{{ errorMessage }}</p>
+    </div>
+
+    <div class="stream-wrap" *ngIf="!loading && activeRoom">
+      <div class="stream-search">
+        <input
+          type="search"
+          placeholder="Search in this room"
+          [(ngModel)]="searchTerm"
+        />
+      </div>
+
+      <div class="stream-list" #timelineViewport>
+        <ng-container *ngFor="let message of activeRoomMessages; trackBy: trackMessage">
+          <div class="new-message-divider" *ngIf="isUnreadDividerMessage(message)">
+            <span>New messages</span>
+          </div>
+          <article
+            class="msg-card"
+            [class.own]="isOwnMessage(message)"
+            [class.system]="message.kind === 'SYSTEM'"
+          >
+          <header class="msg-head">
+            <div class="sender">
+              <strong>{{ senderLabel(message.senderId) }}</strong>
+              <span>@{{ senderHandle(message.senderId) }}</span>
+              <span class="status-chip">{{ senderStatus(message.senderId) }}</span>
+            </div>
+            <div class="time-tools">
+              <time>{{ formatMessageTime(message.createdAt) }}</time>
+              <span class="edited" *ngIf="message.editedAt">edited</span>
+              <button type="button" class="tool" (click)="togglePin(message)" title="Pin">
+                {{ message.pinned ? 'Unpin' : 'Pin' }}
+              </button>
+              <button type="button" class="tool" (click)="toggleSaveMessage(message)" title="Save">
+                {{ isMessageSaved(message.id) ? 'Unsave' : 'Save' }}
+              </button>
+              <button type="button" class="tool" *ngIf="isOwnMessage(message) && message.kind === 'USER'" (click)="startEditing(message)">
+                Edit
+              </button>
+              <button type="button" class="tool danger" *ngIf="isOwnMessage(message)" (click)="deleteMessage(message)">
+                Delete
+              </button>
+            </div>
+          </header>
+
+          <div class="msg-content" *ngIf="editingMessageId !== message.id" [innerHTML]="renderMessage(message.content)"></div>
+          <div class="msg-edit" *ngIf="editingMessageId === message.id">
+            <textarea rows="3" [(ngModel)]="editingDraft"></textarea>
+            <div class="edit-actions">
+              <button type="button" class="primary" (click)="saveEditing(message)">Save</button>
+              <button type="button" (click)="cancelEditing()">Cancel</button>
+            </div>
+          </div>
+
+          <div class="msg-links" *ngIf="messageLinkedArticles(message).length > 0">
+            <a
+              *ngFor="let article of messageLinkedArticles(message)"
+              [routerLink]="['/v3/knowledge-base']"
+              [queryParams]="{ article: article.id }"
+              class="article-chip"
+              target="_blank"
+            >
+              {{ article.title }}
+            </a>
+          </div>
+
+          <div class="msg-reactions">
+            <button
+              type="button"
+              *ngFor="let reaction of reactionSummary(message)"
+              [class.active]="currentUserReacted(message, reaction.emoji)"
+              (click)="toggleReaction(message, reaction.emoji)"
+            >
+              {{ reaction.emoji }} {{ reaction.users.length }}
+            </button>
+            <button
+              type="button"
+              class="ghost"
+              *ngFor="let emoji of emojiPalette"
+              (click)="toggleReaction(message, emoji)"
+            >
+              {{ emoji }}
+            </button>
+          </div>
+
+            <div class="delivery-state" *ngIf="directDeliveryLabel(message)">
+              {{ directDeliveryLabel(message) }}
+            </div>
+
+            <div class="thread-summary" *ngIf="activeRoomIsChannel && (threadReplyCount(message.id) > 0 || message.kind === 'USER')">
+              <button type="button" (click)="openThread(message)">
+                {{ threadReplyCount(message.id) }} replies • Open thread
+              </button>
+            </div>
+          </article>
+        </ng-container>
+      </div>
+
+      <ng-container *ngIf="activeRoomIsChannel">
+        <section class="thread-panel" *ngIf="activeThreadRoot as threadRoot">
+          <header>
+            <strong>Thread</strong>
+            <button type="button" (click)="closeThread()">Close</button>
+          </header>
+          <article class="thread-root">
+            <p class="thread-author">{{ senderLabel(threadRoot.senderId) }}</p>
+            <p [innerHTML]="renderMessage(threadRoot.content)"></p>
+          </article>
+          <div class="thread-list">
+            <article *ngFor="let item of activeThreadMessages; trackBy: trackMessage">
+              <header>
+                <strong>{{ senderLabel(item.senderId) }}</strong>
+                <time>{{ formatMessageTime(item.createdAt) }}</time>
+              </header>
+              <p [innerHTML]="renderMessage(item.content)"></p>
+            </article>
+          </div>
+        </section>
+      </ng-container>
+
+      <footer class="composer">
+        <div class="composer-tools">
+          <div class="mention-buttons">
+            <button type="button" *ngFor="let user of mentionCandidates" (click)="appendMention(user.handle)">
+              @{{ user.handle }}
+            </button>
+          </div>
+
+          <div class="composer-articles">
+            <label>Tag KB article in message</label>
+            <select (change)="addArticleToComposer(+$any($event.target).value)">
+              <option value="">Select article</option>
+              <option *ngFor="let article of availableKBAttachments" [value]="article.id">
+                {{ article.title }}
+              </option>
+            </select>
+            <div class="picked-articles" *ngIf="composerLinkedArticleIds.length > 0">
+              <span *ngFor="let articleId of composerLinkedArticleIds">
+                {{ kbArticleById[articleId]?.title || ('Article #' + articleId) }}
+                <button type="button" (click)="removeComposerArticle(articleId)">x</button>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <textarea
+          rows="4"
+          [(ngModel)]="composerDraft"
+          (ngModelChange)="onComposerDraftChanged()"
+          placeholder="Write to the channel. Use @handle for mentions, add KB tags, and keep updates actionable."
+        ></textarea>
+
+        <div class="composer-actions">
+          <span class="status">{{ statusMessage }}</span>
+          <div class="typing-indicator" *ngIf="typingUsers.length > 0">
+            <span class="typing-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span>{{ typingLine }}</span>
+          </div>
+          <button type="button" class="primary" [disabled]="!canSend" (click)="sendMessage()">
+            {{ saving ? 'Sending...' : (activeRoomIsChannel && threadRootMessageId ? 'Reply in thread' : 'Send message') }}
+          </button>
+        </div>
+      </footer>
+    </div>
+  </section>
+
+  <aside class="panel collab-right" *ngIf="canManageChannels && activeRoom as room">
+    <section class="right-block">
+      <h3>Room Control</h3>
+      <div class="meta-grid">
+        <div>
+          <span>Type</span>
+          <strong>{{ room.kind === 'CHANNEL' ? (room.isPrivate ? 'Private channel' : 'Public channel') : 'Direct chat' }}</strong>
+        </div>
+        <div>
+          <span>Members</span>
+          <strong>{{ room.memberIds.length }}</strong>
+        </div>
+        <div>
+          <span>Pinned</span>
+          <strong>{{ pinnedMessages.length }}</strong>
+        </div>
+      </div>
+
+      <div class="topic-editor" *ngIf="activeChannel as channel">
+        <label>Channel topic</label>
+        <input type="text" [(ngModel)]="topicDraft" />
+        <button type="button" class="primary" (click)="saveRoomTopic()">Save topic</button>
+      </div>
+    </section>
+
+    <section class="right-block" *ngIf="activeChannel as channel">
+      <h3>Channel Access</h3>
+      <p class="hint">Channels are invitation-based. Only admins can invite members.</p>
+      <div class="member-badges" *ngIf="channel.memberIds.length > 0">
+        <span class="member-badge" *ngFor="let memberId of channel.memberIds">
+          {{ senderLabel(memberId) }}
+        </span>
+      </div>
+      <div class="link-add" *ngIf="canManageChannels">
+        <select [(ngModel)]="selectedInviteUserId">
+          <option [ngValue]="null">Invite teammate</option>
+          <option *ngFor="let user of inviteCandidates" [ngValue]="user.id">
+            {{ user.name }} (@{{ user.handle }})
+          </option>
+        </select>
+        <button
+          type="button"
+          class="primary"
+          [disabled]="!selectedInviteUserId || saving"
+          (click)="inviteUserToActiveChannel()"
+        >
+          Invite to channel
+        </button>
+      </div>
+    </section>
+
+    <section class="right-block">
+      <h3>KB Links</h3>
+      <div class="link-add">
+        <select [(ngModel)]="selectedRoomArticleId">
+          <option [ngValue]="null">Choose article</option>
+          <option *ngFor="let article of kbArticles" [ngValue]="article.id">{{ article.title }}</option>
+        </select>
+        <button type="button" class="primary" [disabled]="!selectedRoomArticleId" (click)="addArticleToRoom()">Link</button>
+      </div>
+      <div class="link-list" *ngIf="roomLinkedArticles.length > 0">
+        <article *ngFor="let article of roomLinkedArticles">
+          <a [routerLink]="['/v3/knowledge-base']" [queryParams]="{ article: article.id }" target="_blank">{{ article.title }}</a>
+          <button type="button" (click)="removeArticleFromRoom(article.id)">Unlink</button>
+        </article>
+      </div>
+    </section>
+
+    <section class="right-block">
+      <h3>Pinned Messages</h3>
+      <div class="list-mini" *ngIf="pinnedMessages.length > 0; else noPins">
+        <article *ngFor="let message of pinnedMessages">
+          <header>
+            <strong>{{ senderLabel(message.senderId) }}</strong>
+            <time>{{ formatMessageTime(message.createdAt) }}</time>
+          </header>
+          <p [innerHTML]="renderMessage(message.content)"></p>
+        </article>
+      </div>
+      <ng-template #noPins>
+        <p class="hint">No pinned messages yet.</p>
+      </ng-template>
+    </section>
+
+    <section class="right-block">
+      <h3>Mention Inbox</h3>
+      <div class="list-mini" *ngIf="mentionInbox.length > 0; else noMentions">
+        <article *ngFor="let message of mentionInbox">
+          <header>
+            <strong>{{ senderLabel(message.senderId) }}</strong>
+            <time>{{ formatMessageTime(message.createdAt) }}</time>
+          </header>
+          <p [innerHTML]="renderMessage(message.content)"></p>
+        </article>
+      </div>
+      <ng-template #noMentions>
+        <p class="hint">No recent mentions.</p>
+      </ng-template>
+    </section>
+
+    <section class="right-block">
+      <h3>Online Team</h3>
+      <div class="online-list">
+        <article *ngFor="let user of users">
+          <span class="dot" [class.offline]="user.status === 'OFFLINE'"></span>
+          <strong>{{ user.name }}</strong>
+          <small>{{ user.role }}</small>
+        </article>
+      </div>
+    </section>
+  </aside>
+</section>

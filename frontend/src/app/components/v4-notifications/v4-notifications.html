@@ -1,0 +1,49 @@
+<section class="v4-page v4-fade-in">
+  <header class="v4-page-header">
+    <div>
+      <h1 class="v4-page-title">Notifications & Alerts</h1>
+      <p class="v4-page-copy">
+        Keep operators focused with urgency-based alerts and clean actionable context.
+      </p>
+    </div>
+    <div class="v4-actions">
+      <span class="v4-badge info">{{ unreadCount }} unread</span>
+      <button type="button" class="v4-btn" (click)="markAllRead()">Mark all as read</button>
+    </div>
+  </header>
+
+  <section class="v4-surface">
+    <header class="v4-surface-header">
+      <div class="filters">
+        <button type="button" class="v4-btn" [class.primary]="filter === 'all'" (click)="setFilter('all')">All</button>
+        <button type="button" class="v4-btn" [class.primary]="filter === 'unread'" (click)="setFilter('unread')">Unread</button>
+        <button type="button" class="v4-btn" [class.primary]="filter === 'critical'" (click)="setFilter('critical')">Critical</button>
+      </div>
+    </header>
+
+    <div class="v4-surface-body">
+      <div class="notice-list" *ngIf="filtered.length > 0; else noAlerts">
+        <article class="notice" *ngFor="let n of filtered" [class.unread]="!n.read" [attr.data-level]="n.level">
+          <div class="notice-main">
+            <header>
+              <strong>{{ n.title }}</strong>
+              <span class="v4-badge">{{ n.time }}</span>
+            </header>
+            <p>{{ n.body }}</p>
+          </div>
+          <div class="v4-actions">
+            <button type="button" class="v4-btn" *ngIf="!n.read" (click)="markRead(n)">Mark read</button>
+            <button type="button" class="v4-btn primary">Open</button>
+          </div>
+        </article>
+      </div>
+
+      <ng-template #noAlerts>
+        <div class="v4-empty">
+          <strong>No alert in this filter</strong>
+          <p>Everything is under control. You can switch filters for more context.</p>
+        </div>
+      </ng-template>
+    </div>
+  </section>
+</section>

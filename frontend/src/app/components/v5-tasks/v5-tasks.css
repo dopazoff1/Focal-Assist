@@ -1,0 +1,127 @@
+.progress-card {
+  padding: 0.9rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+}
+
+.progress-card p {
+  margin: 0;
+  font-size: 0.74rem;
+  color: var(--v5-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.progress-card h2 {
+  margin: 0.28rem 0 0;
+  font-size: 1.4rem;
+}
+
+.progress-wrap {
+  min-width: min(380px, 64%);
+  display: grid;
+  gap: 0.28rem;
+}
+
+.progress-wrap small {
+  color: var(--v5-text-3);
+  font-size: 0.72rem;
+}
+
+.task-lanes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.lane {
+  border: 1px solid var(--v5-border);
+  border-radius: 12px;
+  background: var(--v5-surface-2);
+  box-shadow: var(--v5-shadow-sm);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 290px;
+}
+
+.lane > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.7rem;
+  border-bottom: 1px solid var(--v5-border-subtle);
+}
+
+.lane > header h3 {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.lane-list {
+  display: grid;
+  align-content: start;
+  gap: 0.54rem;
+  padding: 0.68rem;
+}
+
+.task-card {
+  border: 1px solid var(--v5-border);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: var(--v5-shadow-sm);
+  padding: 0.56rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem;
+  align-items: flex-start;
+  cursor: pointer;
+  transition: transform 160ms var(--v5-ease), border-color 160ms var(--v5-ease);
+}
+
+.task-card:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--v5-primary) 24%, var(--v5-border));
+}
+
+.task-card input {
+  margin-top: 0.1rem;
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--v5-primary);
+}
+
+.task-card strong {
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.task-card p {
+  margin: 0.2rem 0 0.36rem;
+  color: var(--v5-text-2);
+  font-size: 0.76rem;
+}
+
+.task-card.done strong {
+  text-decoration: line-through;
+  color: color-mix(in srgb, var(--v5-text-2) 72%, var(--v5-text-3));
+}
+
+@media (max-width: 1100px) {
+  .task-lanes {
+    grid-template-columns: 1fr;
+  }
+
+  .progress-card {
+    display: grid;
+  }
+
+  .progress-wrap {
+    min-width: 0;
+  }
+}
+
+

@@ -1,0 +1,88 @@
+<main class="public-chat-shell" [style.--project-brand]="project?.brandColor || '#3157ff'">
+  <section class="public-chat-card">
+    <header>
+      <div class="brand-mark">{{ (project?.name || 'A').slice(0, 2).toUpperCase() }}</div>
+      <div>
+        <p>Live support</p>
+        <h1>{{ project?.name || 'Customer chat' }}</h1>
+        <small>{{ project?.description || 'Talk to our support team.' }}</small>
+      </div>
+    </header>
+
+    <div class="loading" *ngIf="loading">
+      <span></span><span></span><span></span>
+    </div>
+
+    <div class="error" *ngIf="error && !loading">{{ error }}</div>
+
+    <form class="start-form" *ngIf="!loading && !started && !error" (ngSubmit)="start()">
+      <h2>Start a conversation</h2>
+      <p>{{ project?.welcomeMessage || 'Hi. How can we help?' }}</p>
+      <input name="customerName" [(ngModel)]="customerName" placeholder="Your name" />
+      <input name="customerEmail" [(ngModel)]="customerEmail" placeholder="Email (optional)" />
+      <button type="submit">Start chat</button>
+    </form>
+
+    <section class="chat-area" *ngIf="started">
+      <div class="public-chat-thread">
+        <article
+          class="bubble"
+          *ngFor="let msg of messages"
+          [class.me]="msg.senderType === 'CUSTOMER'"
+          [class.agent]="msg.senderType === 'AGENT'"
+          [class.bot]="msg.senderType === 'BOT'"
+          [class.system]="msg.senderType === 'SYSTEM'">
+          <small>{{ msg.senderName || msg.senderType }} - {{ msg.createdAt | date:'short' }}</small>
+          <p>{{ msg.body }}</p>
+        </article>
+
+        <article class="csat-card" *ngIf="isClosed()">
+          <span class="csat-eyebrow">Conversation ended</span>
+          <h2>How was your support experience?</h2>
+          <p *ngIf="!csatSubmitted">Your feedback helps us improve the quality and speed of support.</p>
+          <p *ngIf="csatSubmitted">Thanks. Your feedback has been sent to the support team.</p>
+
+          <div class="csat-stars" *ngIf="!csatSubmitted" aria-label="CSAT rating">
+            <button
+              type="button"
+              *ngFor="let rating of [1, 2, 3, 4, 5]"
+              [class.active]="rating <= csatRating"
+              (click)="csatRating = rating"
+              [attr.aria-label]="'Rate ' + rating + ' out of 5'">
+              ★
+            </button>
+          </div>
+
+          <textarea
+            *ngIf="!csatSubmitted"
+            name="csatComment"
+            [(ngModel)]="csatComment"
+            placeholder="Optional comment..."
+            rows="3">
+          </textarea>
+
+          <div class="csat-actions">
+            <button
+              type="button"
+              *ngIf="!csatSubmitted"
+              [disabled]="!csatRating || csatSending"
+              (click)="submitCsat()">
+              {{ csatSending ? 'Sending...' : 'Send feedback' }}
+            </button>
+            <button type="button" class="secondary" (click)="startNewChat()">Start new chat</button>
+          </div>
+        </article>
+      </div>
+
+      <form class="public-composer" *ngIf="!isClosed()" (ngSubmit)="send()">
+        <div class="quick-replies" *ngIf="quickReplies().length">
+          <button type="button" *ngFor="let reply of quickReplies()" (click)="sendQuickReply(reply)">
+            {{ reply }}
+          </button>
+        </div>
+        <input name="body" [(ngModel)]="body" placeholder="Write your message..." autocomplete="off" />
+        <button type="submit" [disabled]="sending || !body.trim()">Send</button>
+      </form>
+    </section>
+  </section>
+</main>

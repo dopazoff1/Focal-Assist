@@ -1,0 +1,96 @@
+logging {
+  level  = "info"
+  format = "logfmt"
+}
+
+local.file_match "creditplus_file_logs" {
+  path_targets = [
+    {
+      "__path__" = "/mnt/frontend/*.log",
+      "app"      = "creditplus-focal",
+      "component" = "frontend",
+      "source"   = "file",
+    },
+    {
+      "__path__" = "/mnt/frontend/logs/*.log",
+      "app"      = "creditplus-focal",
+      "component" = "frontend",
+      "source"   = "file",
+    },
+    {
+      "__path__" = "/mnt/backend/*.log",
+      "app"      = "creditplus-api",
+      "component" = "backend",
+      "source"   = "file",
+    },
+  ]
+  sync_period = "10s"
+}
+
+loki.source.file "creditplus_file_logs" {
+  targets       = local.file_match.creditplus_file_logs.targets
+  forward_to    = [loki.process.creditplus_logs.receiver]
+  tail_from_end = true
+}
+
+discovery.docker "local" {
+  host = "unix:///var/run/docker.sock"
+}
+
+discovery.relabel "docker_logs" {
+  targets = []
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*focalassist.*|.*creditplus-api.*)"
+    action        = "keep"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "compose_service"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_project"]
+    target_label  = "compose_project"
+  }
+
+  rule {
+    target_label = "source"
+    replacement  = "docker"
+  }
+}
+
+loki.source.docker "creditplus_containers" {
+  host          = "unix:///var/run/docker.sock"
+  targets       = discovery.docker.local.targets
+  relabel_rules = discovery.relabel.docker_logs.rules
+  forward_to    = [loki.process.creditplus_logs.receiver]
+}
+
+loki.process "creditplus_logs" {
+  stage.regex {
+    expression = ".*\\b(?P<level>TRACE|DEBUG|INFO|WARN|ERROR)\\b.*"
+  }
+
+  stage.labels {
+    values = {
+      level = "",
+    }
+  }
+
+  forward_to = [loki.write.local.receiver]
+}
+
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

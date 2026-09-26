@@ -1,0 +1,77 @@
+<section class="hub-page">
+  <header class="hub-hero">
+    <div class="hub-hero-mark" aria-hidden="true"><svg lucideSparkles [size]="20"></svg></div>
+    <p class="hub-eyebrow">Knowledge discovery</p>
+    <h1>Knowledge Hub</h1>
+    <p class="hub-hero-copy">Find the answer, procedure, or decision path you need.</p>
+
+    <form class="hub-search" (submit)="submitSearch($event)" role="search">
+      <svg lucideSearch [size]="21" aria-hidden="true"></svg>
+      <label class="sr-only" for="hub-search-input">Search the Knowledge Hub</label>
+      <input
+        id="hub-search-input"
+        type="search"
+        [(ngModel)]="searchTerm"
+        name="hubSearch"
+        placeholder="Search articles, procedures, and map steps"
+        autocomplete="off"
+        (input)="onSearchInput()"
+      />
+      <button *ngIf="searchTerm" type="button" class="hub-search-clear" (click)="clearSearch()" aria-label="Clear search" title="Clear search">x</button>
+      <button type="submit" class="hub-search-submit" aria-label="Search" title="Search"><svg lucideArrowRight [size]="18" aria-hidden="true"></svg></button>
+
+      <div class="hub-suggestions" *ngIf="searchSuggestions.length" role="listbox" aria-label="Search suggestions">
+        <button type="button" class="hub-suggestion" *ngFor="let article of searchSuggestions; trackBy: trackByArticle" (click)="openArticle(article.id)" role="option">
+          <span class="hub-suggestion-icon"><svg lucideBookOpen [size]="16" aria-hidden="true"></svg></span>
+          <span class="hub-suggestion-copy">
+            <strong [innerHTML]="highlight(article.title)"></strong>
+            <small><span [innerHTML]="highlight(article.categoryName)"></span> - <span [innerHTML]="highlight(getSnippet(article))"></span></small>
+          </span>
+          <svg lucideArrowUpRight [size]="16" aria-hidden="true"></svg>
+        </button>
+      </div>
+    </form>
+  </header>
+
+  <section class="hub-results" *ngIf="searchSubmitted">
+    <div class="hub-section-head">
+      <div>
+        <p class="hub-eyebrow">Search results</p>
+        <h2>{{ searchResults.length }} results for "{{ searchTerm }}"</h2>
+      </div>
+      <button type="button" class="hub-text-action" (click)="clearSearch()">Clear search</button>
+    </div>
+    <div class="hub-result-list" *ngIf="searchResults.length; else noResults">
+      <button class="hub-result" type="button" *ngFor="let article of searchResults; trackBy: trackByArticle" (click)="openArticle(article.id)">
+        <span class="hub-result-icon"><svg lucideBookOpen [size]="17" aria-hidden="true"></svg></span>
+        <span class="hub-result-copy"><strong [innerHTML]="highlight(article.title)"></strong><small><span [innerHTML]="highlight(article.categoryName)"></span> - <span [innerHTML]="highlight(getSnippet(article))"></span></small></span>
+        <svg lucideArrowRight [size]="18" aria-hidden="true"></svg>
+      </button>
+    </div>
+    <ng-template #noResults><p class="hub-empty">No article content, category, or map step matches that search.</p></ng-template>
+  </section>
+
+  <section class="hub-categories" *ngIf="!searchSubmitted">
+    <div class="hub-section-head">
+      <div><p class="hub-eyebrow">Browse by subject</p><h2>Choose a starting point</h2></div>
+      <span class="hub-count">{{ index.categories.length }} categories</span>
+    </div>
+
+    <div class="hub-category-grid" *ngIf="!loading; else loadingState">
+      <article class="hub-category-node" *ngFor="let card of categoryCards; let index = index; trackBy: trackByCategory" [style.--hub-node-index]="index">
+        <div class="hub-category-rule" aria-hidden="true"></div>
+        <button type="button" class="hub-category-heading" (click)="openCategory(card.category.id)">
+          <span><small>{{ (index + 1).toString().padStart(2, '0') }}</small><strong>{{ card.category.name }}</strong></span>
+          <svg lucideArrowUpRight [size]="19" aria-hidden="true"></svg>
+        </button>
+        <div class="hub-category-articles">
+          <button type="button" *ngFor="let article of card.articles; trackBy: trackByArticle" (click)="openArticle(article.id)">
+            <svg lucideBookOpen [size]="15" aria-hidden="true"></svg><span>{{ article.title }}</span><svg lucideArrowRight [size]="14" aria-hidden="true"></svg>
+          </button>
+        </div>
+        <button type="button" class="hub-category-footer" (click)="openCategory(card.category.id)">{{ card.total > 3 ? 'View all ' + card.total + ' articles' : 'View category' }}<svg lucideArrowRight [size]="15" aria-hidden="true"></svg></button>
+      </article>
+    </div>
+    <ng-template #loadingState><div class="hub-loading" aria-live="polite"><span class="hub-spinner" aria-hidden="true"></span>Loading the knowledge index...</div></ng-template>
+  </section>
+</section>

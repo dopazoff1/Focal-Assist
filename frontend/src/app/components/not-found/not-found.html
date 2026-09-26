@@ -1,0 +1,20 @@
+<section class="not-found-page">
+  <div class="not-found-card">
+    <p class="code">404</p>
+    <h1>Page not found</h1>
+    <p class="message">
+      The page you requested does not exist or the URL is invalid.
+    </p>
+    <p class="path">
+      <span>Path</span>
+      <code>{{ requestedPath }}</code>
+    </p>
+
+    <div class="actions">
+      <a class="primary" [routerLink]="homeLink">Go to home</a>
+      <a class="ghost" routerLink="/v3/knowledge-base" *ngIf="homeLink === '/v3/home'">Open Knowledge Base</a>
+      <a class="ghost" routerLink="/knowledge-base-public" *ngIf="homeLink !== '/v3/home'">Open Help Center</a>
+    </div>
+  </div>
+</section>
+

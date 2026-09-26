@@ -1,0 +1,10 @@
+node_modules
+dist
+.angular
+.git
+.gitignore
+npm-debug.log
+yarn-error.log
+frontend-dev.log
+first-version-before-codex-changes.zip
+.vscode

@@ -1,0 +1,40 @@
+<section class="cert">
+  <header class="cert-head">
+    <a class="back" [routerLink]="['../']">Back to course</a>
+    <button type="button" class="btn" (click)="print()">Print</button>
+  </header>
+
+  <div class="panel" *ngIf="summary$ | async as summary">
+    <div class="error" *ngIf="!summary || summary.progress?.state !== 'COMPLETED'">
+      <strong>Certificate not available.</strong>
+      <p>You need to complete the course to generate a certificate.</p>
+    </div>
+
+    <div class="paper" *ngIf="summary && summary.progress?.state === 'COMPLETED'">
+      <div class="mark">KA</div>
+      <h1>Certificate of Completion</h1>
+      <p class="sub">This certifies that</p>
+      <div class="name">{{ auth.getUserName() }}</div>
+      <p class="sub">has successfully completed</p>
+      <div class="course">{{ summary.course.title }}</div>
+      <div class="meta">
+        <span>Completed {{ summary.progress?.completedAt | date:'mediumDate' }}</span>
+        <span>Version v{{ summary.course.version }}</span>
+      </div>
+      <div class="sig">
+        <div>
+          <strong>Focal Academy</strong>
+          <small>Support OS</small>
+        </div>
+        <div class="line"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" *ngIf="error && !(summary$ | async)">
+    <div class="error">
+      <strong>{{ error }}</strong>
+    </div>
+  </div>
+</section>
+

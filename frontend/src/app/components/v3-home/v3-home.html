@@ -1,0 +1,381 @@
+<div class="v3-home">
+  <header class="home-context">
+    <div class="home-context-copy">
+      <h1>{{ 'home.hero.title' | t }}</h1>
+    </div>
+
+    <dl class="session-context" aria-label="Current workspace context">
+      <div>
+        <dt>{{ 'home.chip.role' | t }}</dt>
+        <dd>
+          <svg lucideShieldCheck [size]="16" aria-hidden="true"></svg>
+          {{ roleLabel }}
+        </dd>
+      </div>
+      <div>
+        <dt>{{ 'home.chip.status' | t }}</dt>
+        <dd class="status-value">
+          <svg lucideActivity [size]="16" aria-hidden="true"></svg>
+          {{ auth.getUserStatus() }}
+        </dd>
+      </div>
+      <div *ngIf="auth.getTimeZone()">
+        <dt>{{ 'home.chip.tz' | t }}</dt>
+        <dd>
+          <svg lucideClock3 [size]="16" aria-hidden="true"></svg>
+          {{ auth.getTimeZone() }}
+        </dd>
+      </div>
+    </dl>
+  </header>
+
+  <div class="home-workbench">
+    <section class="module-directory" aria-labelledby="workspace-tools-title">
+      <header class="directory-head">
+        <div>
+          <h2 id="workspace-tools-title">Operational tools</h2>
+        </div>
+      </header>
+
+      <div class="module-groups">
+        <section
+          class="module-group"
+          *ngIf="showCustomerOperations"
+          aria-labelledby="customer-operations-title"
+        >
+          <header class="group-head">
+            <div>
+              <h3 id="customer-operations-title">Customer operations</h3>
+            </div>
+          </header>
+
+          <div class="module-list">
+            <a class="module-row" routerLink="/v3/crm" *ngIf="canUseCrm">
+              <span class="module-icon"><svg lucideInbox [size]="18" aria-hidden="true"></svg></span>
+              <span class="module-copy">
+                <strong>{{ 'home.card.crm.title' | t }}</strong>
+              </span>
+              <span class="module-cta">
+                {{ 'home.cta.open' | t }}
+                <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+              </span>
+            </a>
+
+            <a class="module-row" routerLink="/v3/collaboration" *ngIf="canUseCollaboration">
+              <span class="module-icon"><svg lucideMessagesSquare [size]="18" aria-hidden="true"></svg></span>
+              <span class="module-copy">
+                <strong>{{ 'home.card.collab.title' | t }}</strong>
+              </span>
+              <span class="module-cta">
+                {{ 'home.cta.chat' | t }}
+                <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+              </span>
+            </a>
+
+            <a class="module-row" routerLink="/v3/live-chat" *ngIf="canUseLiveChat">
+              <span class="module-icon"><svg lucideMessageCircle [size]="18" aria-hidden="true"></svg></span>
+              <span class="module-copy">
+                <strong>Live Chat</strong>
+              </span>
+              <span class="module-cta">
+                {{ 'home.cta.chat' | t }}
+                <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+              </span>
+            </a>
+
+            <a class="module-row" routerLink="/v3/chat-projects" *ngIf="canManageChatProjects">
+              <span class="module-icon"><svg lucideKanbanSquare [size]="18" aria-hidden="true"></svg></span>
+              <span class="module-copy">
+                <strong>Chat Projects</strong>
+              </span>
+              <span class="module-cta">
+                {{ 'home.cta.manage' | t }}
+                <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+              </span>
+            </a>
+
+            <a class="module-row" routerLink="/v3/calendar" *ngIf="canUseCalendar">
+              <span class="module-icon"><svg lucideCalendarDays [size]="18" aria-hidden="true"></svg></span>
+              <span class="module-copy">
+                <strong>{{ 'home.card.calendar.title' | t }}</strong>
+              </span>
+              <span class="module-cta">
+                {{ 'home.cta.plan' | t }}
+                <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+              </span>
+            </a>
+
+            <a class="module-row" routerLink="/v3/flowdesk/board" *ngIf="canUseFlowDesk">
+              <span class="module-icon"><svg lucideKanban [size]="18" aria-hidden="true"></svg></span>
+              <span class="module-copy">
+                <strong>{{ 'home.card.flowdesk.title' | t }}</strong>
+              </span>
+              <span class="module-cta">
+                {{ 'home.cta.open' | t }}
+                <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+              </span>
+            </a>
+          </div>
+        </section>
+
+        <section
+          class="module-group"
+          *ngIf="showAssistanceAndKnowledge"
+          aria-labelledby="assistance-knowledge-title"
+        >
+          <header class="group-head">
+            <div>
+              <h3 id="assistance-knowledge-title">Assistance and knowledge</h3>
+            </div>
+          </header>
+
+          <div class="module-list">
+            <a class="module-row" routerLink="/v3/magic-assistance" *ngIf="canUseMagicAssistance">
+              <span class="module-icon"><svg lucideSparkles [size]="18" aria-hidden="true"></svg></span>
+              <span class="module-copy">
+                <strong>{{ 'home.card.magic.title' | t }}</strong>
+              </span>
+              <span class="module-cta">
+                {{ 'home.cta.open' | t }}
+                <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+              </span>
+            </a>
+
+            <a class="module-row" routerLink="/v3/knowledge-base" *ngIf="canUseKnowledgeBase">
+              <span class="module-icon"><svg lucideBookOpen [size]="18" aria-hidden="true"></svg></span>
+              <span class="module-copy">
+                <strong>{{ 'home.card.kb.title' | t }}</strong>
+              </span>
+              <span class="module-cta">
+                {{ 'home.cta.open' | t }}
+                <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+              </span>
+            </a>
+
+            <a class="module-row" routerLink="/v3/kb-analytics" *ngIf="canUseKnowledgeAnalytics">
+              <span class="module-icon"><svg lucideChartNoAxesCombined [size]="18" aria-hidden="true"></svg></span>
+              <span class="module-copy">
+                <strong>{{ 'home.card.kbAnalytics.title' | t }}</strong>
+              </span>
+              <span class="module-cta">
+                {{ 'home.cta.view' | t }}
+                <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+              </span>
+            </a>
+
+            <a class="module-row" routerLink="/v3/process-assistant" *ngIf="canUseProcessAssistant">
+              <span class="module-icon"><svg lucideBot [size]="18" aria-hidden="true"></svg></span>
+              <span class="module-copy">
+                <strong>{{ 'home.card.copilot.title' | t }}</strong>
+              </span>
+              <span class="module-cta">
+                {{ 'home.cta.chat' | t }}
+                <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+              </span>
+            </a>
+
+            <a class="module-row" routerLink="/v3/academy" *ngIf="canUseAcademy">
+              <span class="module-icon"><svg lucideGraduationCap [size]="18" aria-hidden="true"></svg></span>
+              <span class="module-copy">
+                <strong>{{ 'home.card.academy.title' | t }}</strong>
+              </span>
+              <span class="module-cta">
+                {{ 'home.cta.learn' | t }}
+                <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+              </span>
+            </a>
+          </div>
+        </section>
+
+        <section
+          class="module-group"
+          *ngIf="showQualityAndWorkforce"
+          aria-labelledby="quality-workforce-title"
+        >
+          <header class="group-head">
+            <div>
+              <h3 id="quality-workforce-title">Quality and workforce</h3>
+            </div>
+          </header>
+
+          <div class="module-list">
+            <a class="module-row" routerLink="/v3/article-management" *ngIf="canManageArticles">
+              <span class="module-icon"><svg lucideFileText [size]="18" aria-hidden="true"></svg></span>
+              <span class="module-copy">
+                <strong>{{ 'home.card.articles.title' | t }}</strong>
+              </span>
+              <span class="module-cta">
+                {{ 'home.cta.manage' | t }}
+                <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+              </span>
+            </a>
+
+            <a class="module-row" routerLink="/v3/team-management" *ngIf="canManageTeams">
+              <span class="module-icon"><svg lucideUsers [size]="18" aria-hidden="true"></svg></span>
+              <span class="module-copy">
+                <strong>{{ 'home.card.teams.title' | t }}</strong>
+              </span>
+              <span class="module-cta">
+                {{ 'home.cta.manage' | t }}
+                <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+              </span>
+            </a>
+
+            <a class="module-row" routerLink="/v3/qa-evaluation" *ngIf="canUseQaEvaluation">
+              <span class="module-icon"><svg lucideClipboardCheck [size]="18" aria-hidden="true"></svg></span>
+              <span class="module-copy">
+                <strong>{{ 'home.card.qa.title' | t }}</strong>
+              </span>
+              <span class="module-cta">
+                {{ 'home.cta.review' | t }}
+                <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+              </span>
+            </a>
+
+            <a class="module-row" routerLink="/v3/adherence-dashboard" *ngIf="canViewAdherence">
+              <span class="module-icon"><svg lucideGauge [size]="18" aria-hidden="true"></svg></span>
+              <span class="module-copy">
+                <strong>{{ 'home.card.adherence.title' | t }}</strong>
+              </span>
+              <span class="module-cta">
+                {{ 'home.cta.view' | t }}
+                <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+              </span>
+            </a>
+          </div>
+        </section>
+
+        <section
+          class="module-group"
+          *ngIf="showBuildAndAdministration"
+          aria-labelledby="build-administration-title"
+        >
+          <header class="group-head">
+            <div>
+              <h3 id="build-administration-title">Build and administration</h3>
+            </div>
+          </header>
+
+          <div class="module-list">
+            <a class="module-row" routerLink="/v3/tree-builder" *ngIf="canUseBuilders">
+              <span class="module-icon"><svg lucideWorkflow [size]="18" aria-hidden="true"></svg></span>
+              <span class="module-copy">
+                <strong>{{ 'home.card.tree.title' | t }}</strong>
+              </span>
+              <span class="module-cta">
+                {{ 'home.cta.build' | t }}
+                <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+              </span>
+            </a>
+
+            <a class="module-row" routerLink="/v3/kb-map-builder" *ngIf="canUseBuilders">
+              <span class="module-icon"><svg lucideMap [size]="18" aria-hidden="true"></svg></span>
+              <span class="module-copy">
+                <strong>{{ 'home.card.kbMap.title' | t }}</strong>
+              </span>
+              <span class="module-cta">
+                {{ 'home.cta.build' | t }}
+                <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+              </span>
+            </a>
+
+            <a class="module-row" routerLink="/v3/case-tag-builder" *ngIf="canUseBuilders">
+              <span class="module-icon"><svg lucideTags [size]="18" aria-hidden="true"></svg></span>
+              <span class="module-copy">
+                <strong>{{ 'home.card.caseTags.title' | t }}</strong>
+              </span>
+              <span class="module-cta">
+                {{ 'home.cta.build' | t }}
+                <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+              </span>
+            </a>
+
+            <a class="module-row" routerLink="/v3/prompt-map-builder" *ngIf="canManagePromptMap">
+              <span class="module-icon"><svg lucideWandSparkles [size]="18" aria-hidden="true"></svg></span>
+              <span class="module-copy">
+                <strong>{{ 'home.card.promptMap.title' | t }}</strong>
+              </span>
+              <span class="module-cta">
+                {{ 'home.cta.build' | t }}
+                <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+              </span>
+            </a>
+
+            <a class="module-row" routerLink="/v3/staff-management" *ngIf="canManageStaff">
+              <span class="module-icon"><svg lucideUserRoundCog [size]="18" aria-hidden="true"></svg></span>
+              <span class="module-copy">
+                <strong>{{ 'home.card.staff.title' | t }}</strong>
+              </span>
+              <span class="module-cta">
+                {{ 'home.cta.manage' | t }}
+                <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+              </span>
+            </a>
+
+            <a class="module-row" routerLink="/v3/role-access-map" *ngIf="canManageRoleAccessMap">
+              <span class="module-icon"><svg lucideKeyRound [size]="18" aria-hidden="true"></svg></span>
+              <span class="module-copy">
+                <strong>{{ 'home.card.roleAccess.title' | t }}</strong>
+              </span>
+              <span class="module-cta">
+                {{ 'home.cta.manage' | t }}
+                <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+              </span>
+            </a>
+
+            <a class="module-row" routerLink="/v3/settings" *ngIf="canUseUserSettings">
+              <span class="module-icon"><svg lucideSettings [size]="18" aria-hidden="true"></svg></span>
+              <span class="module-copy">
+                <strong>{{ 'home.card.settings.title' | t }}</strong>
+              </span>
+              <span class="module-cta">
+                {{ 'home.cta.manage' | t }}
+                <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+              </span>
+            </a>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <aside class="home-actions" aria-labelledby="quick-actions-title">
+      <header>
+        <h2 id="quick-actions-title">{{ 'home.quick.title' | t }}</h2>
+      </header>
+
+      <nav class="quick-list" *ngIf="showQuickActions" aria-label="Quick actions">
+        <a routerLink="/v3/crm" *ngIf="canUseCrm">
+          <svg lucideInbox [size]="18" aria-hidden="true"></svg>
+          <span>{{ 'home.quick.openCrm' | t }}</span>
+          <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+        </a>
+        <a routerLink="/v3/calendar" *ngIf="canUseCalendar">
+          <svg lucideCalendarDays [size]="18" aria-hidden="true"></svg>
+          <span>{{ 'home.quick.openCalendar' | t }}</span>
+          <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+        </a>
+        <a routerLink="/v3/knowledge-base" *ngIf="canUseKnowledgeBase">
+          <svg lucideBookOpen [size]="18" aria-hidden="true"></svg>
+          <span>{{ 'home.quick.searchKb' | t }}</span>
+          <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+        </a>
+        <a routerLink="/v3/magic-assistance" *ngIf="canUseMagicAssistance">
+          <svg lucideSparkles [size]="18" aria-hidden="true"></svg>
+          <span>{{ 'home.quick.startMagic' | t }}</span>
+          <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+        </a>
+        <a routerLink="/v3/collaboration" *ngIf="canUseCollaboration">
+          <svg lucideMessagesSquare [size]="18" aria-hidden="true"></svg>
+          <span>{{ 'home.quick.openCollab' | t }}</span>
+          <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+        </a>
+        <a routerLink="/v3/process-assistant" *ngIf="canUseProcessAssistant">
+          <svg lucideBot [size]="18" aria-hidden="true"></svg>
+          <span>{{ 'home.quick.openCopilot' | t }}</span>
+          <svg lucideArrowRight [size]="16" aria-hidden="true"></svg>
+        </a>
+      </nav>
+
+    </aside>
+  </div>
+</div>

@@ -1,0 +1,52 @@
+<header class="site-header" *ngIf="isLoggedIn">
+  <div class="left-section">
+    <a routerLink="/">
+      <img src="Logo.png" alt="Focal Logo" class="logo-img">
+    </a>
+    <span class="brand-name">Focal</span>
+    <nav class="main-nav">
+      <a routerLink="/magic-assistance">Magic Assistance</a>
+      <a routerLink="/knowledge-base">Knowledge Base</a>
+      <a routerLink="/crm">CRM</a>
+      <a routerLink="/tree-builder" *ngIf="canUseBuilders">Tree Builder</a>
+      <a routerLink="/kb-map-builder" *ngIf="canUseBuilders">KB Map Builder</a>
+      <a routerLink="/case-tag-builder" *ngIf="canUseBuilders">Case Tag Builder</a>
+      <a routerLink="/article-management" *ngIf="canManageArticles">Article Management</a>
+      <a routerLink="/staff-management" *ngIf="canManageStaff">Staff Management</a>
+    </nav>
+  </div>
+
+  <div class="user-actions">
+    <div class="theme-funnel">
+      <div class="theme-step">
+        <label class="theme-picker-label" for="theme-funnel">{{ stepLabel }}</label>
+        <select
+          id="theme-funnel"
+          class="theme-picker"
+          [value]="selectedFunnelValue"
+          (change)="onFunnelChange($any($event.target).value)"
+        >
+          <option value="" disabled selected>Select...</option>
+          <option *ngFor="let option of funnelOptions" [value]="option.key">
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
+
+      <button
+        type="button"
+        class="funnel-btn"
+        *ngIf="currentStep !== 'typology'"
+        (click)="goBackStep()"
+      >
+        Back
+      </button>
+      <button type="button" class="funnel-btn" (click)="resetFunnel()">Reset</button>
+
+      <span class="current-theme">Current: {{ currentThemeLabel }}</span>
+    </div>
+    <span class="user-name">Welcome, {{ auth.getUserName() }}</span>
+    <button (click)="logout()" class="logout">Disconnect</button>
+  </div>
+</header>
+

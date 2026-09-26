@@ -1,0 +1,63 @@
+<section class="article-validation-page">
+  <aside class="validation-queue-panel">
+    <header class="validation-queue-header">
+      <div><p class="validation-kicker">Review desk</p><h1>Article validation</h1></div>
+      <button type="button" class="icon-button" (click)="loadQueue()" [disabled]="loading" aria-label="Refresh validation queue" title="Refresh validation queue"><svg lucideRefreshCw [size]="16"></svg></button>
+    </header>
+    <p class="validation-intro">Reviewers work in order. Approving advances the draft; rejecting returns it to its maker with your comments.</p>
+    <div class="queue-state" *ngIf="loading">Loading queue...</div>
+    <div class="queue-state" *ngIf="!loading && !queue.length">Nothing is waiting for your review.</div>
+    <button type="button" class="queue-item" *ngFor="let item of queue; trackBy: trackByRevision" [class.selected]="selected?.revisionId === item.revisionId" (click)="openRevision(item)">
+      <span class="queue-item-step">STEP {{ item.currentStep + 1 }} / {{ item.totalSteps }}</span>
+      <strong>{{ item.title }}</strong>
+      <span>{{ item.categoryName }}</span>
+      <small>From {{ item.makerName }}</small>
+    </button>
+  </aside>
+
+  <main class="validation-review-panel" *ngIf="selected as revision; else selectRevision">
+    <header class="review-header">
+      <div><p class="validation-kicker">Revision {{ revision.revisionId }}</p><h2>{{ revision.title }}</h2><p>{{ revision.categoryName }} - Submitted for sequential review</p></div>
+      <span class="review-status">{{ revision.status }}</span>
+    </header>
+
+    <div class="review-chain" aria-label="Validation chain">
+      <div class="review-chain-node" *ngFor="let step of revision.validationChain; let index = index" [class.current]="index === revision.currentStep">
+        <span>STEP {{ index + 1 }}</span><strong>{{ step.reviewer.name }}</strong><small>{{ step.reviewer.role }}</small>
+        <svg lucideArrowRight [size]="15" *ngIf="index < revision.validationChain.length - 1" aria-hidden="true"></svg>
+      </div>
+    </div>
+
+    <div class="review-layout">
+      <article class="review-content-frame">
+        <div class="review-content" appMermaidContent [mermaidContent]="revision.content" [innerHTML]="revision.content" (mouseup)="captureSelection($event)"></div>
+      </article>
+
+      <aside class="review-tools">
+        <div class="review-tool-section">
+          <p class="validation-kicker">Comment on the article</p>
+          <p class="tool-note">Select text or an element in the draft, then write a precise comment.</p>
+          <blockquote *ngIf="selectedText">“{{ selectedText }}”</blockquote>
+          <textarea [(ngModel)]="commentText" rows="6" placeholder="What should change?" aria-label="Review comment"></textarea>
+          <button type="button" class="comment-button" (click)="addComment()" [disabled]="saving || !commentText.trim()"><svg lucideMessageSquare [size]="16"></svg>Add comment</button>
+        </div>
+
+        <div class="review-comments" *ngIf="revision.comments.length">
+          <p class="validation-kicker">Review history</p>
+          <article *ngFor="let comment of revision.comments; trackBy: trackByComment">
+            <strong>{{ comment.author.name }}</strong><small>{{ comment.selectedText ? 'On: ' + comment.selectedText : 'General comment' }}</small><p>{{ comment.comment }}</p>
+          </article>
+        </div>
+
+        <div class="review-actions" *ngIf="revision.status === 'PENDING_REVIEW'">
+          <button type="button" class="reject-button" (click)="reject()" [disabled]="saving || !commentText.trim()"><svg lucideX [size]="16"></svg>Reject to maker</button>
+          <button type="button" class="approve-button" (click)="approve()" [disabled]="saving"><svg lucideCheck [size]="16"></svg>{{ approvalLabel }}</button>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <ng-template #selectRevision><main class="validation-empty"><p class="validation-kicker">Select a revision</p><h2>Your queue is ready.</h2><p>Choose a draft from the left to inspect its content and validation history.</p></main></ng-template>
+  <p class="validation-message error" *ngIf="errorMessage">{{ errorMessage }}</p>
+  <p class="validation-message success" *ngIf="statusMessage">{{ statusMessage }}</p>
+</section>

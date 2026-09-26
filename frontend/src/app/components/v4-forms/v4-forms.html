@@ -1,0 +1,117 @@
+<section class="v4-page v4-fade-in">
+  <header class="v4-page-header">
+    <div>
+      <h1 class="v4-page-title">Conversion-Optimized Forms</h1>
+      <p class="v4-page-copy">
+        Structured inputs, clear validation, and progress guidance to reduce drop-off and improve data quality.
+      </p>
+    </div>
+    <div class="v4-actions">
+      <span class="v4-badge info">Completion {{ completionPercent }}%</span>
+    </div>
+  </header>
+
+  <section class="v4-grid cols-2 form-layout">
+    <article class="v4-surface">
+      <header class="v4-surface-header">
+        <div>
+          <h3 class="v4-surface-title">Lead Qualification Form</h3>
+          <p class="v4-surface-subtitle">Fill required fields to unlock submission.</p>
+        </div>
+      </header>
+
+      <form class="v4-surface-body form-grid" (ngSubmit)="submit()">
+        <label class="v4-label">
+          <span>Full Name *</span>
+          <input class="v4-input" [(ngModel)]="model.fullName" name="fullName" placeholder="e.g. Sarah Connor" />
+        </label>
+
+        <label class="v4-label">
+          <span>Email *</span>
+          <input class="v4-input" [(ngModel)]="model.email" name="email" placeholder="name@company.com" />
+        </label>
+
+        <label class="v4-label">
+          <span>Company *</span>
+          <input class="v4-input" [(ngModel)]="model.company" name="company" placeholder="Company name" />
+        </label>
+
+        <label class="v4-label">
+          <span>Role</span>
+          <input class="v4-input" [(ngModel)]="model.role" name="role" placeholder="Decision maker role" />
+        </label>
+
+        <label class="v4-label">
+          <span>Lead Source *</span>
+          <select class="v4-select" [(ngModel)]="model.source" name="source">
+            <option value="">Select source</option>
+            <option *ngFor="let source of sources" [value]="source">{{ source }}</option>
+          </select>
+        </label>
+
+        <label class="v4-label">
+          <span>Potential Deal Value *</span>
+          <input class="v4-input" [(ngModel)]="model.dealValue" name="dealValue" placeholder="e.g. $35k" />
+        </label>
+
+        <label class="v4-label">
+          <span>Priority</span>
+          <select class="v4-select" [(ngModel)]="model.priority" name="priority">
+            <option value="normal">Normal</option>
+            <option value="high">High</option>
+            <option value="critical">Critical</option>
+          </select>
+        </label>
+
+        <label class="v4-label">
+          <span>Next Action Date *</span>
+          <input class="v4-input" type="date" [(ngModel)]="model.nextActionDate" name="nextActionDate" />
+        </label>
+
+        <label class="v4-label full">
+          <span>Notes</span>
+          <textarea class="v4-textarea" rows="4" [(ngModel)]="model.notes" name="notes" placeholder="Context, objections, and urgency details"></textarea>
+        </label>
+
+        <div class="form-actions full">
+          <button type="button" class="v4-btn ghost">Save Draft</button>
+          <button type="submit" class="v4-btn primary" [disabled]="!canSubmit">Create Lead</button>
+        </div>
+
+        <p class="form-error full" *ngIf="submitted && !canSubmit">
+          Please complete all required fields before submitting.
+        </p>
+        <p class="form-success full" *ngIf="saved">Lead saved successfully and routed for follow-up.</p>
+      </form>
+    </article>
+
+    <article class="v4-surface soft guidance">
+      <header class="v4-surface-header">
+        <div>
+          <h3 class="v4-surface-title">Completion Guidance</h3>
+          <p class="v4-surface-subtitle">Lower friction while maintaining high data quality.</p>
+        </div>
+      </header>
+
+      <div class="v4-surface-body">
+        <div class="v4-progress-track">
+          <span class="v4-progress-fill" [style.width.%]="completionPercent"></span>
+        </div>
+
+        <ul class="v4-list checklist">
+          <li class="v4-list-item" [class.done]="model.fullName.trim().length > 0">Full name captured</li>
+          <li class="v4-list-item" [class.done]="model.email.trim().length > 0">Email captured</li>
+          <li class="v4-list-item" [class.done]="model.company.trim().length > 0">Company captured</li>
+          <li class="v4-list-item" [class.done]="model.source.trim().length > 0">Source selected</li>
+          <li class="v4-list-item" [class.done]="model.dealValue.trim().length > 0">Deal value estimated</li>
+          <li class="v4-list-item" [class.done]="model.nextActionDate.trim().length > 0">Next action date set</li>
+        </ul>
+
+        <div class="v4-empty">
+          <strong>Best practice</strong>
+          <p>Set next action immediately after lead creation to keep conversion velocity high.</p>
+        </div>
+      </div>
+    </article>
+  </section>
+</section>

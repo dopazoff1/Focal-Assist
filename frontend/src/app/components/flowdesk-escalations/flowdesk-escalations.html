@@ -1,0 +1,372 @@
+<section class="esc-page">
+  <header class="esc-head">
+    <div>
+      <h1>Escalation Desk</h1>
+      <p>L1 creates and escalates tickets. L2 works queue tickets with playlist ownership and Jira actions.</p>
+    </div>
+    <div class="role-chip" [class.l2]="isL2">
+      <span>Role</span>
+      <strong>{{ myRole }}</strong>
+    </div>
+  </header>
+
+  <section class="esc-layout">
+    <aside class="esc-list">
+      <div class="scope-tabs" *ngIf="isL1">
+        <button type="button" [class.active]="ticketScope === 'my'" (click)="changeScope('my')">My tickets</button>
+        <button type="button" [class.active]="ticketScope === 'all'" (click)="changeScope('all')">All tickets</button>
+      </div>
+
+      <div class="scope-tabs" *ngIf="isL2">
+        <button type="button" [class.active]="ticketScope === 'playlist'" (click)="changeScope('playlist')">Playlist</button>
+        <button type="button" [class.active]="ticketScope === 'my'" (click)="changeScope('my')">My tickets</button>
+        <button type="button" [class.active]="ticketScope === 'all'" (click)="changeScope('all')">All tickets</button>
+      </div>
+
+      <div class="row-actions" *ngIf="isL2 && ticketScope === 'playlist'">
+        <button type="button" class="btn-play" (click)="startPlaylist()" [disabled]="l2Playlist.length === 0 || playlistBusy">Play</button>
+        <button type="button" class="btn-next" (click)="moveToNextPlaylistTicket()" [disabled]="l2Playlist.length === 0 || playlistBusy">Next</button>
+      </div>
+
+      <input
+        class="scope-search"
+        type="search"
+        [(ngModel)]="query"
+        (ngModelChange)="refreshVisibleTickets()"
+        placeholder="Search by key, title, customer..."
+      />
+
+      <div class="ticket-list">
+        <button
+          type="button"
+          class="ticket-row"
+          *ngFor="let ticket of visibleTickets; trackBy: trackTicket"
+          [class.active]="ticket.id === selectedTicketId"
+          (click)="selectTicket(ticket.id)"
+        >
+          <div class="top">
+            <strong>{{ ticket.key }}</strong>
+            <span class="status">{{ ticket.status }}</span>
+          </div>
+          <h4>{{ ticket.title }}</h4>
+          <div class="meta">
+            <span class="priority" [attr.data-priority]="ticket.priority">{{ ticket.priority }}</span>
+            <small>{{ ticket.updatedAt | date:'yyyy-MM-dd HH:mm' }}</small>
+          </div>
+        </button>
+
+        <p class="empty" *ngIf="!loading && visibleTickets.length === 0">No tickets for this view.</p>
+        <p class="empty" *ngIf="loading">Loading tickets...</p>
+      </div>
+    </aside>
+
+    <section class="esc-main">
+      <ng-container *ngIf="selectedTicket as ticket; else noTicket">
+        <article class="ticket-summary">
+          <div class="summary-top">
+            <h2>{{ ticket.key }} - {{ ticket.title }}</h2>
+            <span class="status-pill">{{ ticket.status }}</span>
+          </div>
+          <p>{{ ticket.description || 'No description.' }}</p>
+          <div class="summary-grid">
+            <div><span>Customer</span><strong>{{ ticket.customerEmail || '-' }}</strong></div>
+            <div><span>Client ID</span><strong>{{ ticket.clientId || '-' }}</strong></div>
+            <div><span>Level</span><strong>{{ ticket.level }}</strong></div>
+            <div><span>Created by</span><strong>{{ ticket.createdByName }}</strong></div>
+            <div><span>L2 owner</span><strong>{{ ticket.l2AssigneeName || 'Unassigned' }}</strong></div>
+            <div><span>Issue types</span><strong>{{ ticket.issueTypes.length ? ticket.issueTypes.join(', ') : '-' }}</strong></div>
+            <div><span>Escalation reason</span><strong>{{ ticket.escalationReason || '-' }}</strong></div>
+            <div><span>Duplicate of</span><strong>{{ ticket.duplicateOfTicketId ? ('ESC-' + ticket.duplicateOfTicketId) : '-' }}</strong></div>
+            <div><span>Jira</span><strong>{{ ticket.jiraIssueKey || 'Not linked' }}</strong></div>
+          </div>
+        </article>
+
+        <article class="ticket-comments">
+          <header>
+            <h3>Comments & updates</h3>
+          </header>
+          <div class="comment-list">
+            <div class="comment-row" *ngFor="let comment of selectedComments">
+              <div class="comment-meta">
+                <strong>{{ comment.authorName }}</strong>
+                <span>{{ comment.authorRole }}</span>
+                <small>{{ comment.createdAt | date:'yyyy-MM-dd HH:mm:ss' }}</small>
+              </div>
+              <p>{{ commentBody(comment) }}</p>
+            </div>
+            <p class="empty" *ngIf="selectedComments.length === 0">No comments yet.</p>
+          </div>
+
+          <div class="comment-compose">
+            <textarea
+              rows="3"
+              [(ngModel)]="internalCommentDraft"
+              placeholder="Internal update visible to L1/L2..."
+            ></textarea>
+            <button type="button" (click)="addInternalComment()">Add comment</button>
+          </div>
+        </article>
+      </ng-container>
+
+      <ng-template #noTicket>
+        <article class="ticket-summary empty-card">
+          <h2>{{ isL2 && ticketScope === 'playlist' ? 'Click Play to pick the oldest queue ticket' : 'Select a ticket' }}</h2>
+          <p>{{ isL2 && ticketScope === 'playlist' ? 'Tickets are assigned when Play is clicked, to avoid collisions between L2 agents.' : 'Choose a ticket from the left panel to view details and actions.' }}</p>
+        </article>
+      </ng-template>
+    </section>
+
+    <aside class="esc-side">
+      <article class="panel" *ngIf="isL1">
+        <h3>Create L1 ticket</h3>
+        <div class="form">
+          <input [(ngModel)]="createTitle" placeholder="Title" />
+          <input [(ngModel)]="createCustomerEmail" placeholder="Customer email" />
+          <input
+            [(ngModel)]="createClientId"
+            (ngModelChange)="refreshDuplicateClientTickets()"
+            placeholder="Client ID"
+          />
+          <select [(ngModel)]="createPriority">
+            <option *ngFor="let priority of priorities" [value]="priority">{{ priority }}</option>
+          </select>
+          <select [(ngModel)]="createRouting">
+            <option value="l2_queue">Route to L2 queue</option>
+            <option value="l2_direct">Assign directly to L2</option>
+          </select>
+          <ng-container *ngIf="createRouting === 'l2_direct'">
+            <select
+              *ngIf="l2Users.length > 0; else createDirectManual"
+              [ngModel]="createDirectL2UserId || ''"
+              (ngModelChange)="onCreateDirectL2Changed($event)"
+            >
+              <option value="">Select L2 assignee</option>
+              <option *ngFor="let user of l2Users" [value]="user.id">
+                {{ user.firstName }} {{ user.lastName }} ({{ user.role }})
+              </option>
+            </select>
+            <ng-template #createDirectManual>
+              <input [(ngModel)]="createDirectL2Name" placeholder="Direct L2 assignee name" />
+            </ng-template>
+          </ng-container>
+          <div class="issue-type-row">
+            <input
+              [(ngModel)]="createIssueTypeDraft"
+              (keydown.enter)="$event.preventDefault(); addIssueTypeFromDraft()"
+              placeholder="Add issue type"
+            />
+            <button type="button" (click)="addIssueTypeFromDraft()">Add type</button>
+          </div>
+          <div class="issue-types" *ngIf="createIssueTypes.length">
+            <button type="button" *ngFor="let issueType of createIssueTypes" (click)="removeIssueType(issueType)">
+              {{ issueType }} x
+            </button>
+          </div>
+          <textarea rows="3" [(ngModel)]="createDescription" placeholder="Description"></textarea>
+          <div class="duplicate-warning" *ngIf="duplicateClientTickets.length">
+            <strong>Duplicate warning</strong>
+            <p>Tickets already exist with this Client ID:</p>
+            <ul>
+              <li *ngFor="let dup of duplicateClientTickets">
+                {{ dup.key }} - {{ dup.title }} ({{ dup.status }})
+              </li>
+            </ul>
+          </div>
+          <button type="button" (click)="createTicket()">Create ticket</button>
+        </div>
+      </article>
+
+      <article class="panel" *ngIf="isL1 && selectedTicket as ticket">
+        <h3>Escalate to L2</h3>
+        <p class="target">{{ ticket.key }} - {{ ticket.title }}</p>
+        <div class="form">
+          <select *ngIf="l2Users.length > 0" [ngModel]="escalationAssigneeUserId || ''" (ngModelChange)="onEscalationAssigneeChanged($event)">
+            <option value="">Assign later</option>
+            <option *ngFor="let user of l2Users" [value]="user.id">
+              {{ user.firstName }} {{ user.lastName }} ({{ user.role }})
+            </option>
+          </select>
+          <input *ngIf="l2Users.length === 0" [(ngModel)]="escalationAssigneeName" placeholder="L2 assignee name (optional)" />
+          <textarea rows="3" [(ngModel)]="escalationReason" placeholder="Escalation reason"></textarea>
+          <button type="button" (click)="escalateSelectedTicket()">Escalate</button>
+          <small class="warn" *ngIf="staffError">{{ staffError }}</small>
+        </div>
+      </article>
+
+      <article class="panel" *ngIf="isL2">
+        <h3>L2 playlist</h3>
+        <p class="target">{{ l2PlaylistPosition() }} / {{ l2Playlist.length }} pending in queue</p>
+        <div class="row-actions playlist-actions">
+          <button type="button" class="btn-play" (click)="startPlaylist()" [disabled]="l2Playlist.length === 0 || playlistBusy">Play</button>
+          <button type="button" class="btn-next" (click)="moveToNextPlaylistTicket()" [disabled]="l2Playlist.length === 0 || playlistBusy">Next ticket</button>
+        </div>
+      </article>
+
+      <article class="panel" *ngIf="isL2 && selectedTicket as ticket">
+        <h3>L2 update workflow</h3>
+        <p class="target">{{ ticket.key }} - {{ ticket.title }}</p>
+        <div class="form">
+          <select *ngIf="l2Users.length > 0" [ngModel]="l2AssigneeUserId || ''" (ngModelChange)="onL2AssigneeChanged($event)">
+            <option value="">Unassigned</option>
+            <option *ngFor="let user of l2Users" [value]="user.id">
+              {{ user.firstName }} {{ user.lastName }} ({{ user.role }})
+            </option>
+          </select>
+          <input *ngIf="l2Users.length === 0" [(ngModel)]="l2AssigneeName" placeholder="L2 assignee name" />
+          <select [(ngModel)]="l2Status">
+            <option
+              *ngFor="let status of l2Statuses"
+              [value]="status"
+              [disabled]="(status === 'resolved' || status === 'closed') && !canResolveSelectedTicket()"
+            >
+              {{ status }}
+            </option>
+          </select>
+          <textarea rows="3" [(ngModel)]="l2CommentDraft" placeholder="L2 comment / update"></textarea>
+          <button type="button" (click)="saveL2Update()">Save L2 update</button>
+          <small class="warn" *ngIf="ticket.jiraIssueKey && !canResolveSelectedTicket()">
+            Jira is not resolved yet. Resolve/close is blocked until Jira status is synced as resolved.
+          </small>
+          <small class="warn" *ngIf="staffError">{{ staffError }}</small>
+        </div>
+      </article>
+
+      <article class="panel" *ngIf="isL2 && selectedTicket as ticket">
+        <h3>Duplicate control</h3>
+        <p class="target">{{ ticket.key }} - {{ ticket.title }}</p>
+        <div class="form">
+          <select [(ngModel)]="duplicateOriginalTicketId">
+            <option [ngValue]="null">Select original ticket</option>
+            <option
+              *ngFor="let original of tickets"
+              [ngValue]="original.id"
+              [disabled]="original.id === ticket.id"
+            >
+              {{ original.key }} - {{ original.title }} ({{ original.status }})
+            </option>
+          </select>
+          <textarea rows="2" [(ngModel)]="duplicateNote" placeholder="Optional duplicate note"></textarea>
+          <button type="button" (click)="closeSelectedAsDuplicate()">Close as duplicate</button>
+        </div>
+      </article>
+
+      <article class="panel" *ngIf="isL2 && selectedTicket as ticket">
+        <h3>Jira actions (L2)</h3>
+        <p class="target">Jira account is taken from your User Settings page.</p>
+        <div class="jira-actions">
+          <button type="button" (click)="createJiraIssueForSelectedTicket()" [disabled]="jiraBusy || !!ticket.jiraIssueKey">
+            Create Jira issue
+          </button>
+          <button type="button" (click)="syncJiraIssue()" [disabled]="jiraBusy || !ticket.jiraIssueKey">
+            Sync Jira
+          </button>
+          <a *ngIf="ticket.jiraIssueUrl" [href]="ticket.jiraIssueUrl" target="_blank" rel="noopener noreferrer">Open in Jira</a>
+
+          <div class="transition-row" *ngIf="ticket.jiraIssueKey">
+            <button type="button" (click)="loadJiraTransitions()" [disabled]="jiraBusy">Load transitions</button>
+            <select [(ngModel)]="jiraTransitionId">
+              <option value="">Select transition</option>
+              <option *ngFor="let transition of jiraTransitions" [value]="transition.id">{{ transition.name }}</option>
+            </select>
+            <button type="button" (click)="applyJiraTransition()" [disabled]="jiraBusy">Apply</button>
+          </div>
+
+          <textarea rows="2" [(ngModel)]="jiraCommentDraft" placeholder="Comment to add in Jira issue"></textarea>
+          <button type="button" (click)="addJiraCommentToIssue()" [disabled]="jiraBusy || !ticket.jiraIssueKey">
+            Add Jira comment
+          </button>
+        </div>
+
+        <p class="msg" *ngIf="jiraMessage">{{ jiraMessage }}</p>
+      </article>
+
+      <article class="panel feedback" *ngIf="actionMessage || actionError">
+        <p class="ok" *ngIf="actionMessage">{{ actionMessage }}</p>
+        <p class="err" *ngIf="actionError">{{ actionError }}</p>
+      </article>
+    </aside>
+  </section>
+
+  <div class="jira-modal-backdrop" *ngIf="showJiraCreateModal">
+    <section class="jira-modal">
+      <header>
+        <h3>Create Jira issue</h3>
+        <button type="button" class="modal-close" (click)="closeJiraCreateModal()">×</button>
+      </header>
+      <div class="jira-preview jira-form" *ngIf="selectedTicket as ticket">
+        <div><span>Ticket</span><strong>{{ ticket.key }}</strong></div>
+        <div><span>Created By</span><strong>{{ ticket.createdByName }}</strong></div>
+        <label>
+          <span>Project Key</span>
+          <input
+            [(ngModel)]="jiraDraft.projectKey"
+            (blur)="normalizeJiraDraft('projectKey')"
+            placeholder="Project key (e.g., OPS)"
+          />
+        </label>
+        <label>
+          <span>Issue Type</span>
+          <input
+            [(ngModel)]="jiraDraft.issueTypeName"
+            (blur)="normalizeJiraDraft('issueTypeName')"
+            placeholder="Task / Bug / Incident"
+          />
+        </label>
+        <label>
+          <span>Priority</span>
+          <input
+            [(ngModel)]="jiraDraft.priority"
+            (blur)="normalizeJiraDraft('priority')"
+            placeholder="Low / Medium / High / Critical"
+          />
+        </label>
+        <label>
+          <span>Client ID</span>
+          <input
+            [(ngModel)]="jiraDraft.clientId"
+            (blur)="normalizeJiraDraft('clientId')"
+            placeholder="Client ID"
+          />
+        </label>
+        <label class="wide">
+          <span>Summary</span>
+          <input
+            [(ngModel)]="jiraDraft.summary"
+            (blur)="normalizeJiraDraft('summary')"
+            placeholder="Jira summary"
+          />
+        </label>
+        <label class="wide">
+          <span>Description</span>
+          <textarea
+            rows="4"
+            [(ngModel)]="jiraDraft.description"
+            (blur)="normalizeJiraDraft('description')"
+            placeholder="Jira description"
+          ></textarea>
+        </label>
+        <label class="wide">
+          <span>Escalation Reason</span>
+          <textarea
+            rows="3"
+            [(ngModel)]="jiraDraft.escalationReason"
+            (blur)="normalizeJiraDraft('escalationReason')"
+            placeholder="Escalation reason"
+          ></textarea>
+        </label>
+        <label class="wide">
+          <span>Customer Email</span>
+          <input
+            [(ngModel)]="jiraDraft.customerEmail"
+            (blur)="normalizeJiraDraft('customerEmail')"
+            placeholder="customer@example.com"
+          />
+        </label>
+      </div>
+      <footer>
+        <button type="button" class="btn-next" (click)="closeJiraCreateModal()">Cancel</button>
+        <button type="button" class="btn-play" (click)="confirmCreateJiraIssue()">Create Jira issue</button>
+      </footer>
+    </section>
+  </div>
+</section>

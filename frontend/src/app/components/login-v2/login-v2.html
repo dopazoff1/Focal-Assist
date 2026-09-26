@@ -1,0 +1,102 @@
+<main class="login-v2" focalVisibleMotion [class.is-exiting]="isExiting">
+  <div class="login-v2-grid" aria-hidden="true"></div>
+  <div class="login-v2-shell">
+    <section class="login-v2-form-panel" aria-labelledby="login-v2-title">
+      <header class="login-v2-brand">
+        <a class="login-v2-mark" routerLink="/login" aria-label="Focal standard sign in">F+</a>
+        <div>
+          <strong>Focal</strong>
+          <span>Operations workspace</span>
+        </div>
+        <span class="login-v2-version">V3 / 02</span>
+      </header>
+
+      <div class="login-v2-form-wrap">
+        <p class="login-v2-kicker"><span class="status-dot"></span> Secure workspace access</p>
+        <h1 id="login-v2-title">Enter the signal.</h1>
+        <p class="login-v2-intro">A focused route into your customer operations system.</p>
+
+        <form class="login-v2-form" (ngSubmit)="login()" #loginForm="ngForm">
+          <label for="login-v2-email">Username</label>
+          <div class="login-v2-input" [class.is-invalid]="emailInput.invalid && emailInput.touched">
+            <svg lucideUserRound [size]="17" aria-hidden="true"></svg>
+            <input
+              id="login-v2-email"
+              type="text"
+              name="email"
+              placeholder="you@company"
+              autocomplete="username"
+              [(ngModel)]="email"
+              #emailInput="ngModel"
+              [disabled]="isLoggingIn"
+              [attr.aria-invalid]="emailInput.invalid && emailInput.touched ? 'true' : null"
+              required
+            />
+          </div>
+          <p class="login-v2-feedback" aria-live="polite">
+            <span *ngIf="emailInput.invalid && emailInput.touched">Username is required.</span>
+          </p>
+
+          <label for="login-v2-password">Password</label>
+          <div class="login-v2-input" [class.is-invalid]="passwordInput.invalid && passwordInput.touched">
+            <svg lucideLockKeyhole [size]="17" aria-hidden="true"></svg>
+            <input
+              id="login-v2-password"
+              [type]="passwordVisible ? 'text' : 'password'"
+              name="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              [(ngModel)]="password"
+              #passwordInput="ngModel"
+              [disabled]="isLoggingIn"
+              [attr.aria-invalid]="passwordInput.invalid && passwordInput.touched ? 'true' : null"
+              required
+            />
+            <button
+              class="login-v2-password-toggle"
+              type="button"
+              (click)="togglePasswordVisibility()"
+              [disabled]="isLoggingIn"
+              [attr.aria-label]="passwordVisible ? 'Hide password' : 'Show password'"
+              [attr.title]="passwordVisible ? 'Hide password' : 'Show password'"
+            >
+              <svg *ngIf="!passwordVisible" lucideEye [size]="17" aria-hidden="true"></svg>
+              <svg *ngIf="passwordVisible" lucideEyeOff [size]="17" aria-hidden="true"></svg>
+            </button>
+          </div>
+          <p class="login-v2-feedback" aria-live="polite">
+            <span *ngIf="passwordInput.invalid && passwordInput.touched">Password is required.</span>
+          </p>
+
+          <button class="login-v2-submit" type="submit" [disabled]="loginForm.invalid || isLoggingIn" [attr.aria-busy]="isLoggingIn">
+            <span>{{ isLoggingIn ? 'Opening workspace...' : 'Continue to Focal' }}</span>
+            <svg *ngIf="!isLoggingIn" lucideArrowRight [size]="18" aria-hidden="true"></svg>
+            <svg *ngIf="isLoggingIn" lucideLoaderCircle class="login-v2-spinner" [size]="18" aria-hidden="true"></svg>
+          </button>
+          <p class="login-v2-error" *ngIf="loginError" role="alert">{{ loginError }}</p>
+        </form>
+      </div>
+
+      <footer class="login-v2-footer">
+        <a routerLink="/login"><span>←</span> Use standard sign in</a>
+        <span class="login-v2-help"><svg lucideMousePointer2 [size]="14" aria-hidden="true"></svg> Signal key: kiwikiwikiwikiwi</span>
+      </footer>
+    </section>
+
+    <section class="login-v2-stage" aria-label="Focal signal array visualization">
+      <focal-login-v2-scene *ngIf="!isGameOpen"></focal-login-v2-scene>
+      <div class="stage-topline"><span>FOCAL / SIGNAL ARRAY</span><span>LIVE <i></i></span></div>
+      <div class="stage-corner stage-corner-tl"></div>
+      <div class="stage-corner stage-corner-br"></div>
+      <div class="stage-readout stage-readout-left"><span>FIELD</span><strong>03.17</strong><small>CONNECTED NODES</small></div>
+      <div class="stage-readout stage-readout-right"><span>RESPONSE</span><strong>24ms</strong><small>STABLE CHANNEL</small></div>
+      <div class="stage-caption">
+        <p>Focal / customer operations</p>
+        <h2>See the next<br /><em>clear move.</em></h2>
+        <div class="stage-caption-rule"></div>
+        <span>Precision tools for the work between people, process and progress.</span>
+      </div>
+    </section>
+  </div>
+  <focal-login-v2-game *ngIf="isGameOpen" (closed)="closeGame()"></focal-login-v2-game>
+</main>

@@ -1,0 +1,93 @@
+@import '../tree-builder/tree-builder.css';
+
+.prompt-map-page .canvas-world {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.prompt-map-page .links {
+  overflow: visible;
+}
+
+.prompt-map-page .role-summary li {
+  cursor: default;
+}
+
+.prompt-map-page .role-summary button {
+  padding: 0.28rem 0.5rem;
+  font-size: 0.72rem;
+}
+
+.prompt-map-page .split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.prompt-map-page .checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.prompt-map-page .checkbox input {
+  width: auto;
+  margin: 0;
+}
+
+.prompt-map-page .prompt-list-item {
+  cursor: pointer;
+}
+
+.prompt-map-page .prompt-list-item.active {
+  border-color: color-mix(in srgb, var(--brand) 32%, var(--panel-border));
+  background: color-mix(in srgb, var(--brand) 10%, var(--panel-2));
+}
+
+.prompt-map-page .link-path.role-link {
+  stroke: #2563eb;
+}
+
+.prompt-map-page .role-card {
+  width: 300px;
+  border-color: color-mix(in srgb, #2563eb 34%, var(--panel-border) 66%);
+  background: color-mix(in srgb, #eff6ff 46%, var(--panel-2) 54%);
+}
+
+.prompt-map-page .role-card .meta {
+  margin-top: 0.45rem;
+}
+
+.prompt-map-page .role-card .role-wire {
+  position: absolute;
+  right: -16px;
+  top: calc(50% - 14px);
+}
+
+.prompt-map-page .prompt-card {
+  width: 320px;
+}
+
+.prompt-map-page .prompt-card.inactive {
+  opacity: 0.7;
+  border-style: dashed;
+}
+
+.prompt-map-page .inline-remove {
+  margin-left: 0.45rem;
+  padding: 0.1rem 0.35rem !important;
+  min-height: 0;
+  line-height: 1.1;
+  font-size: 0.75rem;
+}
+
+.prompt-map-page .map-choice {
+  grid-template-columns: 1fr auto;
+}
+
+@media (max-width: 980px) {
+  .prompt-map-page .split {
+    grid-template-columns: 1fr;
+  }
+}

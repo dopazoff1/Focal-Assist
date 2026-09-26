@@ -1,0 +1,249 @@
+<section class="viewer" *ngIf="course as c; else errorTpl">
+  <header class="viewer-head">
+    <div class="title">
+      <a class="back" [routerLink]="['../../']">Academy</a>
+      <div>
+        <h1>{{ c.title }}</h1>
+        <p class="muted">{{ c.subtitle || c.description }}</p>
+      </div>
+    </div>
+
+    <div class="head-right" *ngIf="summary$ | async as summary">
+      <div class="progress">
+        <div class="bar">
+          <span [style.width.%]="summary?.progressPercent || 0"></span>
+        </div>
+        <div class="meta">
+          <span>{{ summary?.progressPercent || 0 }}%</span>
+          <span class="muted">{{ summary?.completedLessons || 0 }}/{{ summary?.totalLessons || 0 }}</span>
+          <span class="danger" *ngIf="summary?.isOverdue">Overdue</span>
+        </div>
+      </div>
+      <div class="head-actions">
+        <a
+          class="btn ghost"
+          *ngIf="summary?.progress?.state === 'COMPLETED'"
+          [routerLink]="['./certificate']"
+        >
+          Certificate
+        </a>
+        <a class="btn ghost" [routerLink]="['../../catalog']">Catalog</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="layout">
+    <aside class="outline panel" *ngIf="summary$ | async as summary">
+      <header class="panel-head">
+        <strong>Lessons</strong>
+      </header>
+
+      <div class="outline-body">
+        <div class="ol-row" *ngFor="let item of flat" [class.active]="selectedLessonId === item.lesson.id">
+          <button type="button" class="ol-btn" (click)="selectLesson(item.lesson.id)">
+            <span class="done" [class.on]="isCompleted(item.lesson.id, summary)">&#10003;</span>
+            <span class="type" [attr.data-type]="item.lesson.type">{{ item.lesson.type[0] }}</span>
+            <span class="txt">
+              <strong>{{ item.lesson.title }}</strong>
+              <small class="muted">{{ item.moduleTitle }}</small>
+            </span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="content panel" *ngIf="selectedLesson as lesson; else noLessonTpl">
+      <header class="panel-head">
+        <div class="ph-left">
+          <strong>{{ lesson.title }}</strong>
+          <small class="muted">{{ lesson.type }}</small>
+        </div>
+        <div class="ph-actions">
+          <button type="button" class="mini" (click)="prev()" [disabled]="isFirstLesson(lesson.id)">Prev</button>
+          <button type="button" class="mini" (click)="next()" [disabled]="isLastLesson(lesson.id)">Next</button>
+        </div>
+      </header>
+
+      <div class="content-body">
+        <div class="link" *ngIf="lesson.type === 'LINK' && lesson.url">
+          <a class="btn" [href]="lesson.url" target="_blank" rel="noopener noreferrer">Open link</a>
+          <span class="muted">{{ lesson.url }}</span>
+        </div>
+
+        <div class="video" *ngIf="lesson.type === 'VIDEO'">
+          <div class="muted" *ngIf="videoLoading">Loading video...</div>
+          <div class="danger" *ngIf="videoError">{{ videoError }}</div>
+
+          <div class="video-player" *ngIf="videoUrl">
+            <div
+              class="video-stage"
+              (dblclick)="enterVideoFullscreen()"
+              (mousemove)="onVideoStagePointerMove()"
+              (touchstart)="onVideoStagePointerMove()"
+              (mouseleave)="onVideoStagePointerLeave()"
+            >
+              <video
+                #lessonVideo
+                class="video-el"
+                [src]="videoUrl"
+                playsinline
+                preload="metadata"
+                (click)="toggleVideoPlay()"
+                (loadedmetadata)="onVideoMetadata()"
+                (timeupdate)="onVideoTimeUpdate()"
+                (play)="onVideoPlay()"
+                (pause)="onVideoPause()"
+                (volumechange)="onVideoVolumeChange()"
+              ></video>
+
+              <div class="video-overlay" [class.visible]="videoControlsVisible || !videoPlaying">
+                <div class="video-overlay-top">
+                  <div class="video-badges">
+                    <span class="pill">Customer Video</span>
+                    <span class="pill ghost">{{ formatVideoTime(videoCurrentTime) }} / {{ formatVideoTime(videoDuration) }}</span>
+                  </div>
+                  <button type="button" class="mini overlay-btn" (click)="enterVideoFullscreen(); $event.stopPropagation()">Fullscreen</button>
+                </div>
+
+                <div class="video-overlay-center">
+                  <button
+                    type="button"
+                    class="video-overlay-play"
+                    *ngIf="!videoPlaying"
+                    (click)="toggleVideoPlay(); $event.stopPropagation()"
+                  >
+                    Play
+                  </button>
+                </div>
+
+                <div class="video-overlay-bottom">
+                  <div class="video-progress">
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="0.1"
+                      [value]="videoProgress"
+                      (input)="onProgressInput($any($event.target).value)"
+                      (click)="$event.stopPropagation()"
+                    />
+                  </div>
+
+                  <div class="video-control-row">
+                    <div class="video-control-left">
+                      <button type="button" class="mini overlay-btn" (click)="toggleVideoPlay(); $event.stopPropagation()">
+                        {{ videoPlaying ? 'Pause' : 'Play' }}
+                      </button>
+                      <button type="button" class="mini overlay-btn" (click)="seekVideo(-10); $event.stopPropagation()">&minus;10s</button>
+                      <button type="button" class="mini overlay-btn" (click)="seekVideo(10); $event.stopPropagation()">+10s</button>
+                      <button type="button" class="mini overlay-btn" (click)="toggleVideoMute(); $event.stopPropagation()">
+                        {{ videoMuted ? 'Unmute' : 'Mute' }}
+                      </button>
+                      <span class="video-time">{{ formatVideoTime(videoCurrentTime) }} / {{ formatVideoTime(videoDuration) }}</span>
+                    </div>
+                    <div class="video-control-right">
+                      <div class="video-speed">
+                        <button type="button" class="mini overlay-btn" [class.active]="videoRate === 1" (click)="setVideoRate(1); $event.stopPropagation()">1x</button>
+                        <button type="button" class="mini overlay-btn" [class.active]="videoRate === 1.25" (click)="setVideoRate(1.25); $event.stopPropagation()">1.25x</button>
+                        <button type="button" class="mini overlay-btn" [class.active]="videoRate === 1.5" (click)="setVideoRate(1.5); $event.stopPropagation()">1.5x</button>
+                      </div>
+                      <a
+                        class="btn ghost overlay-download"
+                        *ngIf="videoUrl"
+                        [href]="videoUrl"
+                        [attr.download]="videoMeta?.filename || 'video'"
+                        (click)="$event.stopPropagation()"
+                      >
+                        Download
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="video-meta">
+              <div>
+                <strong>{{ videoMeta?.filename || 'Uploaded video' }}</strong>
+                <small class="muted" *ngIf="videoMeta">{{ formatBytes(videoMeta.size) }} &bull; {{ videoMeta.mimeType }}</small>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="link" *ngIf="!videoUrl && lesson.url">
+            <a class="btn" [href]="lesson.url" target="_blank" rel="noopener noreferrer">Open video</a>
+            <span class="muted">{{ lesson.url }}</span>
+          </div>
+        </div>
+
+        <div class="md" *ngIf="lesson.type !== 'QUIZ'">
+          <div class="md-inner" [innerHTML]="contentHtml"></div>
+        </div>
+
+        <div class="quiz" *ngIf="lesson.type === 'QUIZ' && lesson.quiz as quiz">
+          <p class="muted" *ngIf="lesson.contentMarkdown">{{ lesson.contentMarkdown }}</p>
+
+          <div class="quiz-meta">
+            <span class="pill">Passing: {{ quiz.passingScore }}%</span>
+            <span class="pill" *ngIf="lastAttempt">Last: {{ lastAttempt.score }}% ({{ lastAttempt.passed ? 'PASS' : 'FAIL' }})</span>
+          </div>
+
+          <div class="q" *ngFor="let q of quiz.questions; let qi = index">
+            <strong class="q-title">{{ qi + 1 }}. {{ q.prompt }}</strong>
+            <label class="opt" *ngFor="let opt of q.options; let oi = index">
+              <input type="radio" [name]="'q' + q.id" [checked]="quizAnswers[qi] === oi" (change)="quizAnswers[qi] = oi" />
+              <span>{{ opt }}</span>
+            </label>
+
+            <div class="explain" *ngIf="quizSubmitted && q.explanation">
+              <span class="muted">{{ q.explanation }}</span>
+            </div>
+          </div>
+
+          <div class="quiz-actions">
+            <button type="button" class="btn" (click)="submitQuiz()">Submit</button>
+            <button type="button" class="btn ghost" (click)="retryQuiz()">Reset</button>
+            <span class="muted" *ngIf="lastAttempt && quizSubmitted">
+              Score: {{ lastAttempt.score }}% ({{ lastAttempt.passed ? 'Passed' : 'Not passed' }})
+            </span>
+          </div>
+        </div>
+
+        <div class="complete" *ngIf="lesson.type !== 'QUIZ'">
+          <button type="button" class="btn ghost" (click)="markComplete()">Mark complete</button>
+        </div>
+      </div>
+    </main>
+  </section>
+</section>
+
+<ng-template #noLessonTpl>
+  <section class="viewer">
+    <div class="panel">
+      <div class="content-body">
+        <strong>No lesson selected.</strong>
+      </div>
+    </div>
+  </section>
+</ng-template>
+
+<ng-template #errorTpl>
+  <section class="viewer">
+    <header class="viewer-head">
+      <div class="title">
+        <a class="back" [routerLink]="['../../']">Academy</a>
+        <div>
+          <h1>Course</h1>
+          <p class="muted">Unavailable</p>
+        </div>
+      </div>
+    </header>
+    <div class="panel">
+      <div class="content-body">
+        <strong>{{ error || 'Course not available.' }}</strong>
+      </div>
+    </div>
+  </section>
+</ng-template>

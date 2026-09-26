@@ -1,0 +1,116 @@
+<div class="staff-page">
+  <section class="staff-create card">
+    <h2>Staff Management</h2>
+    <p class="muted">Create accounts, change roles, deactivate/reactivate users.</p>
+
+    <div class="grid">
+      <input [(ngModel)]="newUser.firstName" placeholder="First name">
+      <input [(ngModel)]="newUser.lastName" placeholder="Last name">
+      <input [(ngModel)]="newUser.dob" type="date" placeholder="Date of birth">
+      <input [(ngModel)]="newUser.email" type="email" placeholder="Email">
+      <input [(ngModel)]="newUser.password" type="password" placeholder="Password">
+      <select [(ngModel)]="newUser.role">
+        <option *ngFor="let role of availableRoles" [value]="role">{{ role }}</option>
+      </select>
+    </div>
+
+    <div class="actions">
+      <button class="primary-btn" [disabled]="saving" (click)="createUser()">Create User</button>
+      <button class="secondary-btn" [disabled]="loading || saving" (click)="loadUsers()">Refresh</button>
+    </div>
+
+    <p class="ok" *ngIf="message">{{ message }}</p>
+    <p class="error" *ngIf="error">{{ error }}</p>
+  </section>
+
+  <section class="card table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>CRM Presence</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="loading">
+          <td colspan="7">Loading users...</td>
+        </tr>
+        <tr *ngFor="let user of users">
+          <td>{{ user.id }}</td>
+          <td>{{ user.firstName }} {{ user.lastName }}</td>
+          <td>{{ user.email }}</td>
+          <td>
+            <select [(ngModel)]="roleDraft[user.id]">
+              <option *ngFor="let role of availableRoles" [value]="role">{{ role }}</option>
+            </select>
+          </td>
+          <td>
+            <div class="presence-cell">
+              <select [(ngModel)]="statusDraft[user.id]">
+                <option *ngFor="let status of availableStatuses" [value]="status">{{ status }}</option>
+              </select>
+              <button class="secondary-btn" [disabled]="saving" (click)="updateStatus(user)">Save Status</button>
+            </div>
+          </td>
+          <td>
+            <span class="badge" [class.badge-off]="!user.active">{{ user.active ? 'Active' : 'Inactive' }}</span>
+          </td>
+          <td class="row-actions">
+            <button class="secondary-btn" [disabled]="saving" (click)="updateRole(user)">Save Role</button>
+            <input *ngIf="user.active" [(ngModel)]="deactivateReason[user.id]" placeholder="Reason">
+            <button class="secondary-btn" [disabled]="saving" (click)="toggleActive(user)">
+              {{ user.active ? 'Deactivate' : 'Activate' }}
+            </button>
+            <input [(ngModel)]="passwordDraft[user.id]" type="password" placeholder="New password">
+            <button class="secondary-btn" [disabled]="saving" (click)="resetPassword(user)">Reset Password</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card timeline-wrap">
+    <div class="timeline-head">
+      <h3>Status Timeline</h3>
+      <div class="timeline-actions">
+        <select [(ngModel)]="timelineUserId" (change)="onTimelineFilterChange()">
+          <option [ngValue]="null">All users</option>
+          <option *ngFor="let user of users" [ngValue]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
+        </select>
+        <button class="secondary-btn" [disabled]="loading || saving" (click)="loadTimeline()">Refresh Timeline</button>
+      </div>
+    </div>
+    <div class="timeline-table">
+      <table>
+        <thead>
+          <tr>
+            <th>When</th>
+            <th>User</th>
+            <th>Status</th>
+            <th>Changed By</th>
+            <th>Source</th>
+            <th>Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="timeline.length === 0">
+            <td colspan="6">No status history yet.</td>
+          </tr>
+          <tr *ngFor="let row of timeline">
+            <td>{{ row.changedAt | date:'yyyy-MM-dd HH:mm:ss' }}</td>
+            <td>{{ row.userName }}</td>
+            <td><span class="badge">{{ row.status }}</span></td>
+            <td>{{ row.changedByEmail || '-' }}</td>
+            <td>{{ row.changeSource || '-' }}</td>
+            <td>{{ row.note || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

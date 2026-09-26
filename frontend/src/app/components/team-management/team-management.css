@@ -1,0 +1,43 @@
+﻿@import '../tree-builder/tree-builder.css';
+.team-builder-page .canvas-world {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.team-builder-page .links {
+  overflow: visible;
+}
+
+.team-builder-page .choice-list li {
+  cursor: default;
+}
+
+.team-builder-page .assignment-view {
+  border-top: 1px solid color-mix(in srgb, var(--panel-border) 70%, transparent);
+  margin-top: 0.45rem;
+  padding-top: 0.45rem;
+}
+
+.team-builder-page .node-card.role-agent {
+  border-color: color-mix(in srgb, #16a34a 30%, var(--panel-border) 70%);
+}
+
+.team-builder-page .node-card.role-tl {
+  border-color: color-mix(in srgb, #2563eb 35%, var(--panel-border) 65%);
+  background: color-mix(in srgb, #eff6ff 50%, var(--panel-2) 50%);
+}
+
+.team-builder-page .node-card.role-qa {
+  border-color: color-mix(in srgb, #9333ea 35%, var(--panel-border) 65%);
+  background: color-mix(in srgb, #faf5ff 50%, var(--panel-2) 50%);
+}
+
+.team-builder-page .link-path.tl-link {
+  stroke: #3b82f6;
+}
+
+.team-builder-page .link-path.qa-link {
+  stroke: #a855f7;
+}
+

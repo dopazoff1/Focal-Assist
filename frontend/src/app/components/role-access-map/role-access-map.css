@@ -1,0 +1,67 @@
+@import '../tree-builder/tree-builder.css';
+
+.role-access-page .canvas-world {
+  top: 0;
+  left: 0;
+}
+
+.role-access-page .links {
+  overflow: visible;
+}
+
+.role-access-page .node-card {
+  width: 270px;
+}
+
+.role-access-page .node-card.system-role {
+  border-color: color-mix(in srgb, var(--brand) 28%, var(--panel-border));
+  box-shadow: 0 12px 26px color-mix(in srgb, var(--brand) 16%, transparent);
+}
+
+.role-access-page .node-card.role-channel {
+  width: 320px;
+}
+
+.role-access-page .feature-checks {
+  max-height: 260px;
+  overflow: auto;
+  padding-right: 0.2rem;
+}
+
+.role-access-page .feature-checks label {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  align-items: start;
+  column-gap: 0.5rem;
+  row-gap: 0;
+  padding: 0.34rem 0.28rem;
+  border-radius: 10px;
+}
+
+.role-access-page .feature-checks label:hover {
+  background: color-mix(in srgb, var(--panel-2) 78%, transparent);
+}
+
+.role-access-page .feature-checks input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  margin-top: 0.15rem;
+  align-self: start;
+}
+
+.role-access-page .feature-checks span {
+  display: block;
+  min-width: 0;
+  line-height: 1.24;
+  overflow-wrap: anywhere;
+}
+
+.role-access-page .danger {
+  border-color: color-mix(in srgb, #ef4444 45%, var(--panel-border));
+  color: color-mix(in srgb, #ef4444 80%, var(--text-1));
+}
+
+.role-access-page .danger:disabled {
+  opacity: 0.5;
+}

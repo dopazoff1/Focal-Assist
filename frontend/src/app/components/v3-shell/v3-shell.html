@@ -1,0 +1,443 @@
+<div class="v3-layout" focalVisibleMotion *ngIf="auth.isLoggedIn()" [class.sidebar-open]="sidebarOpen" [class.sidebar-collapsed]="sidebarCollapsed" [class.workspace-entering]="workspaceEntering">
+  <a class="v3-skip-link" href="#workspace-content">Skip to workspace</a>
+  <button
+    type="button"
+    class="v3-backdrop"
+    *ngIf="sidebarOpen"
+    (click)="closeSidebar()"
+    aria-label="Close navigation"
+  ></button>
+
+  <aside id="workspace-navigation" class="v3-sidebar" aria-label="Focal navigation" [attr.inert]="narrowViewport && !sidebarOpen ? '' : null">
+    <header class="v3-side-head">
+      <a class="v3-brand" routerLink="/v3/home" (click)="closeSidebar()">
+        <span class="v3-mark" aria-hidden="true"><img src="logo.jpg" alt="" /></span>
+        <span class="v3-brand-copy">
+          <strong>Focal</strong>
+          <small>{{ 'shell.brand.subtitle' | t }}</small>
+        </span>
+      </a>
+      <button type="button" class="v3-collapse" (click)="toggleSidebarCollapse()" [attr.aria-label]="sidebarCollapsed ? 'Expand navigation' : 'Collapse navigation'" [attr.title]="sidebarCollapsed ? 'Expand navigation' : 'Collapse navigation'" [attr.aria-expanded]="!sidebarCollapsed" aria-controls="workspace-navigation">
+        <svg lucidePanelLeftClose [size]="17" aria-hidden="true"></svg>
+      </button>
+      <button
+        type="button"
+        class="v3-side-close"
+        (click)="closeSidebar()"
+        aria-label="Close navigation"
+        title="Close navigation"
+      >
+        <svg lucideX [size]="18" aria-hidden="true"></svg>
+      </button>
+    </header>
+
+    <nav class="v3-nav" aria-label="Primary navigation">
+      <p class="v3-nav-group">{{ 'shell.group.workspace' | t }}</p>
+      <a routerLink="/v3/home" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canUseCommandCenter" (click)="closeSidebar()">
+        <svg lucideLayoutDashboard class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.commandCenter' | t }}</span>
+      </a>
+      <a routerLink="/v3/calendar" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canUseCalendar" (click)="closeSidebar()">
+        <svg lucideCalendarDays class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.calendar' | t }}</span>
+      </a>
+      <a routerLink="/v3/crm" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canUseCrm" (click)="closeSidebar()">
+        <svg lucideInbox class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.crmInbox' | t }}</span>
+      </a>
+      <a routerLink="/v3/magic-assistance" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canUseMagicAssistance" (click)="closeSidebar()">
+        <svg lucideSparkles class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.magicAssistance' | t }}</span>
+      </a>
+      <a routerLink="/v3/knowledge-base" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canUseKnowledgeBase" (click)="closeSidebar()">
+        <svg lucideBookOpen class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.knowledgeBase' | t }}</span>
+      </a>
+      <a routerLink="/v3/knowledge-hub" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canUseKnowledgeBase" (click)="closeSidebar()">
+        <svg lucideLibrary class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.knowledgeHub' | t }}</span>
+      </a>
+      <a routerLink="/v3/kb-analytics" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canUseKnowledgeAnalytics" (click)="closeSidebar()">
+        <svg lucideChartNoAxesCombined class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.kbAnalytics' | t }}</span>
+      </a>
+      <a routerLink="/v3/collaboration" routerLinkActive="active" ariaCurrentWhenActive="page" class="has-badge" *ngIf="canUseCollaboration" (click)="closeSidebar()">
+        <svg lucideMessagesSquare class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.collaboration' | t }}</span>
+        <span class="v3-nav-badge" *ngIf="collaborationUnreadCount > 0">{{ collaborationUnreadCount }}</span>
+      </a>
+      <a routerLink="/v3/live-chat" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canUseLiveChat" (click)="closeSidebar()">
+        <svg lucideMessageCircle class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>Live Chat</span>
+      </a>
+      <a routerLink="/v3/process-assistant" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canUseProcessAssistant" (click)="closeSidebar()">
+        <svg lucideBot class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.processCopilot' | t }}</span>
+      </a>
+
+      <p class="v3-nav-group" *ngIf="canUseAcademy">{{ 'shell.group.academy' | t }}</p>
+      <a routerLink="/v3/academy" routerLinkActive="active" ariaCurrentWhenActive="page" [routerLinkActiveOptions]="{ exact: true }" *ngIf="canUseAcademyHome" (click)="closeSidebar()">
+        <svg lucideGraduationCap class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.myTrainings' | t }}</span>
+      </a>
+      <a routerLink="/v3/academy/catalog" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canUseAcademyCatalog" (click)="closeSidebar()">
+        <svg lucideLibrary class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.catalog' | t }}</span>
+      </a>
+      <a routerLink="/v3/academy/studio" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canUseAcademyStudio" (click)="closeSidebar()">
+        <svg lucidePanelTop class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.studio' | t }}</span>
+      </a>
+      <a routerLink="/v3/academy/analytics" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canUseAcademyAnalytics" (click)="closeSidebar()">
+        <svg lucideBarChart3 class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.analytics' | t }}</span>
+      </a>
+
+      <p class="v3-nav-group" *ngIf="showBuildGroup">{{ 'shell.group.build' | t }}</p>
+      <a routerLink="/v3/tree-builder" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canUseBuilders" (click)="closeSidebar()">
+        <svg lucideWorkflow class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.treeBuilder' | t }}</span>
+      </a>
+      <a routerLink="/v3/kb-map-builder" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canUseBuilders" (click)="closeSidebar()">
+        <svg lucideMap class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.kbMaps' | t }}</span>
+      </a>
+      <a routerLink="/v3/article-validation-chain" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canConfigureValidationChain" (click)="closeSidebar()">
+        <svg lucideWorkflow class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>Validation Chain</span>
+      </a>
+      <a routerLink="/v3/case-tag-builder" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canUseBuilders" (click)="closeSidebar()">
+        <svg lucideTags class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.caseTags' | t }}</span>
+      </a>
+      <a routerLink="/v3/prompt-map-builder" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canManagePromptMap" (click)="closeSidebar()">
+        <svg lucideWandSparkles class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.promptMaps' | t }}</span>
+      </a>
+
+      <p class="v3-nav-group" *ngIf="showManageGroup">{{ 'shell.group.manage' | t }}</p>
+      <a routerLink="/v3/article-management" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canManageArticles" (click)="closeSidebar()">
+        <svg lucideFileText class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.articles' | t }}</span>
+      </a>
+      <a routerLink="/v3/article-validation" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canValidateArticles" (click)="closeSidebar()">
+        <svg lucideClipboardCheck class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>Validation queue</span>
+      </a>
+      <a routerLink="/v3/team-management" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canManageTeams" (click)="closeSidebar()">
+        <svg lucideUsers class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.teams' | t }}</span>
+      </a>
+      <a routerLink="/v3/channel-access-map" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canManageChannelAccess" (click)="closeSidebar()">
+        <svg lucideShieldCheck class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.channelAccess' | t }}</span>
+      </a>
+      <a routerLink="/v3/chat-projects" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canManageChatProjects" (click)="closeSidebar()">
+        <svg lucideKanbanSquare class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>Chat Projects</span>
+      </a>
+      <a routerLink="/v3/role-access-map" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canManageRoleAccessMap" (click)="closeSidebar()">
+        <svg lucideKeyRound class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.roleAccessMap' | t }}</span>
+      </a>
+      <a routerLink="/v3/qa-evaluation" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canUseQaEvaluation" (click)="closeSidebar()">
+        <svg lucideClipboardCheck class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.qaEvaluation' | t }}</span>
+      </a>
+      <a routerLink="/v3/adherence-dashboard" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canViewAdherence" (click)="closeSidebar()">
+        <svg lucideGauge class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.adherence' | t }}</span>
+      </a>
+      <a routerLink="/v3/staff-management" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canManageStaff" (click)="closeSidebar()">
+        <svg lucideUserRoundCog class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.staff' | t }}</span>
+      </a>
+
+      <p class="v3-nav-group" *ngIf="canUseFlowDesk">{{ 'shell.group.delivery' | t }}</p>
+      <a routerLink="/v3/flowdesk/board" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canUseFlowDesk" (click)="closeSidebar()">
+        <svg lucideKanban class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.flowDesk' | t }}</span>
+      </a>
+      <a routerLink="/v3/flowdesk/escalations" routerLinkActive="active" ariaCurrentWhenActive="page" *ngIf="canUseFlowDesk" (click)="closeSidebar()">
+        <svg lucideSiren class="v3-ico" [size]="18" aria-hidden="true"></svg>
+        <span>{{ 'shell.nav.escalationDesk' | t }}</span>
+      </a>
+    </nav>
+
+    <footer class="v3-side-foot">
+      <button
+        type="button"
+        class="v3-avatar-btn"
+        (click)="openProfilePhotoEditor()"
+        [attr.aria-label]="'Edit profile photo for ' + auth.getUserName()"
+        title="Edit profile photo"
+      >
+        <img *ngIf="profilePhotoUrl; else initialsAvatar" [src]="profilePhotoUrl" alt="" />
+        <ng-template #initialsAvatar>
+          <span>{{ userInitials }}</span>
+        </ng-template>
+      </button>
+      <div class="v3-side-user-copy">
+        <strong>{{ auth.getUserName() }}</strong>
+        <small>{{ auth.getNormalizedRole() || 'USER' }}</small>
+      </div>
+      <button
+        type="button"
+        class="v3-account-settings"
+        (click)="openSettings()"
+        aria-label="Open account settings"
+        title="Account settings"
+      >
+        <svg lucideSettings [size]="17" aria-hidden="true"></svg>
+      </button>
+    </footer>
+  </aside>
+
+  <div class="v3-main">
+    <header class="v3-topbar">
+      <div class="v3-topbar-leading">
+        <button type="button" class="v3-burger" (click)="toggleSidebar()" aria-label="Toggle menu" title="Toggle menu" [attr.aria-expanded]="sidebarOpen" aria-controls="workspace-navigation">
+          <svg lucideMenu [size]="20" aria-hidden="true"></svg>
+        </button>
+
+        <div class="v3-title">
+          <small>{{ pageKicker }}</small>
+          <strong>{{ pageTitle }}</strong>
+        </div>
+      </div>
+
+      <form class="v3-search" (submit)="runQuickSearch($event)">
+        <label class="sr-only" for="v3-global-search">{{ 'shell.controls.searchPlaceholder' | t }}</label>
+        <svg lucideSearch [size]="18" aria-hidden="true"></svg>
+        <input
+          id="v3-global-search"
+          type="search"
+          [placeholder]="'shell.controls.searchPlaceholder' | t"
+          [(ngModel)]="quickSearch"
+          name="q"
+          autocomplete="off"
+        />
+        <button
+          type="submit"
+          [attr.aria-label]="'shell.controls.searchGo' | t"
+          [attr.title]="'shell.controls.searchGo' | t"
+        >
+          <svg lucideSearch [size]="17" aria-hidden="true"></svg>
+        </button>
+      </form>
+
+      <div class="v3-top-actions">
+        <a class="v3-collab-chip" routerLink="/v3/collaboration" *ngIf="canUseCollaboration" aria-label="Collaboration notifications" title="Collaboration notifications">
+          <svg lucideMessagesSquare [size]="17" aria-hidden="true"></svg>
+          <span>{{ 'shell.controls.collaboration' | t }}</span>
+          <strong *ngIf="collaborationUnreadCount > 0">{{ collaborationUnreadCount }}</strong>
+        </a>
+
+        <div class="v3-controls">
+          <label class="v3-select v3-language-select" [attr.title]="'shell.controls.language' | t">
+            <svg lucideLanguages [size]="17" aria-hidden="true"></svg>
+            <span class="sr-only">{{ 'shell.controls.language' | t }}</span>
+            <select
+              [(ngModel)]="selectedLanguage"
+              (change)="updateLanguage()"
+              [attr.aria-label]="'shell.controls.language' | t"
+            >
+              <option *ngFor="let option of languageOptions" [value]="option.code">{{ option.label }}</option>
+            </select>
+          </label>
+
+          <label class="v3-select v3-timezone-select" [attr.title]="'shell.controls.tz' | t">
+            <svg lucideClock3 [size]="17" aria-hidden="true"></svg>
+            <span class="sr-only">{{ 'shell.controls.tz' | t }}</span>
+            <select
+              [(ngModel)]="selectedTimeZone"
+              (change)="updateMyTimeZone()"
+              [disabled]="timeZoneSaving"
+              [attr.aria-label]="'shell.controls.tz' | t"
+              [attr.aria-busy]="timeZoneSaving"
+            >
+              <option value="">{{ 'shell.controls.system' | t }}</option>
+              <option *ngFor="let tz of timeZones" [value]="tz">{{ tz }}</option>
+            </select>
+          </label>
+
+          <label
+            class="v3-select v3-status-select"
+            [class.is-saving]="statusSaving"
+            [attr.title]="'shell.controls.status' | t"
+          >
+            <svg lucideActivity [size]="17" aria-hidden="true"></svg>
+            <span class="sr-only">{{ 'shell.controls.status' | t }}</span>
+            <select
+              [(ngModel)]="selectedStatus"
+              (change)="updateMyStatus()"
+              [disabled]="statusSaving"
+              [attr.aria-label]="'shell.controls.status' | t"
+              [attr.aria-busy]="statusSaving"
+            >
+              <option *ngFor="let status of availableStatuses" [value]="status">{{ status }}</option>
+            </select>
+          </label>
+
+          <button
+            type="button"
+            class="v3-theme-toggle"
+            [class.is-dark]="isDarkMode"
+            role="switch"
+            [attr.aria-checked]="isDarkMode"
+            [attr.aria-label]="isDarkMode ? 'Use light mode' : 'Use dark mode'"
+            [attr.title]="isDarkMode ? 'Use light mode' : 'Use dark mode'"
+            (click)="toggleDarkMode()"
+          >
+            <span class="v3-theme-toggle-track" aria-hidden="true">
+              <span class="v3-theme-toggle-thumb">
+                <svg *ngIf="isDarkMode" lucideMoon [size]="13"></svg>
+                <svg *ngIf="!isDarkMode" lucideSun [size]="13"></svg>
+              </span>
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="v3-arcade-launch"
+            (click)="openSignalSprintGame()"
+            aria-label="Open Signal Sprint game"
+            title="Open Signal Sprint game. Secret key: kiwikiwikiwikiwi"
+          >
+            <svg lucideGamepad2 [size]="18" aria-hidden="true"></svg>
+          </button>
+
+          <button
+            type="button"
+            class="v3-logout"
+            (click)="logout()"
+            [attr.aria-label]="'shell.controls.logout' | t"
+            [attr.title]="'shell.controls.logout' | t"
+          >
+            <svg lucideLogOut [size]="18" aria-hidden="true"></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main
+      #contentHost
+      id="workspace-content"
+      tabindex="-1"
+      class="v3-content"
+      [class.compact-center]="uiScaleMode === 'COMPACT' && compactCenterContent"
+    >
+      <router-outlet (activate)="onRouteActivate()"></router-outlet>
+    </main>
+  </div>
+
+  <focal-login-v2-game
+    *ngIf="isSignalSprintOpen"
+    (closed)="closeSignalSprintGame()"
+  ></focal-login-v2-game>
+
+  <input
+    #profilePhotoInput
+    type="file"
+    accept="image/*"
+    hidden
+    (change)="onProfilePhotoSelected($event)"
+  />
+
+  <div class="v3-avatar-modal-backdrop" *ngIf="showProfilePhotoEditor">
+    <section
+      class="v3-avatar-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="profile-photo-title"
+    >
+      <header>
+        <div>
+          <small>{{ 'shell.photo.title' | t }}</small>
+          <h3 id="profile-photo-title">{{ 'shell.photo.subtitle' | t }}</h3>
+        </div>
+        <button
+          type="button"
+          class="close"
+          (click)="closeProfilePhotoEditor()"
+          [attr.aria-label]="'shell.photo.close' | t"
+          [attr.title]="'shell.photo.close' | t"
+        >
+          <svg lucideX [size]="18" aria-hidden="true"></svg>
+        </button>
+      </header>
+
+      <div class="v3-avatar-crop-area" (pointerdown)="onCropPointerDown($event)">
+        <canvas
+          #profileCropCanvas
+          width="360"
+          height="360"
+          role="img"
+          aria-label="Profile photo crop preview"
+        ></canvas>
+        <div class="placeholder" *ngIf="!cropSourceImage">
+          <strong>{{ 'shell.photo.placeholderTitle' | t }}</strong>
+          <p>{{ 'shell.photo.placeholderHint' | t }}</p>
+        </div>
+      </div>
+
+      <div class="v3-avatar-controls">
+        <button type="button" (click)="chooseProfilePhotoFile()">
+          <svg lucideUpload [size]="17" aria-hidden="true"></svg>
+          <span>{{ 'shell.photo.chooseImage' | t }}</span>
+        </button>
+        <label>
+          <span>{{ 'shell.photo.zoom' | t }}</span>
+          <input
+            type="range"
+            min="1"
+            max="5"
+            step="0.01"
+            [(ngModel)]="cropZoom"
+            (input)="onCropZoomChange()"
+          />
+        </label>
+        <div class="v3-rotate-actions">
+          <button
+            type="button"
+            (click)="rotateCrop(-90)"
+            [attr.aria-label]="'shell.photo.rotateMinus' | t"
+            [attr.title]="'shell.photo.rotateMinus' | t"
+          >
+            <svg lucideRotateCcw [size]="17" aria-hidden="true"></svg>
+          </button>
+          <button
+            type="button"
+            (click)="rotateCrop(90)"
+            [attr.aria-label]="'shell.photo.rotatePlus' | t"
+            [attr.title]="'shell.photo.rotatePlus' | t"
+          >
+            <svg lucideRotateCw [size]="17" aria-hidden="true"></svg>
+          </button>
+        </div>
+      </div>
+
+      <footer>
+        <button
+          type="button"
+          class="ghost"
+          [disabled]="profilePhotoSaving"
+          (click)="removeProfilePhoto()"
+        >
+          <svg lucideTrash2 [size]="17" aria-hidden="true"></svg>
+          <span>{{ 'shell.photo.remove' | t }}</span>
+        </button>
+        <button
+          type="button"
+          class="primary"
+          [disabled]="!cropSourceImage || profilePhotoSaving"
+          [attr.aria-busy]="profilePhotoSaving"
+          (click)="saveProfilePhoto()"
+        >
+          <svg lucideSave [size]="17" aria-hidden="true"></svg>
+          <span>{{ profilePhotoSaving ? ('shell.photo.saving' | t) : ('shell.photo.save' | t) }}</span>
+        </button>
+      </footer>
+    </section>
+  </div>
+</div>

@@ -1,0 +1,276 @@
+.astra-public-kb {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(270px, 330px) 1fr;
+  gap: 0.85rem;
+}
+
+.left,
+.content {
+  border: 1px solid #dbe5f3;
+  border-radius: 14px;
+  background: #ffffff;
+  min-height: 0;
+}
+
+.left {
+  padding: 0.7rem;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 0.55rem;
+}
+
+.search input,
+.content input,
+.content textarea,
+.content select {
+  width: 100%;
+  border: 1px solid #d0dced;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+  padding: 0.5rem 0.55rem;
+}
+
+.groups {
+  min-height: 0;
+  overflow: auto;
+  display: grid;
+  gap: 0.75rem;
+  padding-right: 0.2rem;
+}
+
+.groups article {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.groups h3 {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.groups button {
+  border: 1px solid #dce6f4;
+  border-radius: 10px;
+  background: #f9fbff;
+  color: #1e293b;
+  text-align: left;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.44rem 0.52rem;
+  cursor: pointer;
+}
+
+.groups button.active,
+.groups button:hover {
+  border-color: #9eb8ea;
+  background: #edf4ff;
+}
+
+.content {
+  padding: 0.85rem;
+  overflow: auto;
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
+}
+
+.content header small {
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.content header h2 {
+  margin: 0.2rem 0 0;
+  font-size: 1.28rem;
+}
+
+.body {
+  border: 1px solid #dce5f3;
+  border-radius: 12px;
+  background: #fff;
+  padding: 0.85rem;
+  line-height: 1.6;
+  color: #0f172a;
+}
+
+.panel {
+  border: 1px solid #dbe5f3;
+  border-radius: 12px;
+  background: #f9fbff;
+  padding: 0.7rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.panel h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.feedback-choices {
+  display: inline-flex;
+  gap: 0.45rem;
+}
+
+.feedback-choices button {
+  border: 1px solid #a9dbb8;
+  background: #effcf3;
+  color: #166534;
+  border-radius: 999px;
+  padding: 0.35rem 0.6rem;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.feedback-choices button.neg {
+  border-color: #f1b8b8;
+  background: #fff3f3;
+  color: #b42318;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  font-weight: 800;
+}
+
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.actions {
+  display: flex;
+  justify-content: end;
+}
+
+.primary {
+  border: 1px solid #1e40af;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #2563eb, #1e40af);
+  color: #fff;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  padding: 0.45rem 0.68rem;
+  cursor: pointer;
+}
+
+.error,
+.success,
+.loading,
+.article-loading,
+.empty {
+  margin: 0;
+  border-radius: 10px;
+  padding: 0.55rem 0.62rem;
+}
+
+.error {
+  border: 1px solid #f2c7c7;
+  background: #fff5f5;
+  color: #b42318;
+  font-weight: 700;
+}
+
+.success {
+  border: 1px solid #b7e5ca;
+  background: #effcf3;
+  color: #166534;
+  font-weight: 700;
+}
+
+.loading,
+.article-loading,
+.empty {
+  border: 1px dashed #d7e2f0;
+  background: #fbfdff;
+  color: #64748b;
+}
+
+.loading,
+.article-loading {
+  min-height: 100px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.35rem;
+}
+
+.spin {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 3px solid #d7e2f3;
+  border-top-color: #2563eb;
+  animation: astraPublicSpin 0.9s linear infinite;
+}
+
+.article-loading span {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #2563eb;
+  animation: astraPublicDots 0.9s ease-in-out infinite;
+}
+
+.article-loading span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.article-loading span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes astraPublicSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes astraPublicDots {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.8);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 1040px) {
+  .astra-public-kb {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(200px, 320px) 1fr;
+  }
+
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+}

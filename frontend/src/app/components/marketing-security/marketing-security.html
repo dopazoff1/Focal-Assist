@@ -1,0 +1,32 @@
+<div class="security-page">
+  <section class="panel intro">
+    <p class="kicker">Security & Governance</p>
+    <h1>Enterprise Control, Operational Traceability, and Secure Deployment</h1>
+    <p>
+      Focal is built for organizations that need both speed and control: clear permissions, auditable actions,
+      and production-ready deployment options.
+    </p>
+  </section>
+
+  <section class="grid">
+    <article class="panel">
+      <h2>Access Controls</h2>
+      <ul>
+        <li *ngFor="let item of controls">{{ item }}</li>
+      </ul>
+    </article>
+    <article class="panel">
+      <h2>Deployment</h2>
+      <ul>
+        <li *ngFor="let item of deployment">{{ item }}</li>
+      </ul>
+    </article>
+    <article class="panel">
+      <h2>Operational Reliability</h2>
+      <ul>
+        <li *ngFor="let item of operations">{{ item }}</li>
+      </ul>
+    </article>
+  </section>
+</div>
+

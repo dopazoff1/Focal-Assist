@@ -1,0 +1,65 @@
+<div class="v2-layout" *ngIf="auth.isLoggedIn()">
+  <header class="v2-header">
+    <a class="v2-brand" routerLink="/v2/home">
+      <span class="v2-logo-mark">KA</span>
+      <span class="v2-brand-text">Focal</span>
+    </a>
+
+    <nav class="v2-nav">
+      <a routerLink="/v2/home" routerLinkActive="active">Home</a>
+      <a routerLink="/v2/magic-assistance" routerLinkActive="active">Magic Assistance</a>
+      <a routerLink="/v2/knowledge-base" routerLinkActive="active">Knowledge Base</a>
+      <div class="nav-dropdown">
+        <button type="button" class="dropdown-trigger">Academy</button>
+        <div class="dropdown-menu">
+          <a routerLink="/v2/academy" routerLinkActive="active">My trainings</a>
+          <a routerLink="/v2/academy/catalog" routerLinkActive="active">Catalog</a>
+          <a routerLink="/v2/academy/studio" routerLinkActive="active" *ngIf="canManageTraining">Studio</a>
+          <a routerLink="/v2/academy/analytics" routerLinkActive="active" *ngIf="canManageTraining">Analytics</a>
+        </div>
+      </div>
+      <a routerLink="/v2/crm" routerLinkActive="active">CRM</a>
+      <a routerLink="/v2/tree-builder" routerLinkActive="active" *ngIf="canUseBuilders">Tree Builder</a>
+      <a routerLink="/v2/kb-map-builder" routerLinkActive="active" *ngIf="canUseBuilders">KB Map Builder</a>
+      <a routerLink="/v2/case-tag-builder" routerLinkActive="active" *ngIf="canUseBuilders">Case Tag Builder</a>
+      <a routerLink="/v2/article-management" routerLinkActive="active" *ngIf="canManageArticles">Article Management</a>
+      <a routerLink="/v2/team-management" routerLinkActive="active" *ngIf="canManageTeams">Team Management</a>
+      <a routerLink="/v2/qa-evaluation" routerLinkActive="active" *ngIf="canUseQaEvaluation">QA Evaluation</a>
+      <a routerLink="/v2/adherence-dashboard" routerLinkActive="active" *ngIf="canViewAdherence">Adherence</a>
+      <div class="nav-dropdown" *ngIf="canUseFlowDesk">
+        <button type="button" class="dropdown-trigger">FlowDesk</button>
+        <div class="dropdown-menu">
+          <a routerLink="/v2/flowdesk/board" routerLinkActive="active">Board</a>
+          <a routerLink="/v2/flowdesk/backlog" routerLinkActive="active">Backlog</a>
+          <a routerLink="/v2/flowdesk/sprints" routerLinkActive="active">Sprints</a>
+          <a routerLink="/v2/flowdesk/reports" routerLinkActive="active">Reports</a>
+        </div>
+      </div>
+      <a routerLink="/v2/staff-management" routerLinkActive="active" *ngIf="canManageStaff">Staff</a>
+    </nav>
+
+    <div class="v2-user-block">
+      <span>{{ auth.getUserName() }}</span>
+      <a class="v2-mode-switch" routerLink="/v3/home" title="Open V3 (new UI)">V3</a>
+      <label class="presence-control">
+        <span>TZ</span>
+        <select [(ngModel)]="selectedTimeZone" (change)="updateMyTimeZone()" [disabled]="timeZoneSaving">
+          <option value="">System</option>
+          <option *ngFor="let tz of timeZones" [value]="tz">{{ tz }}</option>
+        </select>
+      </label>
+      <label class="presence-control">
+        <span>Status</span>
+        <select [(ngModel)]="selectedStatus" (change)="updateMyStatus()" [disabled]="statusSaving">
+          <option *ngFor="let status of availableStatuses" [value]="status">{{ status }}</option>
+        </select>
+      </label>
+      <button type="button" (click)="logout()">Logout</button>
+    </div>
+  </header>
+
+  <main class="v2-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>
+

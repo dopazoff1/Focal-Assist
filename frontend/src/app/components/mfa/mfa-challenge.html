@@ -1,0 +1,37 @@
+<main class="mfa-page" [class.is-exiting]="isExiting" aria-labelledby="mfa-challenge-title">
+  <aside class="mfa-rail">
+    <focal-login-scene />
+    <div class="mfa-rail-mark">
+      <img src="logo.jpg" alt="Credit+" />
+      <span><strong>Focal</strong><small>Customer operations</small></span>
+    </div>
+    <div class="mfa-rail-copy">
+      <p class="eyebrow">Protected sign in</p>
+      <h1>Verify it’s really you.</h1>
+      <p>Use the code from your authenticator app to continue to your workspace.</p>
+    </div>
+    <p class="mfa-rail-foot">Focal / Credit+</p>
+  </aside>
+
+  <section class="mfa-main">
+    <div class="mfa-panel">
+      <header class="mfa-panel-header">
+        <p class="eyebrow">Two-step verification</p>
+        <h2 id="mfa-challenge-title">Enter your security code</h2>
+        <p>{{ useBackupCode ? 'Use one of the backup codes you saved during setup.' : 'Open Google Authenticator and enter the current six-digit code.' }}</p>
+      </header>
+
+      <div class="mfa-field">
+        <label [for]="useBackupCode ? 'mfa-backup-code' : 'mfa-code'">{{ useBackupCode ? 'Backup code' : 'Authenticator code' }}</label>
+        <input *ngIf="!useBackupCode" id="mfa-code" class="mfa-input" [(ngModel)]="code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000" [disabled]="isSubmitting" (keyup.enter)="submit()" />
+        <input *ngIf="useBackupCode" id="mfa-backup-code" class="mfa-input backup-input" [(ngModel)]="backupCode" autocomplete="off" placeholder="ABCD-EFGH" [disabled]="isSubmitting" (keyup.enter)="submit()" />
+      </div>
+      <p class="mfa-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</p>
+      <div class="mfa-actions">
+        <button class="mfa-primary" type="button" (click)="submit()" [disabled]="isSubmitting"><span>{{ isSubmitting ? 'Verifying...' : 'Continue' }}</span><svg *ngIf="!isSubmitting" lucideArrowRight [size]="17" aria-hidden="true"></svg><svg *ngIf="isSubmitting" class="mfa-icon-spin" lucideLoaderCircle [size]="17" aria-hidden="true"></svg></button>
+      </div>
+      <button type="button" class="mfa-link" (click)="switchMethod()"><svg lucideKeyRound [size]="15" aria-hidden="true"></svg>{{ useBackupCode ? 'Use authenticator code' : 'Use a backup code' }}</button>
+      <button type="button" class="mfa-link" (click)="backToLogin()">Back to sign in</button>
+    </div>
+  </section>
+</main>

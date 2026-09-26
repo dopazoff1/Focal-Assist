@@ -1,0 +1,72 @@
+services:
+  focalassist-db:
+    image: mysql:8.4
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-creditplus_db}
+      MYSQL_USER: ${MYSQL_USER:-creditplus_app}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - focalassist_mysql_data:/var/lib/mysql
+      - ${BACKEND_CONTEXT:-../creditplus-api}/db/creditplus_db.sql:/docker-entrypoint-initdb.d/01-creditplus_db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u${MYSQL_USER:-creditplus_app} -p${MYSQL_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+  focalassist-api:
+    build:
+      context: ${BACKEND_CONTEXT:-../creditplus-api}
+      dockerfile: Dockerfile
+    image: focalassist-api:latest
+    environment:
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:mysql://focalassist-db:3306/${MYSQL_DATABASE:-creditplus_db}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-creditplus_app}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "false"
+      APP_PUBLIC_BASE_URL: ${APP_PUBLIC_BASE_URL}
+      APP_CORS_ALLOWED_ORIGIN_PATTERNS: ${APP_PUBLIC_BASE_URL}
+      APP_FRAME_ANCESTORS: "'self' ${APP_PUBLIC_BASE_URL}"
+      SECURITY_JWT_SECRET: ${SECURITY_JWT_SECRET}
+      SECURITY_JWT_EXPIRATION_SECONDS: 43200
+      CHAT_PUBLIC_BASE_URL: ${APP_PUBLIC_BASE_URL}
+      TRAINING_ASSETS_DIR: /app/data/training-assets
+      TRAINING_ASSETS_MAX_BYTES: 262144000
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_DEFAULT_MODEL: ${OPENAI_DEFAULT_MODEL:-gpt-4o-mini}
+      GMAIL_CLIENT_ID: ${GMAIL_CLIENT_ID:-}
+      GMAIL_CLIENT_SECRET: ${GMAIL_CLIENT_SECRET:-}
+      GMAIL_REDIRECT_URI: ${APP_PUBLIC_BASE_URL}/api/gmail/oauth/callback
+      CHAT_META_APP_ID: ${CHAT_META_APP_ID:-}
+      CHAT_META_REDIRECT_URI: ${APP_PUBLIC_BASE_URL}/api/crm/chats/oauth/callback
+      CHAT_META_VERIFY_TOKEN: ${CHAT_META_VERIFY_TOKEN:-focal-meta-verify-token}
+    expose:
+      - "8080"
+    volumes:
+      - focalassist_training_assets:/app/data/training-assets
+    depends_on:
+      focalassist-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  focalassist-web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    image: focalassist-web:latest
+    environment:
+      BACKEND_UPSTREAM: http://focalassist-api:8080
+    ports:
+      - "${WEB_PORT:-80}:80"
+    depends_on:
+      - focalassist-api
+    restart: unless-stopped
+
+volumes:
+  focalassist_mysql_data:
+  focalassist_training_assets:

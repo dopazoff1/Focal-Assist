@@ -1,0 +1,31 @@
+<div class="compare-page">
+  <section class="panel intro">
+    <p class="kicker">Comparison</p>
+    <h1>Focal vs Zendesk</h1>
+    <p>
+      Focal is designed as an operations-first stack for support execution, QA governance, SOP guidance, and
+      team adherence in one platform.
+    </p>
+    <a class="btn solid" routerLink="/marketing/pricing">Request Tailored Proposal</a>
+  </section>
+
+  <section class="panel table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Capability</th>
+          <th>Focal</th>
+          <th>Zendesk</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of rows">
+          <td>{{ row.capability }}</td>
+          <td>{{ row.focal }}</td>
+          <td>{{ row.zendesk }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</div>
+

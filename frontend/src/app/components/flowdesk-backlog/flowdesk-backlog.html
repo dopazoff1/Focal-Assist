@@ -1,0 +1,57 @@
+﻿<section class="backlog-page" *ngIf="issues$ | async as issues">
+  <header class="page-head">
+    <h1>FlowDesk Backlog</h1>
+    <input [(ngModel)]="query" placeholder="Search issue, assignee, priority...">
+  </header>
+
+  <section class="create-panel">
+    <h2>Create Issue</h2>
+    <div class="form-grid">
+      <input [(ngModel)]="newTitle" placeholder="Issue title">
+      <input [(ngModel)]="newAssignee" placeholder="Assignee">
+      <select [(ngModel)]="newType">
+        <option value="story">Story</option>
+        <option value="task">Task</option>
+        <option value="bug">Bug</option>
+      </select>
+      <select [(ngModel)]="newPriority">
+        <option value="low">Low</option>
+        <option value="medium">Medium</option>
+        <option value="high">High</option>
+        <option value="critical">Critical</option>
+      </select>
+      <input type="number" min="0" [(ngModel)]="newPoints" placeholder="Points">
+      <button type="button" (click)="createIssue()">Add</button>
+    </div>
+    <textarea [(ngModel)]="newDescription" rows="3" placeholder="Issue description"></textarea>
+  </section>
+
+  <section class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Key</th>
+          <th>Title</th>
+          <th>Type</th>
+          <th>Priority</th>
+          <th>Status</th>
+          <th>Points</th>
+          <th>Assignee</th>
+          <th>Updated</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let issue of filtered(issues)">
+          <td>{{ issue.key }}</td>
+          <td>{{ issue.title }}</td>
+          <td>{{ issue.type }}</td>
+          <td><span class="priority" [attr.data-priority]="issue.priority">{{ issue.priority }}</span></td>
+          <td>{{ issue.status }}</td>
+          <td>{{ issue.points }}</td>
+          <td>{{ issue.assignee }}</td>
+          <td>{{ issue.updatedAt | date:'yyyy-MM-dd HH:mm' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</section>

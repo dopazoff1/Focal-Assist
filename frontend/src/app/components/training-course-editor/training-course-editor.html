@@ -1,0 +1,310 @@
+<section class="course-editor" *ngIf="course as c; else errorTpl">
+  <header class="head">
+    <div class="head-left">
+      <a class="back" [routerLink]="['../../']">Studio</a>
+      <div class="head-title">
+        <h1>{{ c.title }}</h1>
+        <div class="head-meta">
+          <span class="pill" [attr.data-status]="c.status">{{ c.status }}</span>
+          <span class="muted">v{{ c.version }}</span>
+          <span class="muted">Updated {{ c.updatedAt | date:'medium' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="head-actions">
+      <a class="btn ghost" [routerLink]="['../../../course', c.id]">Preview</a>
+      <button type="button" class="btn ghost" (click)="archive()" *ngIf="canPublish">Archive</button>
+      <button type="button" class="btn ghost" (click)="unpublish()" *ngIf="canPublish && c.status === 'PUBLISHED'">Unpublish</button>
+      <button type="button" class="btn" (click)="publish()" *ngIf="canPublish && c.status !== 'PUBLISHED'">Publish</button>
+      <button type="button" class="btn" (click)="save()" [disabled]="!dirty">Save</button>
+    </div>
+  </header>
+
+  <div class="notice error" *ngIf="error">{{ error }}</div>
+  <div class="notice info" *ngIf="info">{{ info }}</div>
+
+  <section class="grid">
+    <aside class="panel outline">
+      <header class="panel-head">
+        <strong>Outline</strong>
+        <small>Modules and lessons.</small>
+      </header>
+
+      <div class="outline-body">
+        <div class="outline-tools">
+          <button type="button" class="btn small" (click)="addModule()">Add module</button>
+          <label class="inline">
+            <span>Lesson type</span>
+            <select [(ngModel)]="addLessonType">
+              <option value="LESSON">Lesson</option>
+              <option value="QUIZ">Quiz</option>
+              <option value="LINK">Link</option>
+              <option value="VIDEO">Video</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="module" *ngFor="let m of c.modules">
+          <div class="module-head" [class.active]="selectedModuleId === m.id">
+            <input
+              [(ngModel)]="m.title"
+              (ngModelChange)="setDirty()"
+              placeholder="Module title"
+            />
+            <div class="mini-actions">
+              <button type="button" class="mini" (click)="moveModule(m.id, -1)" title="Move up">&uarr;</button>
+              <button type="button" class="mini" (click)="moveModule(m.id, 1)" title="Move down">&darr;</button>
+              <button type="button" class="mini danger" (click)="deleteModule(m.id)" title="Delete module">&times;</button>
+            </div>
+          </div>
+
+          <div class="module-lessons">
+            <button type="button" class="add" (click)="selectedModuleId = m.id; addLesson(m.id)">+ Add lesson</button>
+
+            <div
+              class="lesson"
+              *ngFor="let l of m.lessons"
+              [class.active]="selectedLessonId === l.id"
+            >
+              <button type="button" class="lesson-main" (click)="selectLesson(m.id, l.id)">
+                <span class="type" [attr.data-type]="l.type">{{ l.type[0] }}</span>
+                <span class="lesson-title">{{ l.title }}</span>
+              </button>
+              <div class="mini-actions">
+                <button type="button" class="mini" (click)="moveLesson(l.id, -1)" title="Move up">&uarr;</button>
+                <button type="button" class="mini" (click)="moveLesson(l.id, 1)" title="Move down">&darr;</button>
+                <button type="button" class="mini danger" (click)="deleteLesson(l.id)" title="Delete lesson">&times;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty" *ngIf="c.modules.length === 0">
+          <strong>No modules yet.</strong>
+          <span>Add a module to start building this course.</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="panel lesson-editor">
+      <header class="panel-head">
+        <strong>Lesson editor</strong>
+        <small *ngIf="selectedLesson as l">#{{ l.id }} &bull; {{ l.type }}</small>
+      </header>
+
+      <div class="lesson-body" *ngIf="selectedLesson as l; else pickLessonTpl">
+        <div class="lesson-fields">
+          <label>
+            <span>Title</span>
+            <input [(ngModel)]="l.title" (ngModelChange)="setDirty()" />
+          </label>
+
+          <label>
+            <span>Type</span>
+            <select [ngModel]="l.type" (ngModelChange)="setLessonType($event)">
+              <option value="LESSON">Lesson</option>
+              <option value="QUIZ">Quiz</option>
+              <option value="LINK">Link</option>
+              <option value="VIDEO">Video</option>
+            </select>
+          </label>
+
+          <label *ngIf="l.type === 'LINK' || l.type === 'VIDEO'">
+            <span>URL</span>
+            <input [(ngModel)]="l.url" (ngModelChange)="setDirty()" placeholder="https://..." />
+          </label>
+        </div>
+
+        <div class="video-upload" *ngIf="l.type === 'VIDEO'">
+          <div class="vu-head">
+            <strong>Uploaded video</strong>
+            <small class="muted" *ngIf="videoUploading">Uploading...</small>
+            <small class="muted" *ngIf="videoMetaLoading && !videoUploading">Loading...</small>
+          </div>
+
+          <div class="vu-current" *ngIf="l.assetId && videoMeta as meta; else vuEmptyTpl">
+            <div class="vu-meta">
+              <strong>{{ meta.filename }}</strong>
+              <small class="muted">{{ formatBytes(meta.size) }} &bull; {{ meta.mimeType }}</small>
+            </div>
+            <button type="button" class="mini danger" (click)="removeVideo(l)" [disabled]="videoUploading">Remove</button>
+          </div>
+
+          <ng-template #vuEmptyTpl>
+            <div class="vu-empty">
+              <span class="muted">No uploaded video attached.</span>
+            </div>
+          </ng-template>
+
+          <label class="vu-picker">
+            <span>Upload (MP4, MOV, etc)</span>
+            <input type="file" accept="video/*" (change)="attachVideo($event, l)" [disabled]="videoUploading" />
+          </label>
+
+          <small class="muted vu-hint">Videos are stored in browser storage (IndexedDB) in this version.</small>
+        </div>
+
+        <div class="lesson-tabs">
+          <button type="button" class="tab" [class.active]="lessonMode === 'CONTENT'" (click)="lessonMode = 'CONTENT'">Content</button>
+          <button type="button" class="tab" [class.active]="lessonMode === 'PREVIEW'" (click)="lessonMode = 'PREVIEW'">Preview</button>
+        </div>
+
+        <div class="lesson-content" *ngIf="l.type !== 'QUIZ'">
+          <textarea
+            *ngIf="lessonMode === 'CONTENT'"
+            [(ngModel)]="l.contentMarkdown"
+            (ngModelChange)="setDirty()"
+            placeholder="Write in Markdown..."
+          ></textarea>
+
+          <div class="preview" *ngIf="lessonMode === 'PREVIEW'">
+            <div class="preview-inner" [innerHTML]="lessonPreviewHtml"></div>
+          </div>
+        </div>
+
+        <div class="quiz" *ngIf="l.type === 'QUIZ'">
+          <div class="quiz-top">
+            <label>
+              <span>Passing score</span>
+              <input type="number" min="0" max="100" [(ngModel)]="l.quiz!.passingScore" (ngModelChange)="setDirty()" />
+            </label>
+            <button type="button" class="btn small" (click)="addQuestion()">Add question</button>
+          </div>
+
+          <div class="q" *ngFor="let q of l.quiz?.questions || []">
+            <div class="q-head">
+              <strong>Q{{ q.id }}</strong>
+              <button type="button" class="mini danger" (click)="deleteQuestion(q.id)">Remove</button>
+            </div>
+
+            <label class="block">
+              <span>Prompt</span>
+              <textarea [(ngModel)]="q.prompt" (ngModelChange)="setDirty()"></textarea>
+            </label>
+
+            <div class="options">
+              <div class="opt" *ngFor="let opt of q.options; let idx = index">
+                <input [(ngModel)]="q.options[idx]" (ngModelChange)="setDirty()" />
+                <label class="radio">
+                  <input type="radio" [name]="'correct-' + q.id" [checked]="q.correctIndex === idx" (change)="q.correctIndex = idx; setDirty()" />
+                  <span>Correct</span>
+                </label>
+              </div>
+            </div>
+
+            <label class="block">
+              <span>Explanation (optional)</span>
+              <textarea [(ngModel)]="q.explanation" (ngModelChange)="setDirty()"></textarea>
+            </label>
+          </div>
+
+          <div class="empty" *ngIf="(l.quiz?.questions || []).length === 0">
+            <strong>No questions yet.</strong>
+            <span>Add a question to build the quiz.</span>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #pickLessonTpl>
+        <div class="empty">
+          <strong>Select a lesson.</strong>
+          <span>Pick a lesson from the outline to edit its content.</span>
+        </div>
+      </ng-template>
+    </main>
+
+    <aside class="panel settings">
+      <header class="panel-head">
+        <strong>Course settings</strong>
+        <small>Metadata and enrollment.</small>
+      </header>
+
+      <div class="settings-body">
+        <label class="block">
+          <span>Title</span>
+          <input [(ngModel)]="c.title" (ngModelChange)="setDirty()" />
+        </label>
+
+        <label class="block">
+          <span>Subtitle</span>
+          <input [(ngModel)]="c.subtitle" (ngModelChange)="setDirty()" />
+        </label>
+
+        <label class="block">
+          <span>Description</span>
+          <textarea [(ngModel)]="c.description" (ngModelChange)="setDirty()"></textarea>
+        </label>
+
+        <div class="split">
+          <label>
+            <span>Difficulty</span>
+            <select [ngModel]="c.difficulty" (ngModelChange)="setDifficulty($event)">
+              <option value="BEGINNER">Beginner</option>
+              <option value="INTERMEDIATE">Intermediate</option>
+              <option value="ADVANCED">Advanced</option>
+            </select>
+          </label>
+          <label>
+            <span>Est. minutes</span>
+            <input type="number" min="0" [(ngModel)]="c.estimatedMinutes" (ngModelChange)="setDirty()" />
+          </label>
+        </div>
+
+        <label class="block">
+          <span>Tags (comma separated)</span>
+          <input [ngModel]="tagsToText(c.tags)" (ngModelChange)="c.tags = textToTags($event); setDirty()" />
+        </label>
+
+        <label class="toggle">
+          <input type="checkbox" [(ngModel)]="c.allowSelfEnroll" (ngModelChange)="setDirty()" />
+          <span>Allow self-enroll</span>
+        </label>
+
+        <div class="prereqs">
+          <div class="prereqs-head">
+            <strong>Prerequisites</strong>
+            <small>Agents should complete these first.</small>
+          </div>
+          <label class="pr" *ngFor="let p of allCoursesForPrereqs">
+            <input
+              type="checkbox"
+              [checked]="c.prerequisites.includes(p.id)"
+              (change)="togglePrereq(p.id)"
+            />
+            <span>{{ p.title }}</span>
+            <small>{{ p.status }}</small>
+          </label>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <span class="k">Modules</span>
+            <strong>{{ c.modules.length }}</strong>
+          </div>
+          <div class="stat">
+            <span class="k">Lessons</span>
+            <strong>{{ lessonCount(c) }}</strong>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </section>
+</section>
+
+<ng-template #errorTpl>
+  <section class="course-editor">
+    <header class="head">
+      <div class="head-left">
+        <a class="back" [routerLink]="['../../']">Studio</a>
+        <div class="head-title">
+          <h1>Course editor</h1>
+          <div class="head-meta">
+            <span class="muted">Error</span>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div class="notice error">{{ error || 'Course not available.' }}</div>
+  </section>
+</ng-template>

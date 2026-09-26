@@ -1,0 +1,78 @@
+<section class="live-chat-page">
+  <main class="conversation-panel" *ngIf="selected; else noConversation">
+    <header class="conversation-head">
+      <div>
+        <p>{{ selected.projectName }} / {{ selected.queueName || 'No queue' }}</p>
+        <h1>{{ selected.customerName || 'Guest' }}</h1>
+        <small>{{ selected.customerEmail || 'No customer email' }}</small>
+      </div>
+      <div class="conversation-actions">
+        <span class="state" [class]="statusClass(selected.status)">{{ selected.status.replaceAll('_', ' ') }}</span>
+        <button type="button" (click)="close()">Close</button>
+      </div>
+    </header>
+
+    <div class="live-chat-thread">
+      <article class="msg" *ngFor="let msg of messages" [class.customer]="msg.senderType === 'CUSTOMER'" [class.agent]="msg.senderType === 'AGENT'" [class.bot]="msg.senderType === 'BOT'" [class.system]="msg.senderType === 'SYSTEM'">
+        <div class="msg-meta">
+          <span>{{ msg.senderName || msg.senderType }}</span>
+          <small>{{ msg.createdAt | date:'short' }}</small>
+        </div>
+        <p>{{ msg.body }}</p>
+      </article>
+    </div>
+
+    <footer class="composer">
+      <textarea [(ngModel)]="composer" placeholder="Write an answer..." (keydown.control.enter)="send()"></textarea>
+      <button type="button" class="primary" [disabled]="sending || !composer.trim()" (click)="send()">Send</button>
+    </footer>
+  </main>
+
+  <ng-template #noConversation>
+    <main class="conversation-panel empty">
+      <h1>Live Chat</h1>
+      <p>No conversation selected.</p>
+      <button type="button" class="primary" (click)="claimNext()">Next waiting chat</button>
+    </main>
+  </ng-template>
+
+  <aside class="chat-sidebar">
+    <div class="sidebar-head">
+      <div>
+        <p>Realtime queue</p>
+        <h2>Assigned chats</h2>
+      </div>
+      <button type="button" class="play" (click)="claimNext()">Next chat</button>
+    </div>
+
+    <div class="filters">
+      <select [(ngModel)]="filters.projectId" (change)="reloadSessions(true)">
+        <option [ngValue]="undefined">All projects</option>
+        <option *ngFor="let project of projects" [ngValue]="project.id">{{ project.name }}</option>
+      </select>
+      <select [(ngModel)]="filters.status" (change)="reloadSessions(true)">
+        <option [ngValue]="undefined">All statuses</option>
+        <option value="WAITING_FOR_AGENT">Waiting</option>
+        <option value="ASSIGNED_TO_AGENT">Assigned</option>
+        <option value="BOT_ACTIVE">Bot active</option>
+        <option value="CLOSED">Closed</option>
+      </select>
+    </div>
+
+    <div class="notice" *ngIf="notice">{{ notice }}</div>
+
+    <div class="session-list" *ngIf="!loading; else loadingSessions">
+      <button type="button" class="session-card" *ngFor="let session of sessions" [class.active]="session.id === selected?.id" (click)="selectSession(session)">
+        <span class="unread" *ngIf="session.unreadForAgent">{{ session.unreadForAgent }}</span>
+        <strong>{{ session.customerName || 'Guest' }}</strong>
+        <small>{{ session.projectName }} - {{ session.queueName || 'No queue' }}</small>
+        <p>{{ session.lastMessagePreview || 'No messages yet.' }}</p>
+        <em>{{ session.status.replaceAll('_', ' ') }}</em>
+      </button>
+    </div>
+
+    <ng-template #loadingSessions>
+      <div class="loading-card"><span></span><span></span><span></span></div>
+    </ng-template>
+  </aside>
+</section>

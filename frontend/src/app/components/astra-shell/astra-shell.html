@@ -1,0 +1,68 @@
+<div class="astra-layout" [class.sidebar-open]="sidebarOpen">
+  <div class="astra-backdrop" *ngIf="sidebarOpen" (click)="closeSidebar()" aria-hidden="true"></div>
+
+  <aside class="astra-sidebar">
+    <a class="astra-brand" routerLink="/astra/dashboard">
+      <span class="astra-logo">AS</span>
+      <div>
+        <strong>Astra</strong>
+        <small>Knowledge OS</small>
+      </div>
+    </a>
+
+    <nav class="astra-nav" aria-label="Astra navigation">
+      <a routerLink="/astra/dashboard" routerLinkActive="active" (click)="closeSidebar()">
+        <span class="ico">DB</span>
+        <span>Dashboard</span>
+      </a>
+      <a routerLink="/astra/knowledge" routerLinkActive="active" (click)="closeSidebar()">
+        <span class="ico">KB</span>
+        <span>Knowledge Base</span>
+      </a>
+      <a routerLink="/astra/tickets" routerLinkActive="active" (click)="closeSidebar()">
+        <span class="ico">TK</span>
+        <span>Public Tickets</span>
+      </a>
+      <a routerLink="/astra/public" routerLinkActive="active" (click)="closeSidebar()">
+        <span class="ico">PB</span>
+        <span>Public KB Preview</span>
+      </a>
+      <a routerLink="/astra/help" (click)="closeSidebar()">
+        <span class="ico">HC</span>
+        <span>Public Help Center</span>
+      </a>
+      <a *ngIf="canManageIntegrations" routerLink="/astra/integrations" routerLinkActive="active" (click)="closeSidebar()">
+        <span class="ico">AI</span>
+        <span>LLM Integrations</span>
+      </a>
+    </nav>
+
+    <footer class="astra-side-footer">
+      <div class="user-name">{{ auth.getUserName() || 'User' }}</div>
+      <div class="user-meta">{{ auth.getNormalizedRole() || 'AGENT' }}</div>
+      <button type="button" class="logout" (click)="logout()">Logout</button>
+    </footer>
+  </aside>
+
+  <section class="astra-main">
+    <header class="astra-topbar">
+      <button type="button" class="menu-btn" (click)="toggleSidebar()" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+
+      <div class="titles">
+        <small>{{ pageSubtitle }}</small>
+        <h1>{{ pageTitle }}</h1>
+      </div>
+
+      <form class="search" (submit)="runQuickSearch($event)">
+        <input type="search" [(ngModel)]="quickSearch" name="astraSearch" placeholder="Search articles or SOP keywords..." />
+        <button type="submit">Go</button>
+      </form>
+    </header>
+
+    <main class="astra-content">
+      <router-outlet></router-outlet>
+    </main>
+  </section>
+</div>

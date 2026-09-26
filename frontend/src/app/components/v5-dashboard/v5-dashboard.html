@@ -1,0 +1,92 @@
+<section class="v5-page v5-fade-in">
+  <header class="v5-page-header">
+    <div>
+      <h1 class="v5-page-title">Revenue Command Dashboard</h1>
+      <p class="v5-page-copy">
+        Monitor conversion velocity, detect blockers early, and push next-best actions to increase close rate.
+      </p>
+    </div>
+    <div class="v5-actions">
+      <button type="button" class="v5-btn ghost">Export Snapshot</button>
+      <button type="button" class="v5-btn primary">Launch Follow-up Sprint</button>
+    </div>
+  </header>
+
+  <section class="v5-surface goal-card">
+    <div class="goal-head">
+      <div>
+        <p class="goal-label">Quarter Goal Progress</p>
+        <h2>$1.84M / $2.2M target</h2>
+      </div>
+      <span class="v5-badge success">84% on track</span>
+    </div>
+    <div class="v5-progress-track" aria-hidden="true">
+      <span class="v5-progress-fill" style="width: 84%"></span>
+    </div>
+  </section>
+
+  <section class="v5-kpi-grid">
+    <article class="v5-kpi" *ngFor="let k of kpis">
+      <div class="v5-kpi-label">{{ k.label }}</div>
+      <div class="v5-kpi-value">{{ k.value }}</div>
+      <div class="v5-kpi-delta" [class.up]="k.trend === 'up'" [class.down]="k.trend === 'down'">{{ k.delta }}</div>
+    </article>
+  </section>
+
+  <section class="v5-grid cols-2">
+    <article class="v5-surface">
+      <header class="v5-surface-header">
+        <div>
+          <h3 class="v5-surface-title">Revenue Trend</h3>
+          <p class="v5-surface-subtitle">Monthly progression with conversion uplift.</p>
+        </div>
+        <span class="v5-badge info">Live</span>
+      </header>
+      <div class="v5-surface-body">
+        <div class="rev-bars" aria-hidden="true">
+          <div class="rev-bar" *ngFor="let v of revenueBars" [style.height.%]="v"></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="v5-surface">
+      <header class="v5-surface-header">
+        <div>
+          <h3 class="v5-surface-title">Activity Feed</h3>
+          <p class="v5-surface-subtitle">Critical events from sales and support operations.</p>
+        </div>
+      </header>
+      <div class="v5-surface-body">
+        <ul class="v5-list">
+          <li class="v5-list-item activity" *ngFor="let a of activities">
+            <div class="activity-head">
+              <strong>{{ a.title }}</strong>
+              <span class="v5-badge" [ngClass]="a.type">{{ a.time }}</span>
+            </div>
+            <p>{{ a.detail }}</p>
+          </li>
+        </ul>
+      </div>
+    </article>
+  </section>
+
+  <section class="v5-surface">
+    <header class="v5-surface-header">
+      <div>
+        <h3 class="v5-surface-title">Next Best Actions</h3>
+        <p class="v5-surface-subtitle">Suggested moves to keep momentum and prevent leakage.</p>
+      </div>
+      <button type="button" class="v5-btn success">Mark Sprint Planned</button>
+    </header>
+    <div class="v5-surface-body">
+      <div class="nba-grid">
+        <article *ngFor="let action of nextBestActions; let i = index">
+          <span>#{{ i + 1 }}</span>
+          <p>{{ action }}</p>
+        </article>
+      </div>
+    </div>
+  </section>
+</section>
+
+

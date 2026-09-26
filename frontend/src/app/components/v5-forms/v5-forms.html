@@ -1,0 +1,119 @@
+<section class="v5-page v5-fade-in">
+  <header class="v5-page-header">
+    <div>
+      <h1 class="v5-page-title">Conversion-Optimized Forms</h1>
+      <p class="v5-page-copy">
+        Structured inputs, clear validation, and progress guidance to reduce drop-off and improve data quality.
+      </p>
+    </div>
+    <div class="v5-actions">
+      <span class="v5-badge info">Completion {{ completionPercent }}%</span>
+    </div>
+  </header>
+
+  <section class="v5-grid cols-2 form-layout">
+    <article class="v5-surface">
+      <header class="v5-surface-header">
+        <div>
+          <h3 class="v5-surface-title">Lead Qualification Form</h3>
+          <p class="v5-surface-subtitle">Fill required fields to unlock submission.</p>
+        </div>
+      </header>
+
+      <form class="v5-surface-body form-grid" (ngSubmit)="submit()">
+        <label class="v5-label">
+          <span>Full Name *</span>
+          <input class="v5-input" [(ngModel)]="model.fullName" name="fullName" placeholder="e.g. Sarah Connor" />
+        </label>
+
+        <label class="v5-label">
+          <span>Email *</span>
+          <input class="v5-input" [(ngModel)]="model.email" name="email" placeholder="name@company.com" />
+        </label>
+
+        <label class="v5-label">
+          <span>Company *</span>
+          <input class="v5-input" [(ngModel)]="model.company" name="company" placeholder="Company name" />
+        </label>
+
+        <label class="v5-label">
+          <span>Role</span>
+          <input class="v5-input" [(ngModel)]="model.role" name="role" placeholder="Decision maker role" />
+        </label>
+
+        <label class="v5-label">
+          <span>Lead Source *</span>
+          <select class="v5-select" [(ngModel)]="model.source" name="source">
+            <option value="">Select source</option>
+            <option *ngFor="let source of sources" [value]="source">{{ source }}</option>
+          </select>
+        </label>
+
+        <label class="v5-label">
+          <span>Potential Deal Value *</span>
+          <input class="v5-input" [(ngModel)]="model.dealValue" name="dealValue" placeholder="e.g. $35k" />
+        </label>
+
+        <label class="v5-label">
+          <span>Priority</span>
+          <select class="v5-select" [(ngModel)]="model.priority" name="priority">
+            <option value="normal">Normal</option>
+            <option value="high">High</option>
+            <option value="critical">Critical</option>
+          </select>
+        </label>
+
+        <label class="v5-label">
+          <span>Next Action Date *</span>
+          <input class="v5-input" type="date" [(ngModel)]="model.nextActionDate" name="nextActionDate" />
+        </label>
+
+        <label class="v5-label full">
+          <span>Notes</span>
+          <textarea class="v5-textarea" rows="4" [(ngModel)]="model.notes" name="notes" placeholder="Context, objections, and urgency details"></textarea>
+        </label>
+
+        <div class="form-actions full">
+          <button type="button" class="v5-btn ghost">Save Draft</button>
+          <button type="submit" class="v5-btn primary" [disabled]="!canSubmit">Create Lead</button>
+        </div>
+
+        <p class="form-error full" *ngIf="submitted && !canSubmit">
+          Please complete all required fields before submitting.
+        </p>
+        <p class="form-success full" *ngIf="saved">Lead saved successfully and routed for follow-up.</p>
+      </form>
+    </article>
+
+    <article class="v5-surface soft guidance">
+      <header class="v5-surface-header">
+        <div>
+          <h3 class="v5-surface-title">Completion Guidance</h3>
+          <p class="v5-surface-subtitle">Lower friction while maintaining high data quality.</p>
+        </div>
+      </header>
+
+      <div class="v5-surface-body">
+        <div class="v5-progress-track">
+          <span class="v5-progress-fill" [style.width.%]="completionPercent"></span>
+        </div>
+
+        <ul class="v5-list checklist">
+          <li class="v5-list-item" [class.done]="model.fullName.trim().length > 0">Full name captured</li>
+          <li class="v5-list-item" [class.done]="model.email.trim().length > 0">Email captured</li>
+          <li class="v5-list-item" [class.done]="model.company.trim().length > 0">Company captured</li>
+          <li class="v5-list-item" [class.done]="model.source.trim().length > 0">Source selected</li>
+          <li class="v5-list-item" [class.done]="model.dealValue.trim().length > 0">Deal value estimated</li>
+          <li class="v5-list-item" [class.done]="model.nextActionDate.trim().length > 0">Next action date set</li>
+        </ul>
+
+        <div class="v5-empty">
+          <strong>Best practice</strong>
+          <p>Set next action immediately after lead creation to keep conversion velocity high.</p>
+        </div>
+      </div>
+    </article>
+  </section>
+</section>
+
+

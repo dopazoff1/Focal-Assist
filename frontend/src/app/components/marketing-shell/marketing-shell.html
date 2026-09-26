@@ -1,0 +1,63 @@
+<div class="mkt-shell">
+  <div class="mkt-backdrop" aria-hidden="true">
+    <span class="orb orb-a"></span>
+    <span class="orb orb-b"></span>
+    <span class="orb orb-c"></span>
+    <span class="mesh"></span>
+  </div>
+
+  <header class="mkt-header">
+    <a class="mkt-brand" routerLink="/marketing">
+      <span class="mkt-mark">KA</span>
+      <span class="mkt-brand-copy">
+        <strong>Focal</strong>
+        <small>Support OS</small>
+      </span>
+    </a>
+
+    <nav class="mkt-nav">
+      <a
+        *ngFor="let link of primaryLinks"
+        [routerLink]="link.to"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: link.to === '/marketing' }"
+      >
+        {{ link.label }}
+      </a>
+    </nav>
+
+    <div class="mkt-actions">
+      <a class="btn ghost" routerLink="/login">Login</a>
+      <a class="btn solid" routerLink="/marketing/pricing">Start Pilot</a>
+    </div>
+  </header>
+
+  <main class="mkt-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <section class="mkt-banner">
+    <div>
+      <p class="kicker">Ready For Production Rollout</p>
+      <h2>Launch a KPI-driven pilot and prove ROI in weeks, not quarters.</h2>
+    </div>
+    <div class="mkt-banner-actions">
+      <a class="btn solid" routerLink="/marketing/pricing">View Commercial Plan</a>
+      <a class="btn ghost" routerLink="/login">Book Executive Demo</a>
+    </div>
+  </section>
+
+  <footer class="mkt-footer">
+    <div class="footer-brand">
+      <strong>Focal</strong>
+      <span>Customer Support Operating System</span>
+    </div>
+    <div class="footer-links">
+      <a routerLink="/help-center">Knowledge Base</a>
+      <a routerLink="/marketing/platform">Platform</a>
+      <a routerLink="/marketing/security">Security</a>
+      <a routerLink="/marketing/pricing">Pricing</a>
+      <a routerLink="/login">Login</a>
+    </div>
+  </footer>
+</div>

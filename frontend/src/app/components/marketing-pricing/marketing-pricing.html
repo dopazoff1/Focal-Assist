@@ -1,0 +1,76 @@
+<div class="pricing-page">
+  <section class="panel hero">
+    <p class="kicker">Commercial Model</p>
+    <h1>Flexible Plans For Teams Scaling Support Operations</h1>
+    <p class="sub">
+      Start with a KPI-focused pilot, then scale by active users. Pricing is designed for operational clarity and
+      predictable expansion.
+    </p>
+    <div class="billing-toggle" role="group" aria-label="Billing mode">
+      <button type="button" [class.active]="billing === 'monthly'" (click)="setBilling('monthly')">Monthly</button>
+      <button type="button" [class.active]="billing === 'annual'" (click)="setBilling('annual')">Annual (Save ~20%)</button>
+    </div>
+  </section>
+
+  <section class="plan-grid">
+    <article class="panel plan" *ngFor="let plan of plans" [class.featured]="plan.featured">
+      <h2>{{ plan.name }}</h2>
+      <p class="subtitle">{{ plan.subtitle }}</p>
+      <p class="amount">
+        {{ displayPrice(plan) }}
+        <small>{{ displayPeriod(plan) }}</small>
+      </p>
+      <ul>
+        <li *ngFor="let feature of plan.features">{{ feature }}</li>
+      </ul>
+      <a class="btn solid" routerLink="/login">{{ plan.cta }}</a>
+    </article>
+  </section>
+
+  <section class="panel compare" id="compare">
+    <div class="head">
+      <p class="kicker">Feature Matrix</p>
+      <h2>Plan Comparison</h2>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Capability</th>
+            <th>Starter</th>
+            <th>Scale</th>
+            <th>Enterprise</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of compareRows">
+            <td>{{ row.label }}</td>
+            <td>{{ row.starter === true ? 'Yes' : row.starter === false ? 'No' : row.starter }}</td>
+            <td>{{ row.scale === true ? 'Yes' : row.scale === false ? 'No' : row.scale }}</td>
+            <td>{{ row.enterprise === true ? 'Yes' : row.enterprise === false ? 'No' : row.enterprise }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="addon-grid">
+    <article class="panel addon" *ngFor="let addon of addons">
+      <h3>{{ addon.name }}</h3>
+      <p class="price">{{ addon.price }}</p>
+      <p>{{ addon.desc }}</p>
+    </article>
+  </section>
+
+  <section class="panel faq">
+    <p class="kicker">FAQ</p>
+    <h2>Commercial Questions Answered</h2>
+    <div class="faq-list">
+      <article *ngFor="let item of faqs">
+        <h3>{{ item.q }}</h3>
+        <p>{{ item.a }}</p>
+      </article>
+    </div>
+  </section>
+</div>
+

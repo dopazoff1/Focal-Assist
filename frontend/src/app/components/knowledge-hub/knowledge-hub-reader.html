@@ -1,0 +1,134 @@
+<section class="hub-page hub-reader-page" [class.is-map-mode]="mapOpen">
+  <button type="button" class="hub-back-button" (click)="goBack()"><svg lucideArrowLeft [size]="17" aria-hidden="true"></svg>Back to previous page</button>
+
+  <div class="hub-reader-loading" *ngIf="loading">Loading article...</div>
+  <div class="hub-empty" *ngIf="!loading && notFound">This article could not be found. <button type="button" class="hub-inline-link" (click)="goBack()">Go back</button></div>
+
+  <article class="hub-reader" *ngIf="!loading && article as currentArticle">
+    <header class="hub-reader-head">
+      <button type="button" class="hub-reader-category" (click)="goToCategory()"><svg lucideBookOpen [size]="15" aria-hidden="true"></svg>{{ currentArticle.categoryName }}</button>
+      <h1>{{ currentArticle.title }}</h1>
+      <div class="hub-reader-actions">
+        <button
+          type="button"
+          class="hub-map-toggle"
+          [class.is-active]="mapOpen"
+          [disabled]="!currentArticle.hasMap || mapLoading"
+          role="switch"
+          [attr.aria-checked]="mapOpen"
+          [attr.aria-label]="currentArticle.hasMap ? 'Show Map / SOP' : 'No Map / SOP available'"
+          [attr.title]="currentArticle.hasMap ? 'Show Map / SOP' : 'No Map / SOP available'"
+          (click)="toggleMap()"
+        >
+          <span class="hub-map-toggle-track" aria-hidden="true"><span class="hub-map-toggle-thumb"></span></span>
+          <span>Map / SOP</span>
+        </button>
+      </div>
+      <p class="hub-reader-meta">Knowledge Hub - Article {{ currentArticle.id }}</p>
+    </header>
+
+    <ng-container *ngIf="!mapOpen; else mapView">
+      <div class="hub-reader-content" appMermaidContent [mermaidContent]="currentArticle.content" [innerHTML]="currentArticle.content"></div>
+    </ng-container>
+
+    <ng-template #mapView>
+      <div class="hub-map-loading" *ngIf="mapLoading">Loading map...</div>
+      <p class="kb-map-empty" *ngIf="mapError">{{ mapError }}</p>
+      <div class="tree-canvas-wrap kb-map-readonly hub-kb-map-wrap" *ngIf="currentArticle.map && mapNodes.length > 0">
+        <div
+          #mapCanvasRef
+          class="tree-canvas map-view-only"
+          [class.panning]="isPanningMap"
+          (mousedown)="onMapCanvasMouseDown($event)"
+          (mousemove)="onMapCanvasMouseMove($event)"
+          (wheel)="onMapWheel($event)"
+          (mouseup)="onMapCanvasMouseUp()"
+          (mouseleave)="onMapCanvasMouseUp()"
+        >
+          <div
+            class="canvas-world"
+            #mapWorldRef
+            [style.width.px]="getMapWorldWidth()"
+            [style.height.px]="getMapWorldHeight()"
+            [style.transform]="getMapWorldTransform()"
+          >
+            <div class="canvas-grid"></div>
+            <svg class="links" aria-hidden="true">
+              <g *ngFor="let source of mapNodes">
+                <path
+                  *ngFor="let choice of source.choices; let choiceIndex = index"
+                  [attr.d]="getMapChoiceConnectionPath(source.id, choiceIndex, choice.targetNodeId)"
+                  class="link-path"
+                ></path>
+              </g>
+            </svg>
+
+            <article
+              *ngFor="let node of mapNodes"
+              #mapNodeRef
+              class="node-card kb-map-node-card"
+              [class.active]="selectedMapNode?.id === node.id"
+              [class.has-info]="node.hasInfo"
+              [class.no-info]="!node.hasInfo"
+              [attr.data-node-id]="node.id"
+              [style.left.px]="node.x"
+              [style.top.px]="node.y"
+              tabindex="0"
+              [attr.aria-label]="node.title + (node.hasInfo ? ', open step details' : '')"
+              (click)="onMapNodeClick(node.id)"
+              (keydown.enter)="onMapNodeKeydown(node, $event)"
+              (keydown.space)="onMapNodeKeydown(node, $event)"
+            >
+              <div class="kb-map-node-heading">
+                <h3 class="kb-map-node-title">{{ node.title }}</h3>
+                <span class="kb-node-info-badge" *ngIf="node.hasInfo" title="Has step details">i</span>
+              </div>
+
+              <div class="map-choices kb-map-readonly-choices" *ngIf="node.choices.length > 0">
+                <button
+                  #mapChoiceRef
+                  type="button"
+                  class="map-choice kb-map-readonly-choice"
+                  *ngFor="let choice of node.choices; let choiceIndex = index"
+                  [attr.data-choice-id]="choice.id"
+                  [attr.data-source-id]="node.id"
+                  [attr.aria-label]="choice.label + ', answer: ' + choice.targetTitle"
+                  (mousedown)="$event.stopPropagation()"
+                  (click)="onMapChoiceClick(node.id, choice, $event)"
+                >
+                  <span class="choice-label" [title]="choice.label">{{ choice.label }}</span>
+                  <span class="choice-target" [title]="choice.targetTitle">{{ choice.targetTitle }}</span>
+                </button>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+      <p class="kb-map-empty" *ngIf="currentArticle.map && mapNodes.length === 0">No steps are available in this map.</p>
+    </ng-template>
+  </article>
+</section>
+
+<div class="kb-step-overlay" *ngIf="selectedMapNode as node" (click)="closeStepOverlay()">
+  <div class="kb-step-shade" aria-hidden="true"></div>
+  <aside class="kb-step-drawer" role="dialog" aria-modal="true" [attr.aria-labelledby]="'hub-step-title-' + node.id" (click)="$event.stopPropagation()">
+    <header class="kb-step-drawer-header">
+      <div>
+        <p class="kb-step-kicker">Step Details</p>
+        <h2 [id]="'hub-step-title-' + node.id">{{ node.title }}</h2>
+      </div>
+      <button #stepCloseButton type="button" class="kb-step-close" (click)="closeStepOverlay()" aria-label="Close step details">&times;</button>
+    </header>
+
+    <div class="kb-step-drawer-body">
+      <div class="kb-step-content" appMermaidContent [mermaidContent]="getStepOverlayContent(node)" [innerHTML]="getStepOverlayContent(node)"></div>
+      <div class="kb-step-options" *ngIf="node.choices.length > 0">
+        <h3>Continue from this step</h3>
+        <button type="button" class="kb-step-option-btn" *ngFor="let choice of node.choices" (click)="onMapChoiceClick(node.id, choice, $event)">
+          <span>{{ choice.label }}</span>
+          <small>{{ choice.targetTitle }}</small>
+        </button>
+      </div>
+    </div>
+  </aside>
+</div>

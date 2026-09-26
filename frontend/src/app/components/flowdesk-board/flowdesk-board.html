@@ -1,0 +1,55 @@
+﻿<section class="flowdesk-page" *ngIf="issues$ | async as issues">
+  <header class="page-head">
+    <div>
+      <h1>FlowDesk Board</h1>
+      <p>Track delivery work independently from CRM workflows.</p>
+    </div>
+    <div class="head-metrics">
+      <span>To Do: {{ countByStatus(issues, 'todo') }}</span>
+      <span>In Progress: {{ countByStatus(issues, 'in_progress') }}</span>
+      <span>In Review: {{ countByStatus(issues, 'in_review') }}</span>
+      <span>Done: {{ countByStatus(issues, 'done') }}</span>
+    </div>
+  </header>
+
+  <section class="quick-create">
+    <input [(ngModel)]="createTitle" placeholder="Quick issue title">
+    <input [(ngModel)]="createAssignee" placeholder="Assignee">
+    <select [(ngModel)]="createType">
+      <option value="story">Story</option>
+      <option value="task">Task</option>
+      <option value="bug">Bug</option>
+    </select>
+    <select [(ngModel)]="createPriority">
+      <option value="low">Low</option>
+      <option value="medium">Medium</option>
+      <option value="high">High</option>
+      <option value="critical">Critical</option>
+    </select>
+    <input type="number" min="0" [(ngModel)]="createPoints" placeholder="Pts">
+    <button type="button" (click)="createQuickIssue()">Create</button>
+  </section>
+
+  <section class="board-grid">
+    <article class="board-col" *ngFor="let col of columns">
+      <header>
+        <h3>{{ col.title }}</h3>
+        <span>{{ inColumn(issues, col.status).length }}</span>
+      </header>
+      <div class="col-body">
+        <div class="issue-card" *ngFor="let issue of inColumn(issues, col.status)">
+          <div class="issue-top">
+            <strong>{{ issue.key }}</strong>
+            <span class="priority" [attr.data-priority]="issue.priority">{{ issue.priority }}</span>
+          </div>
+          <h4>{{ issue.title }}</h4>
+          <p>{{ issue.assignee }} • {{ issue.points }} pts</p>
+          <div class="issue-actions">
+            <button type="button" *ngIf="prevStatus(issue.status) as prev" (click)="move(issue.id, prev)">←</button>
+            <button type="button" *ngIf="nextStatus(issue.status) as next" (click)="move(issue.id, next)">→</button>
+          </div>
+        </div>
+      </div>
+    </article>
+  </section>
+</section>

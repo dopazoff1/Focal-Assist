@@ -1,0 +1,296 @@
+.astra-tickets {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) 1fr;
+  gap: 0.85rem;
+}
+
+.queue,
+.details {
+  border: 1px solid #dbe5f3;
+  border-radius: 14px;
+  background: #ffffff;
+  min-height: 0;
+}
+
+.queue {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 0.55rem;
+  padding: 0.75rem;
+}
+
+.queue header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.queue h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.queue header button {
+  border: 1px solid #ccd8ea;
+  background: #f7faff;
+  color: #1e3a8a;
+  border-radius: 10px;
+  padding: 0.4rem 0.55rem;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.filters {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.filters input,
+.filters select,
+.details input,
+.details select,
+.details textarea {
+  border: 1px solid #d1dcee;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+  padding: 0.5rem 0.55rem;
+}
+
+.queue-list {
+  min-height: 0;
+  overflow: auto;
+  display: grid;
+  gap: 0.4rem;
+  padding-right: 0.15rem;
+}
+
+.ticket-item {
+  border: 1px solid #dbe6f4;
+  background: #f9fbff;
+  border-radius: 11px;
+  padding: 0.5rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.55rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ticket-item strong {
+  display: block;
+  font-size: 0.82rem;
+}
+
+.ticket-item small {
+  color: #64748b;
+  font-size: 0.75rem;
+  display: block;
+  margin-top: 0.14rem;
+}
+
+.ticket-item .state {
+  border: 1px solid #d3deee;
+  border-radius: 999px;
+  padding: 0.1rem 0.45rem;
+  background: #fff;
+  color: #607289;
+  font-size: 0.67rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 900;
+}
+
+.ticket-item.active {
+  border-color: #97b4ea;
+  background: #edf4ff;
+}
+
+.details {
+  padding: 0.85rem;
+  overflow: auto;
+  display: grid;
+  align-content: start;
+  gap: 0.65rem;
+}
+
+.details-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 0.7rem;
+}
+
+.details-head small {
+  color: #64748b;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 900;
+}
+
+.details-head h2 {
+  margin: 0.22rem 0 0;
+  font-size: 1.25rem;
+}
+
+.details-head p {
+  margin: 0.35rem 0 0;
+  color: #334155;
+  font-size: 0.86rem;
+}
+
+.state-pill {
+  border: 1px solid #d0ddee;
+  border-radius: 999px;
+  background: #f8fbff;
+  color: #3f4f64;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 900;
+}
+
+.panel {
+  border: 1px solid #dbe5f3;
+  border-radius: 12px;
+  background: #fbfdff;
+  padding: 0.7rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.panel h3 {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.desc {
+  margin: 0;
+  white-space: pre-wrap;
+  color: #1e293b;
+  line-height: 1.5;
+}
+
+.linked {
+  margin: 0;
+  color: #475569;
+  font-size: 0.8rem;
+}
+
+.form label {
+  display: grid;
+  gap: 0.28rem;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #64748b;
+  font-weight: 800;
+}
+
+.form textarea {
+  min-height: 95px;
+  resize: vertical;
+}
+
+.actions {
+  display: flex;
+  justify-content: end;
+}
+
+.actions .primary {
+  border: 1px solid #1e40af;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #2563eb, #1e40af);
+  color: #fff;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  padding: 0.45rem 0.7rem;
+  cursor: pointer;
+}
+
+.notes pre {
+  margin: 0;
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  color: #1f2937;
+}
+
+.error,
+.success,
+.empty,
+.loading,
+.empty-state {
+  border: 1px dashed #d7e2f0;
+  border-radius: 10px;
+  background: #fbfdff;
+  padding: 0.55rem 0.62rem;
+  margin: 0;
+}
+
+.error {
+  border-style: solid;
+  border-color: #f2c7c7;
+  background: #fff6f6;
+  color: #b42318;
+  font-weight: 700;
+}
+
+.success {
+  border-style: solid;
+  border-color: #b7e5ca;
+  background: #effcf3;
+  color: #166534;
+  font-weight: 700;
+}
+
+.loading {
+  min-height: 120px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.45rem;
+}
+
+.spin {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 3px solid #d8e3f5;
+  border-top-color: #2563eb;
+  animation: astraTicketSpin 0.9s linear infinite;
+}
+
+.empty-state h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.empty-state p {
+  margin: 0.35rem 0 0;
+  color: #475569;
+}
+
+@keyframes astraTicketSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1040px) {
+  .astra-tickets {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(220px, 320px) 1fr;
+  }
+}

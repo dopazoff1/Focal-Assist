@@ -1,0 +1,121 @@
+.route-transition-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  pointer-events: none;
+  opacity: 0;
+  background: color-mix(in srgb, var(--color-surface) 26%, transparent);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transition: opacity 0.2s ease;
+}
+
+.route-transition-layer.active {
+  opacity: 1;
+}
+
+.route-transition-spinner {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  border: var(--rule-fine) solid color-mix(in srgb, var(--color-rule) 90%, transparent);
+  border-top-color: var(--color-accent);
+  box-shadow: var(--shadow-card);
+  animation: route-spin 0.78s linear infinite;
+  background: color-mix(in srgb, var(--color-surface) 94%, transparent);
+}
+
+@keyframes route-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* V3: more SaaS-like navigation transition (top progress line instead of full-screen haze). */
+:host-context(body.v3-mode) .route-transition-layer {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+:host-context(body.v3-mode) .route-transition-spinner {
+  display: none;
+}
+
+:host-context(body.v3-mode) .route-transition-layer::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: -40%;
+  width: 40%;
+  height: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  box-shadow: none;
+  opacity: 0;
+}
+
+:host-context(body.v3-mode) .route-transition-layer.active::before {
+  opacity: 1;
+  animation: v3-route-progress 0.9s ease-in-out infinite;
+}
+
+@keyframes v3-route-progress {
+  from { transform: translateX(0); }
+  to { transform: translateX(360%); }
+}
+
+.account-block-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: var(--color-overlay);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.account-block-modal {
+  width: min(32.5rem, 96vw);
+  border-radius: var(--radius-card);
+  border: var(--rule-hair) solid color-mix(in srgb, var(--color-error) 36%, var(--color-rule));
+  border-top: var(--rule-fine) solid var(--color-error);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-popover);
+  padding: var(--space-sm);
+  display: grid;
+  gap: 0.7rem;
+}
+
+.account-block-modal h2 {
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--text-lg);
+}
+
+.account-block-modal p {
+  margin: 0;
+  color: var(--color-ink-2);
+}
+
+.account-block-modal button {
+  justify-self: end;
+  min-height: var(--control-height);
+  border: var(--rule-hair) solid var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  font: inherit;
+  font-weight: 700;
+  border-radius: var(--radius-button);
+  padding: 0 var(--space-sm);
+  cursor: pointer;
+}
+
+.account-block-modal button:hover {
+  background: var(--color-accent-hover);
+}

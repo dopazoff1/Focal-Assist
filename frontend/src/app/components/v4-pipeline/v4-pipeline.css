@@ -1,0 +1,116 @@
+.v4-board-wrap {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(220px, 1fr));
+  gap: 0.8rem;
+  min-height: 0;
+  overflow: auto;
+  padding-bottom: 0.2rem;
+}
+
+.v4-stage {
+  border: 1px solid var(--v4-border);
+  border-radius: 12px;
+  background: var(--v4-surface-2);
+  box-shadow: var(--v4-shadow-sm);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 280px;
+}
+
+.v4-stage-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.72rem 0.74rem;
+  border-bottom: 1px solid var(--v4-border-subtle);
+}
+
+.v4-stage-head h3 {
+  margin: 0;
+  font-size: 0.89rem;
+}
+
+.v4-stage-head small {
+  color: var(--v4-text-3);
+  font-size: 0.72rem;
+}
+
+.v4-stage-list {
+  padding: 0.66rem;
+  display: grid;
+  align-content: start;
+  gap: 0.6rem;
+}
+
+.v4-deal {
+  border: 1px solid var(--v4-border);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: var(--v4-shadow-sm);
+  padding: 0.55rem 0.58rem;
+  display: grid;
+  gap: 0.4rem;
+  transition: transform 180ms var(--v4-ease), box-shadow 180ms var(--v4-ease), border-color 180ms var(--v4-ease);
+}
+
+.v4-deal:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--v4-shadow-md);
+  border-color: color-mix(in srgb, var(--v4-primary) 24%, var(--v4-border));
+}
+
+.v4-deal strong {
+  font-size: 0.82rem;
+  line-height: 1.33;
+}
+
+.v4-deal p {
+  margin: 0;
+  color: var(--v4-text-2);
+  font-size: 0.78rem;
+}
+
+.v4-deal-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.42rem;
+  flex-wrap: wrap;
+}
+
+.v4-deal-meta span {
+  border-radius: 999px;
+  border: 1px solid var(--v4-border);
+  background: var(--v4-surface-2);
+  font-size: 0.67rem;
+  color: var(--v4-text-2);
+  padding: 0.14rem 0.42rem;
+  font-weight: 700;
+}
+
+.v4-deal-foot {
+  display: grid;
+  gap: 0.24rem;
+}
+
+.v4-deal-foot small {
+  color: var(--v4-text-3);
+  font-size: 0.68rem;
+}
+
+.v4-actions.compact .v4-btn {
+  font-size: 0.72rem;
+  padding: 0.38rem 0.54rem;
+}
+
+@media (max-width: 1450px) {
+  .v4-board-wrap {
+    grid-template-columns: repeat(3, minmax(240px, 1fr));
+  }
+}
+
+@media (max-width: 920px) {
+  .v4-board-wrap {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+}

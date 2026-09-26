@@ -1,0 +1,15 @@
+<app-header *ngIf="!isV2Route"></app-header>
+<router-outlet></router-outlet>
+
+<div class="route-transition-layer" [class.active]="isNavigating" aria-hidden="true">
+  <div class="route-transition-spinner"></div>
+</div>
+
+<div class="account-block-overlay" *ngIf="accountDeactivatedBlocked">
+  <section class="account-block-modal" role="alertdialog" aria-modal="true" aria-labelledby="account-block-title">
+    <h2 id="account-block-title">Account Deactivated</h2>
+    <p>Your account has been deactivated by an administrator. Access is now blocked.</p>
+    <p>Please click below to refresh and return to login.</p>
+    <button type="button" (click)="refreshAfterDeactivation()">Refresh Now</button>
+  </section>
+</div>

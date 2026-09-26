@@ -1,0 +1,25 @@
+<div class="platform-page">
+  <section class="panel hero">
+    <p class="kicker">Platform Architecture</p>
+    <h1>Built As One Unified Operating Layer, Not Disconnected Tools</h1>
+    <p>
+      Every function in Focal is designed to reduce context switching and operational drift. Agents execute
+      faster, supervisors monitor better, and leadership scales with confidence.
+    </p>
+    <a class="btn solid" routerLink="/marketing/pricing">See Commercial Options</a>
+  </section>
+
+  <section class="module-grid">
+    <article class="panel module-card" *ngFor="let module of modules">
+      <div class="module-head">
+        <span class="ico">{{ module.code }}</span>
+        <h2>{{ module.name }}</h2>
+      </div>
+      <p class="summary">{{ module.summary }}</p>
+      <ul>
+        <li *ngFor="let bullet of module.bullets">{{ bullet }}</li>
+      </ul>
+    </article>
+  </section>
+</div>
+

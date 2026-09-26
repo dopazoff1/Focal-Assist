@@ -1,0 +1,373 @@
+﻿.tree-builder-page {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 1rem;
+  padding: 1rem;
+  min-height: calc(100vh - 88px);
+}
+
+.tree-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: calc(100vh - 120px);
+  overflow: auto;
+  padding-right: 0.35rem;
+}
+
+.sidebar-card {
+  border: var(--border-size) var(--border-style) var(--panel-border);
+  background: var(--panel-1);
+  border-radius: var(--radius-card);
+  box-shadow: var(--panel-shadow);
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+h2,
+h3 {
+  margin: 0;
+}
+
+.muted {
+  margin: 0;
+  color: var(--text-3);
+  font-size: 0.9rem;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.86rem;
+  color: var(--text-2);
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: var(--border-size) var(--border-style) var(--panel-border);
+  background: var(--panel-2);
+  color: var(--text-1);
+  border-radius: var(--radius-button);
+  padding: 0.55rem 0.65rem;
+  font: inherit;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.field-help {
+  color: var(--text-3);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.node-editor-shell {
+  border: var(--border-size) var(--border-style) var(--panel-border);
+  border-radius: var(--radius-button);
+  overflow: hidden;
+  background: var(--panel-2);
+  margin: -0.25rem 0 0.15rem;
+}
+
+:host ::ng-deep .node-editor-shell .tox-tinymce,
+:host ::ng-deep .node-editor-shell .tox,
+:host ::ng-deep .node-editor-shell .tox-editor-container {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+:host ::ng-deep .node-editor-shell .tox-tinymce {
+  border: none;
+  border-radius: 0;
+}
+
+:host ::ng-deep .node-editor-shell .tox-editor-header,
+:host ::ng-deep .node-editor-shell .tox-statusbar {
+  border-color: var(--panel-border);
+}
+
+:host ::ng-deep .node-editor-shell .tox .tox-toolbar,
+:host ::ng-deep .node-editor-shell .tox .tox-toolbar__primary,
+:host ::ng-deep .node-editor-shell .tox .tox-menubar {
+  background: color-mix(in srgb, var(--panel-1) 94%, transparent);
+}
+
+.toolbar {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+button {
+  border: var(--border-size) var(--border-style) var(--panel-border);
+  border-radius: var(--radius-button);
+  background: var(--brand);
+  color: #fff;
+  padding: 0.5rem 0.8rem;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--brand-hover);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ghost {
+  background: transparent;
+  color: var(--text-1);
+}
+
+.ghost:hover {
+  background: color-mix(in srgb, var(--panel-2) 80%, transparent);
+}
+
+.danger {
+  background: var(--danger);
+}
+
+.choice-add {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.45rem;
+}
+
+.choice-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.choice-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border: var(--border-size) var(--border-style) var(--panel-border);
+  border-radius: var(--radius-button);
+  padding: 0.45rem 0.6rem;
+  background: color-mix(in srgb, var(--panel-2) 85%, transparent);
+}
+
+.choice-list small {
+  display: block;
+  color: var(--text-3);
+}
+
+.status {
+  margin: 0.1rem 0 0;
+  font-size: 0.84rem;
+  color: var(--text-2);
+}
+
+.error-details {
+  border: 1px solid color-mix(in srgb, var(--danger) 45%, var(--panel-border) 55%);
+  border-radius: var(--radius-button);
+  background: color-mix(in srgb, var(--danger) 8%, var(--panel-1) 92%);
+  padding: 0.45rem 0.55rem;
+}
+
+.error-details summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--danger);
+}
+
+.error-details pre {
+  margin: 0.5rem 0 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.75rem;
+  color: var(--text-1);
+}
+
+.tree-canvas-wrap {
+  border: var(--border-size) var(--border-style) var(--panel-border);
+  border-radius: var(--radius-card);
+  background: var(--panel-1);
+  box-shadow: var(--panel-shadow);
+  overflow: hidden;
+}
+
+.tree-canvas {
+  position: relative;
+  height: calc(100vh - 120px);
+  min-height: 620px;
+  overflow: hidden;
+  cursor: grab;
+}
+
+.tree-canvas.panning {
+  cursor: grabbing;
+}
+
+.canvas-grid {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background:
+    linear-gradient(color-mix(in srgb, var(--panel-border) 40%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--panel-border) 40%, transparent) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.canvas-world {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+}
+
+.links {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.link-path {
+  fill: none;
+  stroke: color-mix(in srgb, var(--brand) 70%, var(--panel-border) 30%);
+  stroke-width: 2.2;
+}
+
+.link-path.live {
+  stroke-dasharray: 8 6;
+  stroke-width: 2.5;
+}
+
+.node-card {
+  position: absolute;
+  width: 296px;
+  border: var(--border-size) var(--border-style) var(--panel-border);
+  border-radius: var(--radius-card);
+  background: var(--panel-2);
+  box-shadow: var(--panel-shadow);
+  padding: 0.65rem 0.8rem 0.75rem;
+  cursor: move;
+  user-select: none;
+}
+
+.node-card header {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  font-size: 0.84rem;
+}
+
+.node-card strong {
+  font-size: 0.92rem;
+}
+
+.node-card .tag,
+.node-card .meta {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  color: var(--text-3);
+}
+
+.map-choices {
+  margin-top: 0.6rem;
+  border-top: 1px solid color-mix(in srgb, var(--panel-border) 70%, transparent);
+  padding-top: 0.55rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.map-choice {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.45rem;
+  align-items: center;
+  font-size: 0.76rem;
+  background: color-mix(in srgb, var(--panel-1) 85%, transparent);
+  border: 1px solid color-mix(in srgb, var(--panel-border) 70%, transparent);
+  border-radius: 10px;
+  padding: 0.3rem 1rem 0.3rem 0.4rem;
+  position: relative;
+}
+
+.choice-label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--text-1);
+}
+
+.choice-target {
+  color: var(--text-3);
+  font-weight: 700;
+}
+
+.choice-wire {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--panel-border);
+  background: var(--brand);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  cursor: crosshair;
+  position: absolute;
+  right: -11px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+.choice-wire:hover {
+  background: var(--brand-hover);
+}
+
+.node-card.active {
+  outline: 2px solid color-mix(in srgb, var(--brand) 74%, #fff 26%);
+}
+
+.start-pill {
+  display: inline-block;
+  margin-top: 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand) 22%, #fff 78%);
+  color: var(--text-1);
+}
+
+@media (max-width: 1200px) {
+  .tree-builder-page {
+    grid-template-columns: 1fr;
+  }
+
+  .tree-sidebar {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .tree-canvas {
+    min-height: 540px;
+  }
+}

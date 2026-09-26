@@ -1,0 +1,82 @@
+<section class="astra-kb">
+  <aside class="kb-left">
+    <div class="kb-search">
+      <input type="search" [(ngModel)]="search" placeholder="Search Astra knowledge..." />
+      <button *ngIf="search" type="button" (click)="clearSearch()" aria-label="Clear search">×</button>
+    </div>
+
+    <div class="kb-loading" *ngIf="loading">
+      <span class="spin"></span>
+      <p>Loading articles...</p>
+    </div>
+
+    <div class="kb-groups" *ngIf="!loading">
+      <article class="group" *ngFor="let category of filteredCategories">
+        <h3>{{ category.name }}</h3>
+        <button
+          *ngFor="let article of filteredArticles(category.id)"
+          type="button"
+          class="article-item"
+          [class.active]="selectedArticle?.id === article.id"
+          (click)="selectArticle(article)"
+        >
+          {{ article.title }}
+        </button>
+      </article>
+      <p class="empty" *ngIf="filteredCategories.length === 0">No results for this search.</p>
+    </div>
+  </aside>
+
+  <section class="kb-main">
+    <p class="error" *ngIf="error">{{ error }}</p>
+
+    <div class="article-loading" *ngIf="loadingArticle">
+      <span></span><span></span><span></span>
+      <p>Loading article...</p>
+    </div>
+
+    <ng-container *ngIf="!loadingArticle && selectedArticle as article">
+      <header class="article-head">
+        <div>
+          <small>{{ article.categoryName }}</small>
+          <h2>{{ article.title }}</h2>
+        </div>
+        <div class="quality-actions">
+          <button type="button" class="like" [disabled]="savingFeedback" (click)="submitFeedback('LIKE')">Like</button>
+          <button type="button" class="dislike" [disabled]="savingFeedback" (click)="submitFeedback('DISLIKE')">Dislike</button>
+        </div>
+      </header>
+
+      <article class="article-body" [innerHTML]="article.content"></article>
+
+      <section class="feedback-box">
+        <h3>Feedback for this article</h3>
+        <textarea
+          [(ngModel)]="feedbackText"
+          placeholder="Share what should be improved, clarified, or updated for this SOP..."
+        ></textarea>
+        <div class="feedback-actions">
+          <button type="button" class="primary" [disabled]="savingFeedback" (click)="submitFeedback('LIKE')">Save as positive</button>
+          <button type="button" class="secondary" [disabled]="savingFeedback" (click)="submitFeedback('DISLIKE')">Save as negative</button>
+        </div>
+      </section>
+
+      <section class="feedback-list">
+        <h3>Recent quality signals</h3>
+        <article *ngFor="let item of articleFeedback">
+          <div class="row-head">
+            <span class="badge" [class.neg]="item.sentiment === 'DISLIKE'">{{ item.sentiment }}</span>
+            <small>{{ item.viewerName || item.viewerEmail || 'Anonymous' }} · {{ item.createdAt | date:'medium' }}</small>
+          </div>
+          <p>{{ item.feedbackText || 'No text feedback provided.' }}</p>
+        </article>
+        <p class="empty" *ngIf="articleFeedback.length === 0">No feedback yet.</p>
+      </section>
+    </ng-container>
+
+    <section class="empty-main" *ngIf="!loadingArticle && !selectedArticle">
+      <h2>Astra Knowledge Base</h2>
+      <p>Select an article from the left panel.</p>
+    </section>
+  </section>
+</section>

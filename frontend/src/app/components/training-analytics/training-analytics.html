@@ -1,0 +1,139 @@
+<section class="analytics">
+  <header class="head">
+    <div class="title">
+      <a class="back" [routerLink]="['../']">Academy</a>
+      <a class="back ghost" [routerLink]="['../studio']">Studio</a>
+      <div>
+        <h1>Analytics</h1>
+        <p class="muted">Completion, overdue, and progress per course.</p>
+      </div>
+    </div>
+  </header>
+
+  <section class="panel controls">
+    <div class="row">
+      <label>
+        <span>Course</span>
+        <select [(ngModel)]="selectedCourseId" (change)="onCourseChange()">
+          <option [ngValue]="null">Select a course…</option>
+          <option *ngFor="let c of (courses$ | async) || []" [ngValue]="c.id">#{{ c.id }} - {{ c.title }}</option>
+        </select>
+      </label>
+      <div class="agent-status" *ngIf="agentsLoading">Loading agents…</div>
+      <div class="agent-status" *ngIf="agentsNotice && !agentsLoading">{{ agentsNotice }}</div>
+      <div class="agent-status error" *ngIf="agentsError">{{ agentsError }}</div>
+    </div>
+
+    <div class="metrics" *ngIf="metrics$ | async as m">
+      <div class="chip">
+        <span class="k">Assigned</span>
+        <strong>{{ m.assigned }}</strong>
+      </div>
+      <div class="chip">
+        <span class="k">Completed</span>
+        <strong>{{ m.completed }}</strong>
+      </div>
+      <div class="chip">
+        <span class="k">Overdue</span>
+        <strong>{{ m.overdue }}</strong>
+      </div>
+      <div class="chip">
+        <span class="k">Avg progress</span>
+        <strong>{{ m.avgProgress }}%</strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel table">
+    <header class="table-head">
+      <strong>Assigned agents</strong>
+      <div class="table-actions" *ngIf="rows$ | async as rows">
+        <button type="button" class="btn ghost" [disabled]="!selectedCourseId || rows.length === 0" (click)="exportCsv(rows, getCourseById(selectedCourseId))">
+          Export CSV
+        </button>
+        <button type="button" class="btn ghost" [disabled]="!selectedCourseId || rows.length === 0" (click)="exportStepsCsv(rows, getCourseById(selectedCourseId))">
+          Export steps
+        </button>
+      </div>
+    </header>
+
+    <div class="empty" *ngIf="!selectedCourseId">
+      <strong>Select a course to view analytics.</strong>
+      <span>Assignments come from the Training Studio.</span>
+    </div>
+
+    <div class="grid" *ngIf="selectedCourseId && (rows$ | async) as rows">
+      <div class="empty" *ngIf="rows.length === 0">
+        <strong>No assignments for this course.</strong>
+        <span>Go to Studio and assign the course to agents.</span>
+        <a class="btn" [routerLink]="['../studio']">Open Studio</a>
+      </div>
+
+      <table *ngIf="rows.length > 0">
+        <thead>
+          <tr>
+            <th>Agent</th>
+            <th>Status</th>
+            <th>Progress</th>
+            <th>Time</th>
+            <th>Due</th>
+            <th>Last seen</th>
+            <th>Completed</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let r of rows">
+            <tr [class.expanded]="expandedUserId === r.userId">
+              <td class="agent">
+                <strong>{{ r.name }}</strong>
+                <small class="muted">{{ r.email || ('#' + r.userId) }}</small>
+              </td>
+              <td>
+                <span class="pill" [attr.data-state]="r.state">{{ r.state }}</span>
+                <span class="pill minor" *ngIf="!r.mandatory">Optional</span>
+              </td>
+              <td>
+                <div class="pbar">
+                  <span [style.width.%]="r.progressPercent"></span>
+                </div>
+                <small class="muted">{{ r.progressPercent }}%</small>
+              </td>
+              <td><small class="muted">{{ formatDuration(r.timeSpentMs) }}</small></td>
+              <td><small class="muted">{{ r.dueAt ? (r.dueAt | date:'mediumDate') : '—' }}</small></td>
+              <td><small class="muted">{{ r.lastSeenAt ? (r.lastSeenAt | date:'short') : '—' }}</small></td>
+              <td><small class="muted">{{ r.completedAt ? (r.completedAt | date:'short') : '—' }}</small></td>
+              <td class="actions">
+                <button type="button" class="mini" (click)="toggleDetails(r.userId)">{{ expandedUserId === r.userId ? 'Hide' : 'Details' }}</button>
+              </td>
+            </tr>
+
+            <tr class="details" *ngIf="expandedUserId === r.userId && (expandedSteps$ | async) as steps">
+              <td [attr.colspan]="8">
+                <div class="details-card">
+                  <header class="details-head">
+                    <strong>Time per step</strong>
+                    <small class="muted">Total: {{ formatDuration(r.timeSpentMs) }}</small>
+                  </header>
+                  <div class="steps">
+                    <div class="step" *ngFor="let s of steps">
+                      <span class="step-type" [attr.data-type]="s.type">{{ s.type }}</span>
+                      <span class="step-txt">
+                        <strong>{{ s.lessonTitle }}</strong>
+                        <small class="muted">{{ s.moduleTitle }} &bull; #{{ s.lessonId }}</small>
+                      </span>
+                      <span class="step-meta">
+                        <span class="pill minor" *ngIf="s.completed">Done</span>
+                        <span class="muted">{{ formatDuration(s.timeSpentMs) }}</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>

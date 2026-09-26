@@ -1,0 +1,159 @@
+<section class="studio">
+  <header class="studio-head">
+    <div class="title">
+      <a class="back" [routerLink]="['../']">Academy</a>
+      <h1>Training Studio</h1>
+      <p>Create courses, publish them, and assign them to agents.</p>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn" (click)="createCourse()">New course</button>
+      <a class="btn ghost" [routerLink]="['../analytics']">Analytics</a>
+    </div>
+  </header>
+
+  <section class="filters">
+    <input type="search" [(ngModel)]="search" (ngModelChange)="bump()" placeholder="Search courses..." autocomplete="off" />
+    <select [(ngModel)]="status" (ngModelChange)="bump()">
+      <option value="ALL">All statuses</option>
+      <option value="PUBLISHED">Published</option>
+      <option value="DRAFT">Draft</option>
+      <option value="ARCHIVED">Archived</option>
+    </select>
+    <button type="button" class="ghost" *ngIf="search" (click)="search = ''; bump()">Clear</button>
+  </section>
+
+  <section class="studio-grid">
+    <article class="panel">
+      <header class="panel-head">
+        <strong>Courses</strong>
+        <small>Draft, publish, archive, duplicate.</small>
+      </header>
+
+      <div class="course-list" *ngIf="courses$ | async as courses">
+        <div class="empty" *ngIf="courses.length === 0">
+          <strong>No courses yet.</strong>
+          <span>Create your first training course.</span>
+        </div>
+
+        <div
+          class="course-row"
+          *ngFor="let c of courses"
+          [class.selected]="selectedCourseId === c.id"
+        >
+          <button type="button" class="course-main" (click)="selectedCourseId = c.id">
+            <div class="row-top">
+              <strong>{{ c.title }}</strong>
+              <span class="pill" [attr.data-status]="c.status">{{ c.status }}</span>
+            </div>
+            <div class="row-sub">
+              <span class="muted">{{ c.subtitle || c.description || 'No description yet.' }}</span>
+            </div>
+            <div class="row-meta">
+              <span class="tag" *ngFor="let t of c.tags.slice(0, 3)">{{ t }}</span>
+              <span class="tag muted" *ngIf="c.tags.length > 3">+{{ c.tags.length - 3 }}</span>
+              <span class="muted">Updated {{ c.updatedAt | date:'mediumDate' }}</span>
+            </div>
+          </button>
+
+          <div class="row-actions">
+            <a class="mini" [routerLink]="['./course', c.id]">Edit</a>
+            <button type="button" class="mini" (click)="duplicate(c.id)">Duplicate</button>
+            <button type="button" class="mini" *ngIf="c.status !== 'PUBLISHED'" (click)="publish(c.id)">Publish</button>
+            <button type="button" class="mini" *ngIf="c.status === 'PUBLISHED'" (click)="unpublish(c.id)">Unpublish</button>
+            <button type="button" class="mini" (click)="archive(c.id)">Archive</button>
+            <button type="button" class="mini danger" (click)="delete(c.id)">Delete</button>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="panel">
+      <header class="panel-head">
+        <strong>Assignments</strong>
+        <small>Pick a course, select agents, set due date.</small>
+      </header>
+
+      <div class="assign-body">
+        <div class="assign-pick">
+          <label>
+            <span>Course</span>
+            <select [(ngModel)]="selectedCourseId">
+              <option [ngValue]="null">Select a course…</option>
+              <option *ngFor="let c of (courses$ | async) || []" [ngValue]="c.id">
+                #{{ c.id }} - {{ c.title }}
+              </option>
+            </select>
+          </label>
+
+          <label>
+            <span>Due</span>
+            <input type="date" [(ngModel)]="dueAt" />
+          </label>
+
+          <label class="toggle">
+            <input type="checkbox" [(ngModel)]="mandatory" />
+            <span>Mandatory</span>
+          </label>
+        </div>
+
+        <div class="agents">
+          <div class="agents-head">
+            <strong>Agents</strong>
+            <span class="muted" *ngIf="agentsLoading">Loading…</span>
+            <span class="muted" *ngIf="!agentsLoading && agents.length">Selected {{ selectedAgentIds.size }}</span>
+          </div>
+
+          <div class="agents-note" *ngIf="agentsNotice">{{ agentsNotice }}</div>
+          <div class="agents-error" *ngIf="agentsError">{{ agentsError }}</div>
+
+          <div class="agents-tools">
+            <input type="search" [(ngModel)]="agentSearch" placeholder="Search agents..." autocomplete="off" />
+            <button type="button" class="ghost" (click)="selectAllAgents()" [disabled]="agents.length === 0">Select all</button>
+            <button type="button" class="ghost" (click)="clearAgents()" [disabled]="selectedAgentIds.size === 0">Clear</button>
+          </div>
+
+          <div class="agents-list">
+            <label class="agent" *ngFor="let a of filteredAgents()">
+              <input type="checkbox" [checked]="selectedAgentIds.has(a.id)" (change)="toggleAgent(a.id)" />
+              <span class="agent-name">{{ a.firstName }} {{ a.lastName }}</span>
+              <span class="agent-email">{{ a.email }}</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="assign-actions">
+          <button type="button" class="btn" (click)="assignSelected()" [disabled]="!selectedCourseId || selectedAgentIds.size === 0">
+            Assign selected
+          </button>
+          <a class="btn ghost" *ngIf="selectedCourseId" [routerLink]="['./course', selectedCourseId]">Open editor</a>
+        </div>
+
+        <div class="current" *ngIf="selectedCourseId">
+          <div class="current-head">
+            <strong>Currently assigned</strong>
+            <small>Remove assignments if needed.</small>
+          </div>
+
+          <div class="current-list" *ngIf="assignments$ | async as asg">
+            <div class="empty" *ngIf="assignmentsForSelected(asg).length === 0">
+              <strong>No assignments for this course.</strong>
+              <span>Select agents above and click Assign.</span>
+            </div>
+
+            <div class="current-row" *ngFor="let a of assignmentsForSelected(asg)">
+              <div class="current-meta">
+                <strong>{{ nameOf(a.userId) }}</strong>
+                <span class="muted">
+                  {{ a.mandatory ? 'Mandatory' : 'Optional' }}
+                  <ng-container *ngIf="a.dueAt"> • Due {{ a.dueAt | date:'mediumDate' }}</ng-container>
+                </span>
+              </div>
+              <button type="button" class="mini danger" (click)="unassign(a.courseId, a.userId)">Remove</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+  </section>
+</section>

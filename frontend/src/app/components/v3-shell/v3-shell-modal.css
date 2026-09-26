@@ -1,0 +1,235 @@
+/* Focal operational design system. See design.md. */
+
+.v3-avatar-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: var(--space-sm);
+  background: var(--color-overlay);
+}
+
+.v3-avatar-modal {
+  width: min(100%, 32rem);
+  max-height: calc(100svh - var(--space-lg));
+  overflow-y: auto;
+  border: var(--rule-hair) solid var(--color-rule-2);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-popover);
+}
+
+.v3-avatar-modal > header,
+.v3-avatar-modal > footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+}
+
+.v3-avatar-modal > header {
+  justify-content: space-between;
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+  background: var(--color-surface-raised);
+}
+
+.v3-avatar-modal > header div {
+  display: grid;
+  gap: var(--space-3xs);
+}
+
+.v3-avatar-modal > header small {
+  color: var(--color-emerald);
+  font-family: var(--font-body);
+  font-size: var(--text-2xs);
+  font-weight: var(--strong-weight);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.v3-avatar-modal h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: var(--tracking-display);
+  line-height: 1.2;
+}
+
+.v3-avatar-modal .close {
+  display: grid;
+  width: var(--icon-button-size);
+  height: var(--icon-button-size);
+  place-items: center;
+  padding: 0;
+  border: var(--rule-hair) solid var(--color-rule);
+  border-radius: var(--radius-input);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-micro) var(--ease-out),
+    color var(--dur-micro) var(--ease-out),
+    transform var(--dur-micro) var(--ease-out);
+}
+
+.v3-avatar-modal .close:hover {
+  background: var(--color-paper-2);
+  color: var(--color-ink);
+}
+
+.v3-avatar-modal .close:focus-visible,
+.v3-avatar-controls button:focus-visible,
+.v3-avatar-modal > footer button:focus-visible {
+  outline: var(--rule-fine) solid var(--color-focus);
+  outline-offset: var(--space-3xs);
+}
+
+.v3-avatar-modal .close:active {
+  transform: translateY(1px);
+}
+
+.v3-avatar-crop-area {
+  position: relative;
+  width: min(calc(100% - var(--space-lg)), 20rem);
+  aspect-ratio: 1;
+  margin: var(--space-sm) auto;
+  overflow: hidden;
+  border: var(--rule-hair) solid var(--color-rule);
+  border-radius: var(--radius-card);
+  background: var(--color-paper-2);
+  cursor: grab;
+  touch-action: none;
+}
+
+.v3-avatar-crop-area:active {
+  cursor: grabbing;
+}
+
+.v3-avatar-crop-area canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.v3-avatar-crop-area .placeholder {
+  background: var(--color-paper-2);
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  gap: var(--space-2xs);
+  padding: var(--space-md);
+  color: var(--color-muted);
+  text-align: center;
+  pointer-events: none;
+}
+
+.v3-avatar-crop-area .placeholder strong {
+  color: var(--color-ink-2);
+  font-size: var(--text-sm);
+}
+
+.v3-avatar-crop-area .placeholder p {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+.v3-avatar-controls {
+  display: grid;
+  grid-template-columns: auto minmax(8rem, 1fr) auto;
+  gap: var(--space-xs);
+  align-items: center;
+  padding: var(--space-sm);
+  border-top: var(--rule-hair) solid var(--color-rule);
+  background: var(--color-paper-2);
+}
+
+.v3-avatar-controls button,
+.v3-avatar-modal > footer button {
+  display: flex;
+  min-height: var(--control-height);
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2xs);
+  padding: 0 var(--space-xs);
+  border: var(--rule-hair) solid var(--color-rule-2);
+  border-radius: var(--radius-button);
+  background: var(--color-surface);
+  color: var(--color-ink-2);
+  cursor: pointer;
+  font-size: var(--text-xs);
+  font-weight: var(--strong-weight);
+  line-height: 1;
+  white-space: nowrap;
+  transition:
+    background-color var(--dur-micro) var(--ease-out),
+    border-color var(--dur-micro) var(--ease-out),
+    color var(--dur-micro) var(--ease-out),
+    transform var(--dur-micro) var(--ease-out);
+}
+
+.v3-avatar-controls button:hover,
+.v3-avatar-modal > footer .ghost:hover {
+  background: var(--color-paper-2);
+  color: var(--color-ink);
+}
+
+.v3-avatar-controls button:active,
+.v3-avatar-modal > footer button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.v3-avatar-controls label {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-2xs);
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--strong-weight);
+}
+
+.v3-avatar-controls input[type="range"] {
+  width: 100%;
+  accent-color: var(--color-accent);
+}
+
+.v3-rotate-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+
+.v3-rotate-actions button {
+  width: var(--icon-button-size);
+  padding: 0;
+}
+
+.v3-avatar-modal > footer {
+  justify-content: flex-end;
+  border-top: var(--rule-hair) solid var(--color-rule);
+}
+
+.v3-avatar-modal > footer .primary {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+.v3-avatar-modal > footer .primary:hover:not(:disabled) {
+  border-color: var(--color-accent-hover);
+  background: var(--color-accent-hover);
+}
+
+.v3-avatar-modal > footer .ghost:hover:not(:disabled) {
+  border-color: var(--color-error);
+  background: var(--color-error-soft);
+  color: var(--color-error);
+}
+
+.v3-avatar-modal > footer button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}

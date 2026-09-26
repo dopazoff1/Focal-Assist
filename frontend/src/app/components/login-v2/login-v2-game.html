@@ -1,0 +1,58 @@
+<section class="games-overlay" aria-label="Focal games">
+  <ng-container *ngIf="!selectedGame">
+    <div class="games-menu">
+      <header class="games-menu-header">
+        <div class="games-brand"><span class="games-mark">F+</span><span><strong>Focal Games</strong><small>After-hours / signal lab</small></span></div>
+        <button class="game-exit" type="button" (click)="close()" title="Close games"><span>Close</span><svg lucideX [size]="16" aria-hidden="true"></svg></button>
+      </header>
+      <main class="games-menu-main">
+        <div class="games-menu-intro"><span class="games-kicker">PLAYBOOK / 04 MODES</span><h1>Choose your signal.</h1><p>Four different ways to leave the queue for a minute.</p></div>
+        <div class="games-grid">
+          <button class="game-card game-card-cars" type="button" (click)="launchGame('cars')"><span class="game-card-no">01</span><span class="game-card-icon"><svg lucideCarFront [size]="25" aria-hidden="true"></svg></span><strong>Retro City Drive</strong><small>Free-roam streets, traffic, pedestrians.</small><span class="game-card-meta">WORLD / DRIVE</span><svg class="game-card-arrow" lucideChevronRight [size]="18" aria-hidden="true"></svg></button>
+          <button class="game-card game-card-subway" type="button" (click)="launchGame('subway')"><span class="game-card-no">02</span><span class="game-card-icon"><svg lucideTrainFront [size]="25" aria-hidden="true"></svg></span><strong>Subway Shift</strong><small>Switch lanes, clear barriers, chase the line.</small><span class="game-card-meta">RUN / REACT</span><svg class="game-card-arrow" lucideChevronRight [size]="18" aria-hidden="true"></svg></button>
+          <button class="game-card game-card-space" type="button" (click)="launchGame('spaceship')"><span class="game-card-no">03</span><span class="game-card-icon"><svg lucideRocket [size]="25" aria-hidden="true"></svg></span><strong>Orbit Courier</strong><small>Thread the field and bring the signals back.</small><span class="game-card-meta">SPACE / DODGE</span><svg class="game-card-arrow" lucideChevronRight [size]="18" aria-hidden="true"></svg></button>
+          <button class="game-card game-card-aki" type="button" (click)="launchGame('akinator')"><span class="game-card-no">04</span><span class="game-card-icon"><svg lucideSparkles [size]="25" aria-hidden="true"></svg></span><strong>Akinator</strong><small>Think of someone. Let the signal infer.</small><span class="game-card-meta">QUESTIONS / AI</span><svg class="game-card-arrow" lucideChevronRight [size]="18" aria-hidden="true"></svg></button>
+        </div>
+      </main>
+      <footer class="games-menu-footer"><span>FOCAL / PLAYBOOK</span><span>Signal key: kiwikiwikiwikiwi</span></footer>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="selectedGame && selectedGame !== 'akinator'">
+    <section class="login-v2-game" [attr.aria-label]="selectedGameTitle">
+      <canvas #canvas aria-hidden="true"></canvas><div class="game-grid" aria-hidden="true"></div>
+      <header class="game-header">
+        <div class="game-brand"><span class="game-mark">F+</span><span><strong>{{ selectedGameTitle }}</strong><small>{{ selectedGameSubtitle }}</small></span></div>
+        <div class="game-stats"><span>Rep <strong>{{ score }}</strong></span><span>Best <strong>{{ best }}</strong></span></div>
+        <button class="game-back" type="button" (click)="backToMenu()" title="Back to games"><svg lucideArrowLeft [size]="15" aria-hidden="true"></svg><span>Games</span></button>
+        <button class="game-exit" type="button" (click)="close()" title="Exit game"><span>Exit</span><svg lucideX [size]="16" aria-hidden="true"></svg></button>
+      </header>
+      <div class="game-intro" *ngIf="selectedGame === 'cars'"><p>Run the district. Bring the signals home.</p><span>WASD / arrows drive / Space brakes / mouse steers</span></div>
+      <div class="game-intro" *ngIf="selectedGame === 'subway'"><p>Stay on the line.</p><span>A / D switch lanes / Space jumps barriers</span></div>
+      <div class="game-intro" *ngIf="selectedGame === 'spaceship'"><p>Carry the signal through.</p><span>WASD / arrows move / mouse flies</span></div>
+      <div class="game-reticle" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <footer class="game-footer"><span>FOCAL / PLAYBOOK / {{ selectedGame }}</span><span>Collect signals / Esc to games</span></footer>
+    </section>
+  </ng-container>
+
+  <ng-container *ngIf="selectedGame === 'akinator'">
+    <section class="akinator-game" aria-label="Focal Akinator">
+      <header class="games-menu-header">
+        <div class="games-brand"><span class="games-mark">F+</span><span><strong>Akinator</strong><small>Signal inference / {{ akinatorOffline ? 'local mode' : 'live link' }}</small></span></div>
+        <div class="aki-header-actions"><button class="game-back" type="button" (click)="backToMenu()" title="Back to games"><svg lucideArrowLeft [size]="15" aria-hidden="true"></svg><span>Games</span></button><button class="game-exit" type="button" (click)="close()" title="Exit games"><span>Exit</span><svg lucideX [size]="16" aria-hidden="true"></svg></button></div>
+      </header>
+      <main class="aki-main">
+        <div class="aki-orbit" aria-hidden="true"><span></span><i></i><i></i><i></i></div>
+        <div class="aki-copy"><span class="games-kicker">04 / QUESTIONS</span><h1>Who is on your mind?</h1><p>Keep the answer in your head. The signal will narrow the field.</p></div>
+        <div class="aki-panel">
+          <div class="aki-progress"><span>CONFIDENCE</span><div><i [style.width.%]="akinatorProgress"></i></div><strong>{{ akinatorProgress }}%</strong></div>
+          <div class="aki-question" *ngIf="!akinatorGuess; else akiGuess"><span>QUESTION {{ fallbackStep + 1 }}</span><h2>{{ akinatorBusy ? 'Connecting to the signal...' : akinatorQuestion }}</h2><div class="aki-answers"><button *ngFor="let answer of akinatorAnswers; let index = index" type="button" [disabled]="akinatorBusy" (click)="answerAkinator(index)">{{ answer }}</button></div></div>
+          <ng-template #akiGuess><div class="aki-guess"><span>SIGNAL MATCH</span><h2>{{ akinatorGuess?.name }}</h2><p>{{ akinatorGuess?.description }}</p><button class="aki-restart" type="button" (click)="restartAkinator()" [disabled]="akinatorBusy">Ask again</button></div></ng-template>
+          <p class="aki-error" *ngIf="akinatorError">{{ akinatorError }}</p>
+          <button class="aki-back" type="button" *ngIf="akinatorSession && !akinatorOffline && !akinatorGuess" (click)="backAkinator()" [disabled]="akinatorBusy">Back one question</button>
+        </div>
+      </main>
+      <footer class="games-menu-footer"><span>FOCAL / SIGNAL INFERENCE</span><span>Answers stay in this session</span></footer>
+    </section>
+  </ng-container>
+</section>

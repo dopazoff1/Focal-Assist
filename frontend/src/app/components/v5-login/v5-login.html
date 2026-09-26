@@ -1,0 +1,101 @@
+<div class="login-v5-page">
+  <div class="login-v5-bg" aria-hidden="true">
+    <span class="blob blob-a"></span>
+    <span class="blob blob-b"></span>
+    <span class="mesh"></span>
+  </div>
+
+  <section class="login-v5-shell">
+    <aside class="login-v5-showcase">
+      <p class="kicker">Focal V5</p>
+      <h2>Run support operations with speed and control.</h2>
+      <p>
+        Unified CRM, process assistant, knowledge base, and delivery workflows in a single workspace.
+      </p>
+      <div class="showcase-metrics" aria-hidden="true">
+        <article>
+          <strong>+21%</strong>
+          <span>Faster first response</span>
+        </article>
+        <article>
+          <strong>-34%</strong>
+          <span>Escalation handling time</span>
+        </article>
+      </div>
+      <ul>
+        <li>Operational dashboards and queues</li>
+        <li>Role-based access and secure workflows</li>
+        <li>Built for response speed and quality</li>
+      </ul>
+    </aside>
+
+    <div class="login-v5-card">
+      <div class="logo-wrap">
+        <img src="logo.jpg" alt="Focal Logo" class="logo" />
+      </div>
+      <p class="form-kicker">Secure Sign In</p>
+      <h1>Welcome back</h1>
+      <p class="subtitle">Access the V5 workspace.</p>
+
+      <form (ngSubmit)="login()" #loginForm="ngForm" class="form">
+        <label class="field">
+          <span>Username</span>
+          <input
+            type="text"
+            name="email"
+            placeholder="Enter your username"
+            [(ngModel)]="email"
+            #emailInput="ngModel"
+            autocomplete="username"
+            [disabled]="isLoggingIn"
+            required
+          />
+        </label>
+        <div *ngIf="emailInput.invalid && emailInput.touched" class="error">Please enter your username.</div>
+
+        <label class="field">
+          <span>Password</span>
+          <div class="password-row">
+            <input
+              [type]="passwordVisible ? 'text' : 'password'"
+              name="password"
+              placeholder="Enter your password"
+              [(ngModel)]="password"
+              #passwordInput="ngModel"
+              autocomplete="current-password"
+              [disabled]="isLoggingIn"
+              required
+            />
+            <button
+              type="button"
+              class="password-toggle"
+              (click)="togglePasswordVisibility()"
+              [disabled]="isLoggingIn"
+              [attr.aria-label]="passwordVisible ? 'Hide password' : 'Show password'"
+            >
+              {{ passwordVisible ? 'Hide' : 'Show' }}
+            </button>
+          </div>
+        </label>
+        <div *ngIf="passwordInput.invalid && passwordInput.touched" class="error">Please enter your password.</div>
+
+        <button type="submit" class="submit" [disabled]="loginForm.invalid || isLoggingIn">
+          {{ isLoggingIn ? 'Signing in...' : 'Enter V5' }}
+        </button>
+
+        <div class="loading" *ngIf="isLoggingIn" aria-live="polite">
+          <div class="loading-head">
+            <span class="spinner" aria-hidden="true"></span>
+            <strong>Preparing your workspace...</strong>
+          </div>
+          <div class="progress"><span></span></div>
+          <p>This takes around 5 seconds.</p>
+        </div>
+
+        <div class="error box" *ngIf="loginError">{{ loginError }}</div>
+      </form>
+    </div>
+  </section>
+</div>
+
+

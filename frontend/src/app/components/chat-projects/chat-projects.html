@@ -1,0 +1,365 @@
+<section class="chat-projects-shell">
+  <aside class="projects-panel">
+    <div class="panel-head">
+      <p>Project-based live chat</p>
+      <h2>Chat Projects</h2>
+    </div>
+
+    <div class="search-row">
+      <input [(ngModel)]="search" (keyup.enter)="reload()" placeholder="Search projects..." />
+      <button type="button" (click)="reload()">Go</button>
+    </div>
+
+    <form class="create-card" (ngSubmit)="createProject()">
+      <strong>New project</strong>
+      <input name="projectName" [(ngModel)]="newProject.name" placeholder="Project name" />
+      <textarea name="projectDesc" [(ngModel)]="newProject.description" placeholder="Short description"></textarea>
+      <button type="submit" [disabled]="saving || !newProject.name">Create</button>
+    </form>
+
+    <div class="project-list" *ngIf="!loading; else loadingProjects">
+      <button
+        type="button"
+        class="project-item"
+        *ngFor="let project of projects"
+        [class.active]="project.id === selected?.id"
+        (click)="selectProject(project)">
+        <span class="project-status" [class]="project.status.toLowerCase()"></span>
+        <span>
+          <strong>{{ project.name }}</strong>
+          <small>/chat/{{ project.slug }}</small>
+        </span>
+      </button>
+    </div>
+
+    <ng-template #loadingProjects>
+      <div class="loading-card">
+        <span></span><span></span><span></span>
+      </div>
+    </ng-template>
+  </aside>
+
+  <main class="project-workspace" *ngIf="selected; else emptyState">
+    <div class="workspace-head">
+      <div>
+        <p>{{ selected.status }} project</p>
+        <h1>{{ selected.name }}</h1>
+        <small>{{ selected.description || 'No description yet.' }}</small>
+      </div>
+      <div class="head-actions">
+        <button type="button" (click)="activateProject()">Activate</button>
+        <button type="button" (click)="duplicateProject()">Duplicate</button>
+        <button type="button" class="ghost" (click)="archiveProject()">Archive</button>
+        <button type="button" class="danger" (click)="deleteProject()">Delete</button>
+      </div>
+    </div>
+
+    <div class="toast" *ngIf="message">{{ message }}</div>
+
+    <nav class="project-tabs">
+      <button type="button" [class.active]="tab === 'overview'" (click)="tab = 'overview'">Overview</button>
+      <button type="button" [class.active]="tab === 'workflow'" (click)="tab = 'workflow'">Workflow Builder</button>
+      <button type="button" [class.active]="tab === 'queues'" (click)="tab = 'queues'">Queues</button>
+      <button type="button" [class.active]="tab === 'api'" (click)="tab = 'api'">API & Embed</button>
+    </nav>
+
+    <section class="tab-panel overview" *ngIf="tab === 'overview'">
+      <div class="settings-grid">
+        <label>
+          Project name
+          <input [(ngModel)]="selected.name" />
+        </label>
+        <label>
+          Public slug
+          <input [(ngModel)]="selected.slug" />
+        </label>
+        <label>
+          Brand color
+          <input type="color" [(ngModel)]="selected.brandColor" />
+        </label>
+        <label>
+          Public access
+          <select [(ngModel)]="selected.publicEnabled">
+            <option [ngValue]="true">Enabled</option>
+            <option [ngValue]="false">Disabled</option>
+          </select>
+        </label>
+      </div>
+      <label class="wide-field">
+        Description
+        <textarea [(ngModel)]="selected.description"></textarea>
+      </label>
+      <label class="wide-field">
+        Welcome message
+        <textarea [(ngModel)]="selected.welcomeMessage"></textarea>
+      </label>
+      <div class="public-url">
+        <span>Public URL</span>
+        <code>{{ publicChatUrl(selected) }}</code>
+        <button type="button" (click)="openPublicChat()">Open</button>
+        <button type="button" (click)="copy(publicChatUrl(selected))">Copy</button>
+      </div>
+      <button type="button" class="primary" (click)="saveProject()" [disabled]="saving">Save project</button>
+    </section>
+
+    <section class="tab-panel workflow" *ngIf="tab === 'workflow'">
+      <div class="builder-toolbar">
+        <div class="node-buttons">
+          <button type="button" *ngFor="let type of nodeTypes" (click)="addNode(type.type)">{{ type.label }}</button>
+        </div>
+        <div class="builder-actions">
+          <button type="button" (click)="zoom(-.1)">-</button>
+          <span>{{ (scale * 100) | number: '1.0-0' }}%</span>
+          <button type="button" (click)="zoom(.1)">+</button>
+          <button type="button" class="primary" (click)="saveWorkflow()">Save draft</button>
+          <button type="button" class="publish" (click)="publishWorkflow()">Publish</button>
+          <button type="button" class="ghost" *ngIf="wireFrom" (click)="cancelWire()">Cancel link</button>
+        </div>
+      </div>
+      <p class="wire-hint" *ngIf="wireFrom">
+        Linking <strong>{{ wireFrom.branch.label }}</strong> from <strong>{{ wireFrom.node.title }}</strong>. Click the target node.
+      </p>
+
+      <div class="builder-layout">
+        <div class="tree-canvas-wrap">
+          <div
+            class="tree-canvas"
+            [class.panning]="isPanningCanvas"
+            (mousedown)="onCanvasMouseDown($event)"
+            (mousemove)="onCanvasMouseMove($event)"
+            (mouseup)="onCanvasMouseUp()"
+            (mouseleave)="onCanvasMouseUp()"
+            (wheel)="onCanvasWheel($event)"
+          >
+            <div
+              class="canvas-grid"
+              [style.background-size]="getCanvasBackgroundSize()"
+              [style.background-position]="getCanvasBackgroundPosition()"
+            ></div>
+            <div
+              class="canvas-world"
+              [style.transform]="getCanvasTransform()"
+              [style.width.px]="getWorldWidth()"
+              [style.height.px]="getWorldHeight()"
+              (pointermove)="pointerMove($event)"
+              (pointerup)="pointerUp($event)"
+            >
+              <svg class="links" aria-hidden="true">
+                <path
+                  *ngFor="let edge of workflow.connections"
+                  [attr.d]="connectionPath(edge)"
+                  class="link-path"
+                ></path>
+                <path
+                  *ngIf="wireDrag"
+                  [attr.d]="wirePreviewPath()"
+                  class="link-path live"
+                ></path>
+              </svg>
+
+              <article
+                class="node-card"
+                *ngFor="let node of workflow.nodes"
+                [attr.data-node-id]="node.clientNodeId"
+                [class.active]="node === selectedNode"
+                [class.start]="node.type === 'START'"
+                [class.source]="wireFrom?.node?.clientNodeId === node.clientNodeId"
+                [style.left.px]="node.x"
+                [style.top.px]="node.y"
+                (mousedown)="$event.stopPropagation()"
+                (pointerdown)="pointerDown($event, node)"
+                (click)="handleNodeClick($event, node)">
+                <header>
+                  <div>
+                    <span>{{ nodeTypeLabel(node.type) }}</span>
+                    <strong>{{ node.title }}</strong>
+                  </div>
+                  <div class="node-actions-inline" (pointerdown)="$event.stopPropagation()" (mousedown)="$event.stopPropagation()" (click)="$event.stopPropagation()">
+                    <button type="button" title="Duplicate node" (click)="duplicateNode(node)">Copy</button>
+                    <button
+                      type="button"
+                      class="danger"
+                      title="Delete node"
+                      [disabled]="node.type === 'START'"
+                      (click)="deleteNode(node)">
+                      Del
+                    </button>
+                  </div>
+                </header>
+
+                <p class="tag" *ngIf="nodeHasQueue(node)">Queue: {{ node.properties?.['queueId'] || 'not set' }}</p>
+                <p class="meta">{{ getNodeBranches(node).length }} branch(es)</p>
+
+                <div class="map-choices" *ngIf="getNodeBranches(node).length">
+                  <div
+                    class="map-choice"
+                    *ngFor="let branch of getNodeBranches(node)"
+                    [class.pending-wire]="isBranchWiring(node, branch)"
+                    (pointerdown)="$event.stopPropagation()"
+                    (mousedown)="$event.stopPropagation()"
+                    (click)="$event.stopPropagation()">
+                    <span class="choice-label" [title]="branch.label">{{ branch.label }}</span>
+                    <span class="choice-target">{{ branchTargetLabel(node, branch) }}</span>
+                    <button
+                      type="button"
+                      class="choice-wire"
+                      title="Drag to another node"
+                      (pointerdown)="startBranchDrag($event, node, branch)"
+                      (pointermove)="updateWireDrag($event)"
+                      (pointerup)="endBranchDrag($event)"
+                      (pointercancel)="cancelWire()"
+                      (mousedown)="$event.stopPropagation()"
+                      (click)="$event.preventDefault(); $event.stopPropagation()"
+                    >
+                      +
+                    </button>
+                    <button
+                      type="button"
+                      class="choice-wire remove-wire"
+                      *ngIf="branchConnection(node, branch) as edge"
+                      title="Remove link"
+                      (pointerdown)="$event.stopPropagation()"
+                      (mousedown)="$event.stopPropagation()"
+                      (click)="$event.stopPropagation(); removeConnection(edge)">
+                      x
+                    </button>
+                  </div>
+                </div>
+
+                <span class="start-pill" *ngIf="node.type === 'START'">Start</span>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <aside class="inspector" *ngIf="selectedNode">
+          <p>Inspector</p>
+          <h3>{{ nodeTypeLabel(selectedNode.type) }}</h3>
+          <label>
+            Title
+            <input [(ngModel)]="selectedNode.title" />
+          </label>
+          <label>
+            Bot message / prompt
+            <textarea [(ngModel)]="selectedNode.properties!['message']" placeholder="Message text"></textarea>
+          </label>
+          <div class="response-editor" *ngIf="selectedNode.type === 'CHOICE_RESPONSE'">
+            <strong>Choices</strong>
+            <div class="choice-editor-row" *ngFor="let choice of getChoiceOptions(selectedNode); let i = index">
+              <input [ngModel]="choice" (ngModelChange)="updateChoiceOption(selectedNode, i, $event)" placeholder="Choice label" />
+              <button type="button" class="danger ghost" (click)="removeChoiceOption(selectedNode, i)">Remove</button>
+            </div>
+            <button type="button" class="ghost" (click)="addChoiceOption(selectedNode)">Add choice</button>
+          </div>
+          <div class="response-editor" *ngIf="selectedNode.type === 'TEXT_ENTRY'">
+            <strong>Text entry</strong>
+            <label>
+              Variable name
+              <input [(ngModel)]="selectedNode.properties!['variableName']" placeholder="customer_input" />
+            </label>
+            <label>
+              Branch label
+              <input [(ngModel)]="selectedNode.properties!['textPathLabel']" placeholder="Any text" />
+            </label>
+          </div>
+          <div class="response-editor" *ngIf="selectedNode.type === 'BOOLEAN_RESPONSE'">
+            <strong>Boolean response</strong>
+            <label>
+              Yes label
+              <input [(ngModel)]="selectedNode.properties!['yesLabel']" placeholder="Yes" />
+            </label>
+            <label>
+              No label
+              <input [(ngModel)]="selectedNode.properties!['noLabel']" placeholder="No" />
+            </label>
+          </div>
+          <label *ngIf="nodeHasQueue(selectedNode)">
+            Destination queue
+            <select [(ngModel)]="selectedNode.properties!['queueId']">
+              <option [ngValue]="undefined">Select queue...</option>
+              <option *ngFor="let queue of queues" [ngValue]="queue.id">{{ queue.name }}</option>
+            </select>
+          </label>
+          <div class="inspector-actions">
+            <button type="button" (click)="duplicateNode(selectedNode)">Duplicate node</button>
+            <button type="button" class="danger" [disabled]="selectedNode.type === 'START'" (click)="deleteNode(selectedNode)">Delete node</button>
+          </div>
+          <div class="connections-list">
+            <strong>Outgoing paths</strong>
+            <div class="edge-row" *ngFor="let edge of workflow.connections">
+              <ng-container *ngIf="edge.sourceNodeId === selectedNode.clientNodeId">
+                <input [(ngModel)]="edge.label" placeholder="Customer answer label" />
+                <span>{{ edge.targetNodeId }}</span>
+                <button type="button" (click)="removeConnection(edge)">x</button>
+              </ng-container>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="tab-panel queues" *ngIf="tab === 'queues'">
+      <form class="queue-create" (ngSubmit)="createQueue()">
+        <input name="queueName" [(ngModel)]="newQueue.name" placeholder="Queue name" />
+        <input name="queueColor" type="color" [(ngModel)]="newQueue.color" />
+        <input name="queuePriority" type="number" [(ngModel)]="newQueue.priority" placeholder="Priority" />
+        <button type="submit">Create queue</button>
+      </form>
+
+      <div class="queue-grid">
+        <article class="queue-card" *ngFor="let queue of queues">
+          <div class="queue-title">
+            <span [style.background]="queue.color"></span>
+            <input [(ngModel)]="queue.name" />
+          </div>
+          <textarea [(ngModel)]="queue.description" placeholder="Queue routing notes"></textarea>
+          <div class="agent-picker">
+            <label *ngFor="let user of users">
+              <input
+                type="checkbox"
+                [checked]="queue.agentIds?.includes(user.id)"
+                (change)="toggleQueueAgent(queue, user.id, $any($event.target).checked)" />
+              <span>{{ user.name || user.email }}</span>
+              <small>{{ user.role }}</small>
+            </label>
+          </div>
+          <button type="button" (click)="saveQueue(queue)">Save queue</button>
+        </article>
+      </div>
+    </section>
+
+    <section class="tab-panel api" *ngIf="tab === 'api'">
+      <div class="api-card">
+        <div>
+          <p>Project API</p>
+          <h3>Secure key-scoped integration</h3>
+          <small>External systems can create sessions using <code>X-Chat-Api-Key</code>. Keys are scoped to this project only.</small>
+        </div>
+        <button type="button" class="primary" (click)="rotateApiKey()">Generate API key</button>
+      </div>
+      <div class="api-token" *ngIf="apiToken">
+        <span>Copy now</span>
+        <code>{{ apiToken }}</code>
+        <button type="button" (click)="copy(apiToken)">Copy</button>
+      </div>
+      <div class="embed-card">
+        <strong>Embed snippet</strong>
+        <pre>{{ embedSnippet() }}</pre>
+        <button type="button" (click)="copy(embedSnippet())">Copy embed</button>
+      </div>
+      <div class="key-list">
+        <div class="key-row" *ngFor="let key of selectedDetails?.apiKeys || []">
+          <span>{{ key.tokenPreview }}</span>
+          <small>{{ key.active ? 'Active' : 'Revoked' }} - {{ key.createdAt | date:'medium' }}</small>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <ng-template #emptyState>
+    <main class="empty-state">
+      <h1>No chat project selected</h1>
+      <p>Create a project to generate a public chatbot, queues, workflow, and project API credentials.</p>
+    </main>
+  </ng-template>
+</section>

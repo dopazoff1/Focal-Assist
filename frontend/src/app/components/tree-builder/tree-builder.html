@@ -1,0 +1,185 @@
+<section class="tree-builder-page">
+  <aside class="tree-sidebar">
+    <div class="sidebar-card">
+      <h2>Decision Tree Builder</h2>
+      <p class="muted">Create pages and connect choices visually.</p>
+
+      <div class="toolbar">
+        <button type="button" (click)="addNode()">Add Node</button>
+        <button type="button" class="ghost" (click)="autoLayout()">Auto Layout</button>
+        <button type="button" class="ghost" (click)="reloadFromMagicAssistance()" [disabled]="isLoading || isSaving">
+          Reload Existing
+        </button>
+        <button type="button" [disabled]="isLoading || isSaving" (click)="saveToDatabase()">
+          {{ isSaving ? 'Saving...' : 'Save to DB' }}
+        </button>
+        <button type="button" class="danger" [disabled]="!selectedNodeId || isSaving" (click)="deleteSelectedNode()">
+          Delete Node
+        </button>
+      </div>
+      <p class="muted" *ngIf="isLoading">Loading current flow...</p>
+    </div>
+
+    <div class="sidebar-card" *ngIf="selectedNode as node">
+      <h3>Selected Node #{{ node.id }}</h3>
+
+      <label>
+        <span>Title</span>
+        <input
+          type="text"
+          [(ngModel)]="node.name"
+          (ngModelChange)="onNodeEdited()"
+          (input)="onNodeEdited()"
+          (keyup)="onNodeEdited()"
+          (blur)="onNodeEdited()"
+        />
+      </label>
+
+      <label>
+        <span>Tag</span>
+        <input
+          type="text"
+          [(ngModel)]="node.tag"
+          (ngModelChange)="onNodeEdited()"
+          (input)="onNodeEdited()"
+          (keyup)="onNodeEdited()"
+          (blur)="onNodeEdited()"
+          placeholder="Optional tag"
+        />
+      </label>
+
+      <label>
+        <span>Content (HTML)</span>
+        <textarea
+          rows="6"
+          [(ngModel)]="node.content"
+          (ngModelChange)="onNodeEdited()"
+          (input)="onNodeEdited()"
+          (keyup)="onNodeEdited()"
+          (blur)="onNodeEdited()"
+        ></textarea>
+      </label>
+
+      <button type="button" class="ghost" (click)="setAsStart(node.id)">
+        Mark As Start Page
+      </button>
+    </div>
+
+    <div class="sidebar-card" *ngIf="selectedNode as node">
+      <h3>Choices</h3>
+
+      <div class="choice-add">
+        <input type="text" [(ngModel)]="newChoiceLabel" placeholder="Choice label" />
+        <button type="button" (click)="addChoice()">Add Choice</button>
+      </div>
+
+      <ul class="choice-list">
+        <li *ngFor="let choice of node.choices">
+          <div>
+            <strong>{{ choice.label }}</strong>
+            <small *ngIf="choice.targetPageId; else unlinkedChoice">to #{{ choice.targetPageId }}</small>
+            <ng-template #unlinkedChoice>
+              <small>unlinked</small>
+            </ng-template>
+          </div>
+          <button type="button" class="danger ghost" (click)="removeChoice(choice.id)">Remove</button>
+        </li>
+      </ul>
+    </div>
+
+    <div class="sidebar-card">
+      <h3>SQL Export</h3>
+      <div class="toolbar">
+        <button type="button" (click)="exportSql()">Generate SQL</button>
+        <button type="button" (click)="saveSqlFile()">Save SQL File</button>
+        <button type="button" class="ghost" [disabled]="!sqlOutput" (click)="copySql()">Copy SQL</button>
+      </div>
+      <textarea rows="10" [value]="sqlOutput" readonly></textarea>
+    </div>
+
+    <p class="status">{{ statusMessage }}</p>
+    <details class="error-details" *ngIf="lastSaveErrorDetails">
+      <summary>Save Error Details</summary>
+      <pre>{{ lastSaveErrorDetails }}</pre>
+    </details>
+    <details class="error-details" *ngIf="lastSaveDebugDetails">
+      <summary>Save Debug Details</summary>
+      <pre>{{ lastSaveDebugDetails }}</pre>
+    </details>
+  </aside>
+
+  <div class="tree-canvas-wrap">
+    <div
+      class="tree-canvas"
+      [class.panning]="isPanningCanvas"
+      #canvasRef
+      (mousedown)="onCanvasMouseDown($event)"
+      (mousemove)="onCanvasMouseMove($event)"
+      (mouseup)="onCanvasMouseUp()"
+      (wheel)="onCanvasWheel($event)"
+    >
+      <div
+        class="canvas-grid"
+        [style.background-size]="getCanvasBackgroundSize()"
+        [style.background-position]="getCanvasBackgroundPosition()"
+      ></div>
+      <div
+        class="canvas-world"
+        [style.transform]="getCanvasTransform()"
+        [style.width.px]="getWorldWidth()"
+        [style.height.px]="getWorldHeight()"
+      >
+        <svg class="links" aria-hidden="true">
+          <g *ngFor="let source of nodes">
+            <path
+              *ngFor="let choice of source.choices"
+              [attr.d]="getConnectionPath(source, choice)"
+              class="link-path"
+            ></path>
+          </g>
+          <path *ngIf="wireFromChoice" [attr.d]="getLiveWirePath()" class="link-path live"></path>
+        </svg>
+
+        <article
+          *ngFor="let node of nodes"
+          class="node-card"
+          [class.active]="node.id === selectedNodeId"
+          [class.start]="node.isStart"
+          [style.left.px]="node.x"
+          [style.top.px]="node.y"
+          (mousedown)="startDrag($event, node)"
+          (click)="selectNode(node.id)"
+          (mouseup)="completeWire($event, node)"
+        >
+          <header>
+            <span>#{{ node.id }}</span>
+            <strong>{{ node.name }}</strong>
+          </header>
+
+          <p class="tag" *ngIf="node.tag">{{ node.tag }}</p>
+          <p class="meta">{{ node.choices.length }} choice(s)</p>
+
+          <div class="map-choices" *ngIf="node.choices.length > 0">
+            <div class="map-choice" *ngFor="let choice of node.choices" (mousedown)="$event.stopPropagation()">
+              <span class="choice-label" [title]="choice.label">{{ choice.label }}</span>
+              <span class="choice-target">{{ choice.targetPageId ? ('#' + choice.targetPageId) : 'Unlinked' }}</span>
+              <button
+                #choiceWireBtn
+                type="button"
+                class="choice-wire"
+                [attr.data-choice-id]="choice.id"
+                [attr.data-source-id]="node.id"
+                title="Drag to rewire this choice"
+                (mousedown)="startChoiceWire($event, node, choice)"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <span class="start-pill" *ngIf="node.isStart">Start</span>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>

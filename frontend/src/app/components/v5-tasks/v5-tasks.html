@@ -1,0 +1,59 @@
+<section class="v5-page v5-fade-in">
+  <header class="v5-page-header">
+    <div>
+      <h1 class="v5-page-title">Task Execution Panel</h1>
+      <p class="v5-page-copy">
+        Keep teams focused on high-impact actions with clear ownership, due signals, and completion tracking.
+      </p>
+    </div>
+    <div class="v5-actions">
+      <button type="button" class="v5-btn ghost">Auto-prioritize</button>
+      <button type="button" class="v5-btn primary">Create Task</button>
+    </div>
+  </header>
+
+  <section class="v5-surface progress-card">
+    <div>
+      <p>Execution completion</p>
+      <h2>{{ completion }}%</h2>
+    </div>
+    <div class="progress-wrap">
+      <div class="v5-progress-track">
+        <span class="v5-progress-fill" [style.width.%]="completion"></span>
+      </div>
+      <small>{{ tasks.length }} active tasks</small>
+    </div>
+  </section>
+
+  <section class="task-lanes">
+    <article class="lane" *ngFor="let lane of lanes">
+      <header>
+        <h3>{{ lane }}</h3>
+        <span class="v5-badge">{{ laneTasks(lane).length }}</span>
+      </header>
+
+      <div class="lane-list" *ngIf="laneTasks(lane).length > 0; else emptyLane">
+        <label class="task-card" *ngFor="let task of laneTasks(lane)" [class.done]="task.done">
+          <input type="checkbox" [checked]="task.done" (change)="toggleTask(task)" />
+          <div>
+            <strong>{{ task.title }}</strong>
+            <p>{{ task.owner }} · due {{ task.due }}</p>
+            <div class="v5-badge-row">
+              <span class="v5-badge" [class.warning]="task.priority === 'Medium'" [class.danger]="task.priority === 'High'">{{ task.priority }}</span>
+              <span class="v5-badge success" *ngIf="task.done">Done</span>
+            </div>
+          </div>
+        </label>
+      </div>
+
+      <ng-template #emptyLane>
+        <div class="v5-empty">
+          <strong>No task in {{ lane }}</strong>
+          <p>Assign one to keep this lane actionable.</p>
+        </div>
+      </ng-template>
+    </article>
+  </section>
+</section>
+
+

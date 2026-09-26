@@ -1,0 +1,104 @@
+<section class="astra-public-kb">
+  <aside class="left">
+    <div class="search">
+      <input type="search" [(ngModel)]="search" placeholder="Search help center..." />
+    </div>
+
+    <div class="loading" *ngIf="loading">
+      <span class="spin"></span>
+      <p>Loading articles...</p>
+    </div>
+
+    <div class="groups" *ngIf="!loading">
+      <article *ngFor="let category of filteredCategories">
+        <h3>{{ category.name }}</h3>
+        <button
+          type="button"
+          *ngFor="let article of filteredArticles(category.id)"
+          (click)="selectArticle(article)"
+          [class.active]="selectedArticle?.id === article.id"
+        >
+          {{ article.title }}
+        </button>
+      </article>
+      <p class="empty" *ngIf="filteredCategories.length === 0">No public articles match this search.</p>
+    </div>
+  </aside>
+
+  <section class="content">
+    <p class="error" *ngIf="error">{{ error }}</p>
+    <p class="success" *ngIf="success">{{ success }}</p>
+
+    <div class="article-loading" *ngIf="loadingArticle">
+      <span></span><span></span><span></span>
+      <p>Loading article...</p>
+    </div>
+
+    <ng-container *ngIf="!loadingArticle && selectedArticle as article">
+      <header>
+        <small>Public Help Center Preview</small>
+        <h2>{{ article.title }}</h2>
+      </header>
+
+      <article class="body" [innerHTML]="article.content"></article>
+
+      <section class="feedback panel">
+        <h3>Was this article helpful?</h3>
+        <div class="feedback-choices">
+          <button type="button" [disabled]="submittingFeedback" (click)="sendFeedback('LIKE')">Helpful</button>
+          <button type="button" class="neg" [disabled]="submittingFeedback" (click)="sendFeedback('DISLIKE')">Not helpful</button>
+        </div>
+        <input [(ngModel)]="feedbackName" placeholder="Your name (optional)" />
+        <input [(ngModel)]="feedbackEmail" placeholder="Your email (optional)" />
+        <textarea [(ngModel)]="feedbackText" placeholder="What can we improve?"></textarea>
+      </section>
+
+      <section class="ticket panel">
+        <h3>Still need help? Submit a support ticket</h3>
+
+        <div class="grid2">
+          <label>
+            Full name
+            <input [(ngModel)]="requesterName" />
+          </label>
+          <label>
+            Work email
+            <input [(ngModel)]="requesterEmail" />
+          </label>
+        </div>
+
+        <label>
+          Company
+          <input [(ngModel)]="requesterCompany" placeholder="Optional" />
+        </label>
+
+        <div class="grid2">
+          <label>
+            Subject
+            <input [(ngModel)]="ticketSubject" />
+          </label>
+          <label>
+            Priority
+            <select [(ngModel)]="ticketPriority">
+              <option value="LOW">Low</option>
+              <option value="NORMAL">Normal</option>
+              <option value="HIGH">High</option>
+              <option value="URGENT">Urgent</option>
+            </select>
+          </label>
+        </div>
+
+        <label>
+          Description
+          <textarea [(ngModel)]="ticketDescription" placeholder="Explain the issue and expected resolution"></textarea>
+        </label>
+
+        <div class="actions">
+          <button type="button" class="primary" [disabled]="creatingTicket" (click)="createTicket()">
+            {{ creatingTicket ? 'Creating...' : 'Create ticket' }}
+          </button>
+        </div>
+      </section>
+    </ng-container>
+  </section>
+</section>

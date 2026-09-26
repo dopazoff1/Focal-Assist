@@ -1,0 +1,94 @@
+<section class="article-management-page">
+  <aside class="panel left-panel">
+    <h2>Article Management</h2>
+    <p class="muted">Create, edit, deactivate, duplicate, and delete articles.</p>
+
+    <div class="section">
+      <h3>Create Article</h3>
+      <label>
+        <span>Category</span>
+        <select [(ngModel)]="createCategoryId">
+          <option [ngValue]="null">Select category...</option>
+          <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.name }}</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Title</span>
+        <input type="text" [(ngModel)]="createTitle" placeholder="New article title" />
+      </label>
+
+      <label>
+        <span>Content (HTML)</span>
+        <textarea rows="6" [(ngModel)]="createContent"></textarea>
+      </label>
+
+      <label>
+        <span>Display order</span>
+        <input type="number" [(ngModel)]="createDisplayOrder" />
+      </label>
+
+      <div class="toolbar">
+        <button type="button" (click)="createArticle()" [disabled]="creating">
+          {{ creating ? 'Creating...' : 'Create' }}
+        </button>
+        <button type="button" class="ghost" (click)="loadData()">Refresh</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Filters</h3>
+      <label>
+        <span>Category</span>
+        <select [(ngModel)]="filterCategoryId" (change)="applyFilters()">
+          <option [ngValue]="null">All categories</option>
+          <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.name }}</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Status</span>
+        <select [(ngModel)]="filterActive" (change)="applyFilters()">
+          <option value="all">All</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Search title</span>
+        <input type="text" [(ngModel)]="searchTerm" (input)="applyFilters()" placeholder="Find article..." />
+      </label>
+    </div>
+  </aside>
+
+  <section class="panel center-panel">
+    <h3>Articles</h3>
+    <ul class="article-list">
+      <li
+        *ngFor="let article of filteredArticles"
+      >
+        <div class="line1">
+          <p class="title-text">{{ article.title }}</p>
+          <span class="state" [class.inactive]="article.isActive === false">
+            {{ article.isActive === false ? 'Inactive' : 'Active' }}
+          </span>
+        </div>
+        <div class="line2">
+          <button type="button" (click)="goToEdit(article)">Edit</button>
+          <button type="button" class="ghost" (click)="openInKnowledgeBase(article)">Open KB</button>
+          <button type="button" class="ghost" (click)="openMapBuilder()">Map</button>
+          <button type="button" class="ghost" (click)="toggleActive(article)" *ngIf="article.isActive !== false">
+            Deactivate
+          </button>
+          <span class="draft-state" *ngIf="article.isActive === false">Draft or unpublished - validate before publishing</span>
+          <button type="button" class="ghost" (click)="duplicateArticle(article)">Duplicate</button>
+          <button type="button" class="danger" (click)="deleteArticle(article)">Delete</button>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+  <p class="ok" *ngIf="statusMessage">{{ statusMessage }}</p>
+</section>

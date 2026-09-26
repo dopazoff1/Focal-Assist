@@ -1,0 +1,232 @@
+/* Focal operational design system. See design.md. */
+
+@media (max-width: 1460px) {
+  body.v3-mode .v3-content .orbit-page {
+    grid-template-columns: 200px minmax(0, 1fr) 280px;
+  }
+
+  body.v3-mode .v3-content .collab-page.with-right {
+    grid-template-columns: 17rem minmax(0, 1fr) 18rem !important;
+  }
+
+  body.v3-mode .v3-content .assistant-page {
+    grid-template-columns: 17rem minmax(0, 1fr) 18rem;
+  }
+
+  body.v3-mode .v3-content .esc-layout {
+    grid-template-columns: 17rem minmax(0, 1fr) 19rem;
+  }
+}
+
+@media (max-width: 1220px) {
+  body.v3-mode .v3-content :is(
+    .orbit-page,
+    .collab-page,
+    .chat-projects-shell,
+    .live-chat-page,
+    .assistant-page,
+    .tree-builder-page,
+    .course-editor,
+    .viewer,
+    .kb-container,
+    .crm-page,
+    .article-management-page,
+    .qa-eval-page,
+    .esc-page
+  ) {
+    min-height: 0;
+    height: auto !important;
+  }
+
+  body.v3-mode .v3-content .orbit-page {
+    grid-template-columns: 1fr;
+    overflow: visible;
+  }
+
+  body.v3-mode .v3-content :is(.orbit-sidebar, .orbit-inspector) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+  }
+
+  body.v3-mode .v3-content .collab-page,
+  body.v3-mode .v3-content .collab-page.with-right,
+  body.v3-mode .v3-content .assistant-page {
+    grid-template-columns: 17rem minmax(0, 1fr) !important;
+  }
+
+  body.v3-mode .v3-content :is(.collab-right, .assistant-settings) {
+    display: grid;
+    grid-column: 1 / -1;
+    max-height: none;
+    overflow: visible;
+  }
+
+  body.v3-mode .v3-content :is(.live-chat-page, .viewer .layout, .course-editor > .grid) {
+    grid-template-columns: minmax(0, 1fr) 18rem;
+  }
+
+  body.v3-mode .v3-content .esc-layout {
+    grid-template-columns: 17rem minmax(0, 1fr);
+  }
+
+  body.v3-mode .v3-content .esc-side {
+    display: grid;
+    grid-column: 1 / -1;
+  }
+
+  body.v3-mode .v3-content :is(.kpi-grid, .kb-analytics-page .kpi-grid) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 920px) {
+  body.v3-mode .v3-content {
+    --workbench-height: auto;
+  }
+
+  body.v3-mode .v3-content :is(
+    .collab-page,
+    .collab-page.with-right,
+    .assistant-page,
+    .chat-projects-shell,
+    .live-chat-page,
+    .tree-builder-page,
+    .kb-container,
+    .crm-page,
+    .article-management-page,
+    .qa-eval-page,
+    .esc-layout,
+    .academy-grid,
+    .studio-grid,
+    .viewer .layout,
+    .course-editor > .grid,
+    .kb-analytics-workbench,
+    .adherence-workbench
+  ) {
+    grid-template-columns: minmax(0, 1fr) !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  body.v3-mode .v3-content :is(.collab-right, .assistant-settings, .esc-side) {
+    display: grid;
+  }
+
+  body.v3-mode .v3-content :is(.crm-sidebar, .projects-panel, .assistant-history, .kb-sidebar) {
+    max-height: 23rem;
+  }
+
+  body.v3-mode .v3-content :is(.tree-sidebar, .qa-left, .qa-middle, .qa-right) {
+    max-height: none;
+    overflow: visible;
+  }
+
+  body.v3-mode .v3-content .orbit-main {
+    order: 1;
+  }
+
+  body.v3-mode .v3-content .orbit-sidebar {
+    order: 2;
+  }
+
+  body.v3-mode .v3-content .orbit-inspector {
+    order: 3;
+  }
+
+  body.v3-mode .v3-content .qa-eval-page {
+    grid-template-rows: auto !important;
+    grid-auto-rows: auto !important;
+    align-items: start;
+  }
+
+  body.v3-mode .v3-content .qa-left {
+    max-height: 20rem;
+    overflow: auto;
+  }
+
+  body.v3-mode .v3-content :is(.tree-canvas-wrap, .tree-canvas) {
+    min-height: 38rem;
+    height: 62svh !important;
+  }
+
+  body.v3-mode .v3-content :is(.kpi-grid, .metrics, .kpis) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  body.v3-mode .v3-content :is(.filters, .form-grid, .staff-page .grid) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  body.v3-mode .v3-content :is(.page-head, .academy-head, .studio-head, .viewer-head, .esc-head) {
+    align-items: stretch;
+  }
+
+  body.v3-mode .v3-content :is(.crm-toast-stack) {
+    top: calc((var(--topbar-height) * 2) + var(--space-sm));
+  }
+}
+
+@media (max-width: 620px) {
+  body.v3-mode .v3-content :is(.orbit-sidebar, .orbit-inspector) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  body.v3-mode .v3-content :is(.academy-head, .studio-head, .viewer-head, .course-editor > .head, .page-head, .esc-head) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  body.v3-mode .v3-content :is(.academy-actions, .head-actions, .quick-links, .actions, .toolbar) {
+    justify-content: stretch;
+  }
+
+  body.v3-mode .v3-content :is(.academy-actions, .head-actions, .quick-links) > :is(button, a) {
+    flex: 1 1 auto;
+  }
+
+  body.v3-mode .v3-content :is(.kpi-grid, .metrics, .kpis, .catalog .grid) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  body.v3-mode .v3-content :is(.table-wrap, .timeline-table) {
+    overflow-x: auto;
+    scrollbar-gutter: stable;
+  }
+
+  body.v3-mode .v3-content :is(.table-wrap table, .timeline-table table) {
+    min-width: 44rem;
+  }
+
+  body.v3-mode .v3-content :is(.orbit-month-surface, .orbit-timeline-shell) {
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-gutter: stable;
+  }
+
+  body.v3-mode .v3-content .orbit-month-grid {
+    min-width: 44rem;
+  }
+
+  body.v3-mode .v3-content .orbit-month-body {
+    grid-auto-rows: minmax(6rem, 1fr);
+  }
+
+  body.v3-mode .v3-content :is(.settings-page .card, .article-management-page .panel, .article-editor-page .editor-card) {
+    padding: var(--space-sm) !important;
+  }
+
+  body.v3-mode .v3-content :is(.toolbar, .actions, .head-actions, .filters) {
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+
+  body.v3-mode .v3-content .crm-toast-stack {
+    right: var(--space-xs);
+    width: calc(100vw - var(--space-md));
+  }
+
+  body.v3-mode .v3-content :is(.modal, .dialog, .jira-modal, .crm-attachment-modal) {
+    width: calc(100vw - var(--space-md)) !important;
+    max-width: calc(100vw - var(--space-md)) !important;
+  }
+}

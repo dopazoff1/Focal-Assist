@@ -1,0 +1,56 @@
+<section class="v4-page v4-fade-in">
+  <header class="v4-page-header">
+    <div>
+      <h1 class="v4-page-title">Pipeline & Deals</h1>
+      <p class="v4-page-copy">
+        Prioritize high-conversion opportunities and surface stalled deals before they become losses.
+      </p>
+    </div>
+    <div class="v4-actions">
+      <button type="button" class="v4-btn ghost">Filter by owner</button>
+      <button type="button" class="v4-btn primary">Create Deal</button>
+    </div>
+  </header>
+
+  <section class="v4-board-wrap">
+    <article class="v4-stage" *ngFor="let stage of stages">
+      <header class="v4-stage-head">
+        <div>
+          <h3>{{ stage.name }}</h3>
+          <small>{{ stage.deals.length }} deals</small>
+        </div>
+        <span class="v4-badge" [class.warning]="stage.wip > 5">WIP {{ stage.wip }}</span>
+      </header>
+
+      <div class="v4-stage-list">
+        <article class="v4-deal" *ngFor="let deal of stage.deals">
+          <strong>{{ deal.title }}</strong>
+          <p>{{ deal.company }}</p>
+
+          <div class="v4-deal-meta">
+            <span>{{ deal.value }}</span>
+            <span>{{ deal.owner }}</span>
+            <span>{{ deal.ageDays }}d</span>
+          </div>
+
+          <div class="v4-deal-foot">
+            <div class="v4-progress-track" aria-hidden="true">
+              <span class="v4-progress-fill" [style.width.%]="deal.probability"></span>
+            </div>
+            <small>{{ deal.probability }}% probability</small>
+          </div>
+
+          <div class="v4-actions compact">
+            <button type="button" class="v4-btn">Follow Up</button>
+            <button type="button" class="v4-btn ghost">Close Next Step</button>
+          </div>
+        </article>
+
+        <div class="v4-empty" *ngIf="stage.deals.length === 0">
+          <strong>No deals in this stage</strong>
+          <p>Add a deal to keep your pipeline flowing.</p>
+        </div>
+      </div>
+    </article>
+  </section>
+</section>

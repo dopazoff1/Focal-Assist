@@ -1,0 +1,116 @@
+<section class="settings-page">
+  <header class="page-head">
+    <h1>User Settings</h1>
+  </header>
+
+  <div class="settings-grid">
+    <article class="card">
+      <h2>Account & Preferences</h2>
+      <div class="form-grid">
+        <label>
+          <span>First name</span>
+          <input [(ngModel)]="firstName" />
+        </label>
+        <label>
+          <span>Last name</span>
+          <input [(ngModel)]="lastName" />
+        </label>
+        <label>
+          <span>Email</span>
+          <input [value]="userEmail" disabled />
+        </label>
+        <label>
+          <span>Role</span>
+          <input [value]="userRole" disabled />
+        </label>
+        <label>
+          <span>Language</span>
+          <select [(ngModel)]="selectedLanguage">
+            <option *ngFor="let option of languageOptions" [value]="option.code">{{ option.label }}</option>
+          </select>
+        </label>
+        <label>
+          <span>Time zone</span>
+          <select [(ngModel)]="selectedTimeZone">
+            <option value="">System</option>
+            <option *ngFor="let tz of timeZones" [value]="tz">{{ tz }}</option>
+          </select>
+        </label>
+        <label class="preference-switch">
+          <span>Desktop notifications</span>
+          <input type="checkbox" role="switch" [(ngModel)]="desktopNotificationsEnabled" />
+        </label>
+        <label class="preference-switch">
+          <span>Message sound alerts</span>
+          <input type="checkbox" role="switch" [(ngModel)]="soundNotificationsEnabled" />
+        </label>
+      </div>
+      <div class="actions">
+        <button type="button" (click)="saveProfilePreferences()" [disabled]="savingProfile">
+          {{ savingProfile ? 'Saving...' : 'Save Preferences' }}
+        </button>
+      </div>
+    </article>
+
+    <article class="card">
+      <h2>Security</h2>
+      <div class="form-grid">
+        <label>
+          <span>Current password</span>
+          <input type="password" [(ngModel)]="currentPassword" />
+        </label>
+        <label>
+          <span>New password</span>
+          <input type="password" [(ngModel)]="newPassword" placeholder="At least 4 characters" />
+        </label>
+        <label>
+          <span>Confirm password</span>
+          <input type="password" [(ngModel)]="confirmPassword" />
+        </label>
+      </div>
+      <div class="actions">
+        <button type="button" (click)="resetMyPassword()" [disabled]="savingSecurity">
+          {{ savingSecurity ? 'Updating...' : 'Update Password' }}
+        </button>
+      </div>
+    </article>
+
+    <article class="card" *ngIf="canConfigureJira">
+      <h2>Jira Account Link (L2)</h2>
+      <div class="form-grid">
+        <label>
+          <span>Jira base URL</span>
+          <input [(ngModel)]="jiraBaseUrl" placeholder="https://jira.example.com" />
+        </label>
+        <label>
+          <span>Username / email</span>
+          <input [(ngModel)]="jiraUsername" />
+        </label>
+        <label>
+          <span>Password / API token</span>
+          <input type="password" [(ngModel)]="jiraPassword" />
+        </label>
+        <label>
+          <span>Project key</span>
+          <input [(ngModel)]="jiraProjectKey" placeholder="SUP" />
+        </label>
+        <label>
+          <span>Issue type</span>
+          <input [(ngModel)]="jiraIssueTypeName" placeholder="Task" />
+        </label>
+      </div>
+      <div class="actions">
+        <button type="button" (click)="saveJiraSettings()" [disabled]="savingJira">
+          Save Jira Settings
+        </button>
+        <button type="button" class="ghost" (click)="testJiraSettings()" [disabled]="savingJira">
+          Test Jira Connection
+        </button>
+      </div>
+      <p class="muted" *ngIf="jiraTestMessage">{{ jiraTestMessage }}</p>
+    </article>
+  </div>
+
+  <p class="ok" *ngIf="message">{{ message }}</p>
+  <p class="error" *ngIf="error">{{ error }}</p>
+</section>

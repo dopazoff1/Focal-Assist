@@ -1,0 +1,121 @@
+<section class="assistant-page">
+  <aside class="assistant-history panel">
+    <div class="history-head">
+      <h2>Process Copilot</h2>
+      <button type="button" (click)="createNewConversation()" [disabled]="creatingConversation || loading">
+        {{ creatingConversation ? 'Creating...' : 'New chat' }}
+      </button>
+    </div>
+
+    <p class="muted">Role: {{ normalizedRole }}</p>
+
+    <label class="field">
+      <span>Prompt type</span>
+      <select [(ngModel)]="selectedPromptProfileId" (change)="onPromptProfileChanged()">
+        <option *ngFor="let p of promptProfiles" [ngValue]="p.id">{{ p.name }}</option>
+      </select>
+    </label>
+
+    <div class="history-list" *ngIf="conversations.length; else emptyConversations">
+      <button
+        type="button"
+        class="history-item"
+        *ngFor="let c of conversations; trackBy: trackConversation"
+        [class.active]="c.id === selectedConversationId"
+        (click)="selectConversation(c.id)"
+      >
+        <div class="history-item-copy">
+          <strong>{{ c.title }}</strong>
+          <small>{{ c.lastMessagePreview || 'No messages yet' }}</small>
+          <span>{{ formatTimestamp(c.updatedAt) }}</span>
+        </div>
+        <span class="history-delete" (click)="deleteConversation(c.id, $event)">Delete</span>
+      </button>
+    </div>
+    <ng-template #emptyConversations>
+      <p class="muted">No conversations yet.</p>
+    </ng-template>
+  </aside>
+
+  <section class="assistant-chat panel">
+    <header class="chat-head">
+      <div class="chat-title">
+        <strong>{{ selectedConversation?.title || 'Conversation' }}</strong>
+        <small *ngIf="selectedPromptProfile">Prompt: {{ selectedPromptProfile.name }}</small>
+      </div>
+      <div class="chat-actions">
+        <button type="button" class="ghost" (click)="createNewConversation()" [disabled]="creatingConversation || loading">
+          New
+        </button>
+      </div>
+    </header>
+
+    <div class="chat-messages" #messagesViewport>
+      <p class="state" *ngIf="loading">Loading conversation...</p>
+      <ng-container *ngIf="!loading">
+        <article
+          *ngFor="let message of messages; trackBy: trackMessage"
+          class="msg-row"
+          [class.msg-user]="message.role === 'user'"
+          [class.msg-assistant]="message.role === 'assistant'"
+          [class.msg-system]="message.role === 'system'"
+        >
+          <div class="msg-bubble">
+            <header>
+              <strong>{{ roleLabel(message) }}</strong>
+              <span>{{ formatTimestamp(message.createdAt) }}</span>
+            </header>
+            <div class="msg-content" [innerHTML]="renderMessage(message)"></div>
+          </div>
+        </article>
+
+        <article class="msg-row msg-assistant typing" *ngIf="sending">
+          <div class="msg-bubble">
+            <header>
+              <strong>Focal Copilot</strong>
+            </header>
+            <div class="msg-content thinking-wrap" aria-live="polite">
+              <span class="thinking-text">Thinking</span>
+              <span class="thinking-dots" aria-hidden="true">
+                <span class="dot dot-1"></span>
+                <span class="dot dot-2"></span>
+                <span class="dot dot-3"></span>
+              </span>
+            </div>
+          </div>
+        </article>
+      </ng-container>
+    </div>
+
+    <footer class="chat-compose">
+      <textarea
+        rows="4"
+        [(ngModel)]="draftMessage"
+        [disabled]="loading || sending"
+        (keydown)="onEditorKeydown($event)"
+        placeholder="Ask anything about process, SOP, handling, QA checks, escalations..."
+      ></textarea>
+      <div class="compose-actions">
+        <span>Enter to send, Shift+Enter for newline</span>
+        <button type="button" (click)="sendMessage()" [disabled]="!canSend">
+          {{ sending ? 'Sending...' : 'Send' }}
+        </button>
+      </div>
+    </footer>
+  </section>
+
+  <aside class="assistant-settings panel">
+    <h3>Prompt Details</h3>
+    <p class="muted">API keys are managed per prompt in Prompt Map Builder and used only from backend.</p>
+
+    <div class="prompt-preview" *ngIf="selectedPromptProfile as p">
+      <h4>Selected Prompt</h4>
+      <p class="muted"><strong>{{ p.name }}</strong></p>
+      <p class="muted">Model: {{ p.model }} | Temp: {{ p.temperature }} | Max tokens: {{ p.maxTokens }}</p>
+      <pre>{{ p.systemPrompt }}</pre>
+    </div>
+
+    <p class="status" *ngIf="statusMessage">{{ statusMessage }}</p>
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+  </aside>
+</section>

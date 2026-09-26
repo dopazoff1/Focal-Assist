@@ -1,0 +1,132 @@
+@import '../kb-map-builder/kb-map-builder.css';
+
+.validation-canvas {
+  overflow: auto;
+  background: var(--panel-1);
+}
+
+.validation-canvas-content {
+  min-width: 760px;
+  min-height: 100%;
+  padding: 0.9rem;
+}
+
+.validation-canvas-content ::ng-deep .validation-chain-panel {
+  min-height: 100%;
+  border: 0;
+  padding: 0;
+}
+
+.validation-canvas-content ::ng-deep .chain-canvas-wrap {
+  border: var(--border-size) var(--border-style) var(--panel-border);
+  border-radius: var(--radius-card);
+  background: var(--panel-1);
+}
+
+.validation-canvas-content ::ng-deep .chain-canvas {
+  min-height: 520px;
+  overflow: hidden;
+  background:
+    linear-gradient(color-mix(in srgb, var(--panel-border) 40%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--panel-border) 40%, transparent) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: -1px -1px;
+}
+
+.validation-canvas-content ::ng-deep .chain-world {
+  min-height: 520px;
+}
+
+.validation-canvas-content ::ng-deep .chain-links {
+  height: 520px;
+}
+
+.validation-canvas-content ::ng-deep .chain-node {
+  width: 296px;
+  min-height: 126px;
+  border: var(--border-size) var(--border-style) var(--panel-border);
+  border-radius: var(--radius-card);
+  background: var(--panel-2);
+  box-shadow: var(--panel-shadow);
+}
+
+.validation-canvas-content ::ng-deep .chain-node header {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.validation-canvas-content ::ng-deep .chain-node header span {
+  color: var(--text-3);
+  letter-spacing: 0;
+}
+
+.role-access-link {
+  display: inline-block;
+  margin-top: 0.25rem;
+  color: var(--text-1);
+  text-decoration: none;
+}
+
+.reviewer-list,
+.configured-reviewer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.reviewer-option,
+.configured-reviewer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.48rem 0.6rem;
+  border: var(--border-size) var(--border-style) var(--panel-border);
+  border-radius: var(--radius-button);
+  background: color-mix(in srgb, var(--panel-2) 85%, transparent);
+  color: var(--text-1);
+  text-align: left;
+}
+
+.reviewer-option:hover,
+.configured-reviewer:hover {
+  background: color-mix(in srgb, var(--brand) 9%, var(--panel-2));
+}
+
+.reviewer-option span:first-child,
+.configured-reviewer span:first-child {
+  display: grid;
+  min-width: 0;
+}
+
+.reviewer-option strong,
+.configured-reviewer strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.78rem;
+}
+
+.reviewer-option small,
+.configured-reviewer small {
+  overflow: hidden;
+  color: var(--text-3);
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.add-mark { color: var(--brand); font-size: 1.1rem; font-weight: 800; }
+.remove-mark { color: var(--danger); font-size: 1.2rem; }
+
+.validation-loading {
+  display: grid;
+  place-items: center;
+  color: var(--text-2);
+}
+
+@media (max-width: 1200px) {
+  .validation-canvas-content { min-width: 0; }
+}

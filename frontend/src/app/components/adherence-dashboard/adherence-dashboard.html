@@ -1,0 +1,185 @@
+﻿<section class="adherence-page">
+  <header class="adherence-hero">
+    <div>
+      <h1>Agent Adherence Dashboard</h1>
+      <p>Project-level adherence from real presence timeline events.</p>
+    </div>
+
+    <div class="filter-bar">
+      <label>
+        Period
+        <select [(ngModel)]="periodPreset" (change)="onPresetChange()">
+          <option value="today">Today</option>
+          <option value="7d">Last 7 Days</option>
+          <option value="30d">Last 30 Days</option>
+          <option value="custom">Custom</option>
+        </select>
+      </label>
+
+      <label *ngIf="periodPreset === 'custom'">
+        Start
+        <input type="date" [(ngModel)]="customStart" (change)="onPresetChange()">
+      </label>
+
+      <label *ngIf="periodPreset === 'custom'">
+        End
+        <input type="date" [(ngModel)]="customEnd" (change)="onPresetChange()">
+      </label>
+
+      <button type="button" (click)="reload()" [disabled]="loading">{{ loading ? 'Loading...' : 'Refresh' }}</button>
+    </div>
+  </header>
+
+  <p class="error" *ngIf="error">{{ error }}</p>
+
+  <section class="kpi-grid" *ngIf="!error">
+    <article class="kpi-card">
+      <h3>Project Adherence</h3>
+      <p class="kpi-value">{{ projectAdherence | number:'1.0-1' }}%</p>
+      <small>Productive / Available time</small>
+    </article>
+
+    <article class="kpi-card">
+      <h3>Occupancy</h3>
+      <p class="kpi-value">{{ projectOccupancy | number:'1.0-1' }}%</p>
+      <small>Available / Monitored window</small>
+    </article>
+
+    <article class="kpi-card">
+      <h3>Agents Active</h3>
+      <p class="kpi-value">{{ activeAgents }} / {{ totalAgents }}</p>
+      <small>With at least one tracked status</small>
+    </article>
+
+    <article class="kpi-card">
+      <h3>Avg. Transitions</h3>
+      <p class="kpi-value">{{ averageTransitions | number:'1.0-1' }}</p>
+      <small>Status changes per agent</small>
+    </article>
+  </section>
+
+  <section class="adherence-workbench" *ngIf="!error">
+    <aside class="agents-pane">
+      <h3>Agents</h3>
+      <div class="agents-list" *ngIf="rows.length; else noAgents">
+        <button
+          type="button"
+          class="agent-item"
+          *ngFor="let row of rows"
+          [class.selected]="row.userId === selectedAgentId"
+          (click)="selectAgent(row.userId)"
+        >
+          <div class="agent-main">
+            <strong>{{ row.userName }}</strong>
+            <span>{{ row.role }}</span>
+          </div>
+          <div class="agent-meta">
+            <span class="status-chip" [ngClass]="statusClass(row.currentStatus)">{{ row.currentStatus }}</span>
+            <span class="score" [ngClass]="adherenceClass(row.adherencePercent)">{{ row.adherencePercent | number:'1.0-1' }}%</span>
+          </div>
+        </button>
+      </div>
+      <ng-template #noAgents>
+        <p class="empty">No agents found in selected window.</p>
+      </ng-template>
+    </aside>
+
+    <main class="timeline-pane">
+      <header class="pane-title">
+        <h3>Adherence Timeline</h3>
+        <p *ngIf="selectedRow">{{ selectedRow.userName }} • {{ selectedRow.role }}</p>
+      </header>
+
+      <div class="timeline-shell" *ngIf="selectedRow; else noSelection">
+        <div class="timeline-y-axis">
+          <span>ONLINE</span>
+          <span>WRAPUP</span>
+          <span>AWAY</span>
+          <span>BREAK</span>
+          <span>OFFLINE</span>
+        </div>
+        <div class="timeline-plot">
+          <div class="h-grid g1"></div>
+          <div class="h-grid g2"></div>
+          <div class="h-grid g3"></div>
+          <div class="h-grid g4"></div>
+          <div class="h-grid g5"></div>
+
+          <ng-container *ngFor="let event of selectedTimelineSorted; let i = index">
+            <div
+              class="plot-segment"
+              *ngIf="i < selectedTimelineSorted.length - 1"
+              [style.left.%]="timelinePoint(i, selectedTimelineSorted.length)"
+              [style.width.%]="timelineSegmentWidth(i, selectedTimelineSorted.length)"
+              [style.top.%]="statusY(event.status)"
+              [ngClass]="statusClass(event.status)"
+            ></div>
+            <div
+              class="plot-point"
+              [style.left.%]="timelinePoint(i, selectedTimelineSorted.length)"
+              [style.top.%]="statusY(event.status)"
+              [ngClass]="statusClass(event.status)"
+              [title]="(event.changedAt | date:'short') + ' • ' + event.status"
+            ></div>
+          </ng-container>
+        </div>
+      </div>
+
+      <div class="timeline-range" *ngIf="selectedRow">
+        <span>{{ windowStart | date:'MMM d, y HH:mm' }}</span>
+        <span>{{ windowEnd | date:'MMM d, y HH:mm' }}</span>
+      </div>
+    </main>
+
+    <aside class="details-pane" *ngIf="selectedRow as row">
+      <h3>Agent Details</h3>
+      <div class="details-grid">
+        <article>
+          <label>Adherence</label>
+          <strong [ngClass]="adherenceClass(row.adherencePercent)">{{ row.adherencePercent | number:'1.0-1' }}%</strong>
+        </article>
+        <article>
+          <label>Occupancy</label>
+          <strong>{{ row.occupancyPercent | number:'1.0-1' }}%</strong>
+        </article>
+        <article>
+          <label>Online</label>
+          <strong>{{ formatMinutes(row.onlineMinutes) }}</strong>
+        </article>
+        <article>
+          <label>Wrapup</label>
+          <strong>{{ formatMinutes(row.wrapupMinutes) }}</strong>
+        </article>
+        <article>
+          <label>Away</label>
+          <strong>{{ formatMinutes(row.awayMinutes) }}</strong>
+        </article>
+        <article>
+          <label>Break</label>
+          <strong>{{ formatMinutes(row.breakMinutes) }}</strong>
+        </article>
+        <article>
+          <label>Offline</label>
+          <strong>{{ formatMinutes(row.offlineMinutes) }}</strong>
+        </article>
+        <article>
+          <label>Transitions</label>
+          <strong>{{ row.transitions }}</strong>
+        </article>
+      </div>
+
+      <div class="events-list">
+        <h4>Recent Events</h4>
+        <div class="event-row" *ngFor="let event of selectedTimelineSorted.slice().reverse().slice(0, 12)">
+          <span class="dot" [ngClass]="statusClass(event.status)"></span>
+          <span class="state">{{ event.status }}</span>
+          <span class="time">{{ event.changedAt | date:'MMM d, HH:mm' }}</span>
+        </div>
+      </div>
+    </aside>
+
+    <ng-template #noSelection>
+      <div class="empty">Select an agent to display timeline.</div>
+    </ng-template>
+  </section>
+</section>

@@ -1,0 +1,111 @@
+<section class="astra-tickets">
+  <aside class="queue">
+    <header>
+      <h2>Ticket Queue</h2>
+      <button type="button" (click)="load()" [disabled]="loading">{{ loading ? 'Refreshing...' : 'Refresh' }}</button>
+    </header>
+
+    <div class="filters">
+      <input type="search" [(ngModel)]="search" placeholder="Search by key, subject, requester..." />
+      <select [(ngModel)]="statusFilter">
+        <option value="ALL">All statuses</option>
+        <option value="OPEN">Open</option>
+        <option value="PENDING">Pending</option>
+        <option value="WAITING_CUSTOMER">Waiting customer</option>
+        <option value="SOLVED">Solved</option>
+        <option value="CLOSED">Closed</option>
+      </select>
+    </div>
+
+    <div class="queue-list" *ngIf="!loading">
+      <button
+        type="button"
+        class="ticket-item"
+        *ngFor="let ticket of filteredTickets"
+        [class.active]="selected?.id === ticket.id"
+        (click)="select(ticket)"
+      >
+        <div>
+          <strong>{{ ticket.ticketKey }}</strong>
+          <small>{{ ticket.subject }}</small>
+        </div>
+        <span class="state">{{ ticket.status }}</span>
+      </button>
+      <p class="empty" *ngIf="filteredTickets.length === 0">No tickets match this filter.</p>
+    </div>
+
+    <div class="loading" *ngIf="loading">
+      <span class="spin"></span>
+      <p>Loading queue...</p>
+    </div>
+  </aside>
+
+  <section class="details">
+    <p class="error" *ngIf="error">{{ error }}</p>
+    <p class="success" *ngIf="success">{{ success }}</p>
+
+    <ng-container *ngIf="selected as ticket; else emptyState">
+      <header class="details-head">
+        <div>
+          <small>{{ ticket.ticketKey }} · {{ ticket.priority }}</small>
+          <h2>{{ ticket.subject }}</h2>
+          <p>
+            {{ ticket.requesterName }} · {{ ticket.requesterEmail }}
+            <span *ngIf="ticket.requesterCompany"> · {{ ticket.requesterCompany }}</span>
+          </p>
+        </div>
+        <span class="state-pill">{{ ticket.status }}</span>
+      </header>
+
+      <section class="panel">
+        <h3>Request context</h3>
+        <p class="desc">{{ ticket.description }}</p>
+        <p class="linked" *ngIf="ticket.articleId">
+          Linked article: <strong>{{ ticket.articleTitle || ('#' + ticket.articleId) }}</strong>
+        </p>
+      </section>
+
+      <section class="panel form">
+        <h3>Update ticket</h3>
+        <label>
+          Status
+          <select [(ngModel)]="updateStatus">
+            <option value="OPEN">Open</option>
+            <option value="PENDING">Pending</option>
+            <option value="WAITING_CUSTOMER">Waiting customer</option>
+            <option value="SOLVED">Solved</option>
+            <option value="CLOSED">Closed</option>
+          </select>
+        </label>
+
+        <label>
+          Assignee
+          <input [(ngModel)]="assigneeName" placeholder="Name of the person handling this request" />
+        </label>
+
+        <label>
+          Internal note
+          <textarea [(ngModel)]="internalNote" placeholder="Visible to support team only"></textarea>
+        </label>
+
+        <div class="actions">
+          <button type="button" class="primary" [disabled]="saving" (click)="save()">
+            {{ saving ? 'Saving...' : 'Save update' }}
+          </button>
+        </div>
+      </section>
+
+      <section class="panel notes" *ngIf="ticket.internalNote">
+        <h3>Internal history</h3>
+        <pre>{{ ticket.internalNote }}</pre>
+      </section>
+    </ng-container>
+
+    <ng-template #emptyState>
+      <div class="empty-state">
+        <h2>Public ticket operations</h2>
+        <p>Select a ticket from the queue to review and update it.</p>
+      </div>
+    </ng-template>
+  </section>
+</section>
