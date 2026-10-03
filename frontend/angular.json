@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "creditplus-focal": {
+    "focal-assist": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -78,10 +78,10 @@
           },
           "configurations": {
             "production": {
-              "buildTarget": "creditplus-focal:build:production"
+              "buildTarget": "focal-assist:build:production"
             },
             "development": {
-              "buildTarget": "creditplus-focal:build:development"
+              "buildTarget": "focal-assist:build:development"
             }
           },
           "defaultConfiguration": "production"

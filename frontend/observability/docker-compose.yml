@@ -1,9 +1,9 @@
-name: creditplus-observability
+name: focal-observability
 
 services:
   grafana:
     image: grafana/grafana-oss:latest
-    container_name: creditplus-grafana
+    container_name: focal-grafana
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
@@ -21,7 +21,7 @@ services:
 
   loki:
     image: grafana/loki:3.7.0
-    container_name: creditplus-loki
+    container_name: focal-loki
     command: -config.file=/etc/loki/loki-config.yml
     ports:
       - "${LOKI_PORT:-3100}:3100"
@@ -32,7 +32,7 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
-    container_name: creditplus-prometheus
+    container_name: focal-prometheus
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
@@ -49,7 +49,7 @@ services:
 
   alloy:
     image: grafana/alloy:latest
-    container_name: creditplus-alloy
+    container_name: focal-alloy
     command:
       - run
       - --server.http.listen-addr=0.0.0.0:12345
@@ -61,7 +61,7 @@ services:
       - alloy_data:/var/lib/alloy/data
       - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
       - ..:/mnt/frontend:ro
-      - ${BACKEND_REPO:-C:/Users/asus/eclipse-workspace/creditplus-api}:/mnt/backend:ro
+      - ${BACKEND_REPO:-C:/Users/asus/eclipse-workspace/focal-assist-api}:/mnt/backend:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     depends_on:
       - loki

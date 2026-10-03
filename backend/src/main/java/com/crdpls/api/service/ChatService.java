@@ -664,7 +664,7 @@ public class ChatService {
     private String defaultHandle(String channelType) {
         return "whatsapp".equals(channelType)
             ? "+212 600 000 000"
-            : "@creditplus_support";
+            : "@focal_support";
     }
 
     private boolean isBlank(String value) {

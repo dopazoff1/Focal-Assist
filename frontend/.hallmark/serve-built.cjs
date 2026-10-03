@@ -6,7 +6,7 @@ const app = express();
 const port = Number(process.env.PORT || 4200);
 const backendPort = Number(process.env.BACKEND_PORT || 8080);
 const akinatorPort = Number(process.env.AKINATOR_PORT || 4201);
-const browserDir = path.resolve(__dirname, '..', 'dist', 'creditplus-focal', 'browser');
+const browserDir = path.resolve(__dirname, '..', 'dist', 'focal-assist', 'browser');
 const indexFile = path.join(browserDir, 'index.csr.html');
 const proxyPrefixes = ['/auth/', '/api/'];
 

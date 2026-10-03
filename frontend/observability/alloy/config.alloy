@@ -3,23 +3,23 @@ logging {
   format = "logfmt"
 }
 
-local.file_match "creditplus_file_logs" {
+local.file_match "focal_file_logs" {
   path_targets = [
     {
       "__path__" = "/mnt/frontend/*.log",
-      "app"      = "creditplus-focal",
+      "app"      = "focal-assist",
       "component" = "frontend",
       "source"   = "file",
     },
     {
       "__path__" = "/mnt/frontend/logs/*.log",
-      "app"      = "creditplus-focal",
+      "app"      = "focal-assist",
       "component" = "frontend",
       "source"   = "file",
     },
     {
       "__path__" = "/mnt/backend/*.log",
-      "app"      = "creditplus-api",
+      "app"      = "focal-assist-api",
       "component" = "backend",
       "source"   = "file",
     },
@@ -27,9 +27,9 @@ local.file_match "creditplus_file_logs" {
   sync_period = "10s"
 }
 
-loki.source.file "creditplus_file_logs" {
-  targets       = local.file_match.creditplus_file_logs.targets
-  forward_to    = [loki.process.creditplus_logs.receiver]
+loki.source.file "focal_file_logs" {
+  targets       = local.file_match.focal_file_logs.targets
+  forward_to    = [loki.process.focal_logs.receiver]
   tail_from_end = true
 }
 
@@ -42,7 +42,7 @@ discovery.relabel "docker_logs" {
 
   rule {
     source_labels = ["__meta_docker_container_name"]
-    regex         = "/(.*focalassist.*|.*creditplus-api.*)"
+    regex         = "/(.*focalassist.*|.*focal-assist-api.*)"
     action        = "keep"
   }
 
@@ -68,14 +68,14 @@ discovery.relabel "docker_logs" {
   }
 }
 
-loki.source.docker "creditplus_containers" {
+loki.source.docker "focal_containers" {
   host          = "unix:///var/run/docker.sock"
   targets       = discovery.docker.local.targets
   relabel_rules = discovery.relabel.docker_logs.rules
-  forward_to    = [loki.process.creditplus_logs.receiver]
+  forward_to    = [loki.process.focal_logs.receiver]
 }
 
-loki.process "creditplus_logs" {
+loki.process "focal_logs" {
   stage.regex {
     expression = ".*\\b(?P<level>TRACE|DEBUG|INFO|WARN|ERROR)\\b.*"
   }

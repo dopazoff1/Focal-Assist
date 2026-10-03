@@ -98,8 +98,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "up{job=\"creditplus-api\"}",
-          "legendFormat": "creditplus-api",
+          "expr": "up{job=\"focal-assist-api\"}",
+          "legendFormat": "focal-assist-api",
           "range": true,
           "refId": "A"
         }
@@ -187,7 +187,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(http_server_requests_seconds_count{job=\"creditplus-api\"}[5m]))",
+          "expr": "sum(rate(http_server_requests_seconds_count{job=\"focal-assist-api\"}[5m]))",
           "legendFormat": "requests/sec",
           "range": true,
           "refId": "A"
@@ -276,7 +276,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"creditplus-api\"}[5m])))",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"focal-assist-api\"}[5m])))",
           "legendFormat": "p95 latency",
           "range": true,
           "refId": "A"
@@ -365,7 +365,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(jvm_memory_used_bytes{job=\"creditplus-api\", area=\"heap\"}) / 1024 / 1024",
+          "expr": "sum(jvm_memory_used_bytes{job=\"focal-assist-api\", area=\"heap\"}) / 1024 / 1024",
           "legendFormat": "heap MB",
           "range": true,
           "refId": "A"
@@ -403,7 +403,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{app=\"creditplus-api\"} |= \"http_request\"",
+          "expr": "{app=\"focal-assist-api\"} |= \"http_request\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -453,7 +453,7 @@
   "schemaVersion": 39,
   "style": "light",
   "tags": [
-    "creditplus",
+    "focal",
     "observability"
   ],
   "templating": {
@@ -465,8 +465,8 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Creditplus Overview",
-  "uid": "creditplus-overview",
+  "title": "Focal Overview",
+  "uid": "focal-overview",
   "version": 1,
   "weekStart": ""
 }

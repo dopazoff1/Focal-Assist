@@ -18,13 +18,13 @@ npm run start:dev          # Dev server at http://localhost:4200
 **Production Build:**
 ```bash
 cd frontend
-npm run build:prod         # Outputs to dist/creditplus-focal/browser/
+npm run build:prod         # Outputs to dist/focal-assist/browser/
 ```
 
 **SSR (Server-Side Rendering):**
 ```bash
 cd frontend
-npm run serve:ssr:creditplus-focal  # Node.js server at localhost:4000
+npm run serve:ssr:focal-assist  # Node.js server at localhost:4000
 ```
 
 **Docker (Frontend):**
@@ -38,7 +38,7 @@ COPY . .
 RUN npm run build:prod
 
 FROM nginx:alpine
-COPY --from=builder /app/dist/creditplus-focal/browser /usr/share/nginx/html
+COPY --from=builder /app/dist/focal-assist/browser /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
@@ -94,7 +94,7 @@ services:
     image: mysql:8.0
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: creditplus_db
+      MYSQL_DATABASE: focal_db
     volumes:
       - mysql_data:/var/lib/mysql
     ports:
@@ -163,9 +163,9 @@ spring.jpa.hibernate.ddl-auto: update
 
 **Manual Setup:**
 ```sql
-CREATE DATABASE creditplus_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE focal_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER 'focal_user'@'%' IDENTIFIED BY 'secure_password';
-GRANT ALL PRIVILEGES ON creditplus_db.* TO 'focal_user'@'%';
+GRANT ALL PRIVILEGES ON focal_db.* TO 'focal_user'@'%';
 FLUSH PRIVILEGES;
 ```
 
@@ -281,7 +281,7 @@ management:
         <appender-ref ref="FILE"/>
     </root>
     
-    <logger name="com.creditplus.focalassist" level="DEBUG"/>
+    <logger name="com.focalassist.focalassist" level="DEBUG"/>
     <logger name="org.springframework.security" level="DEBUG"/>
 </configuration>
 ```
@@ -293,14 +293,14 @@ management:
 #!/bin/bash
 # backup-db.sh
 DATE=$(date +%Y%m%d_%H%M%S)
-mysqldump -u root -p${DB_PASSWORD} creditplus_db | gzip > /backups/creditplus_db_${DATE}.sql.gz
+mysqldump -u root -p${DB_PASSWORD} focal_db | gzip > /backups/focal_db_${DATE}.sql.gz
 # Keep last 30 days
-find /backups -name "creditplus_db_*.sql.gz" -mtime +30 -delete
+find /backups -name "focal_db_*.sql.gz" -mtime +30 -delete
 ```
 
 **Upload to S3 (Optional):**
 ```bash
-aws s3 cp /backups/creditplus_db_${DATE}.sql.gz s3://your-bucket/backups/
+aws s3 cp /backups/focal_db_${DATE}.sql.gz s3://your-bucket/backups/
 ```
 
 ### 7.11 CI/CD Pipeline (GitHub Actions Example)
@@ -334,7 +334,7 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: test
-          MYSQL_DATABASE: creditplus_db
+          MYSQL_DATABASE: focal_db
         ports: ["3306:3306"]
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:

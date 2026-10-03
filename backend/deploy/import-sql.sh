@@ -5,8 +5,8 @@ set -eu
 : "${MYSQL_USER:?MYSQL_USER is required}"
 : "${MYSQL_PASSWORD:?MYSQL_PASSWORD is required}"
 
-MYSQL_DATABASE="${MYSQL_DATABASE:-creditplus_db}"
-SQL_FILE="${SQL_FILE:-db/creditplus_db.sql}"
+MYSQL_DATABASE="${MYSQL_DATABASE:-focal_db}"
+SQL_FILE="${SQL_FILE:-db/focal_db.sql}"
 
 if [ ! -f "$SQL_FILE" ]; then
   echo "SQL file not found: $SQL_FILE" >&2

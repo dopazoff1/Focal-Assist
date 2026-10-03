@@ -123,7 +123,7 @@ It is not yet a turnkey, hosted multi-tenant SaaS distribution. A public deploym
 - Node.js 20 or newer
 - npm 11 or a compatible npm version
 - Java 17 or newer
-- MySQL or MariaDB with a database named `creditplus_db`
+- MySQL or MariaDB with a database named `focal_db`
 - Git
 - Docker Desktop, only if you prefer the container workflow
 
@@ -132,13 +132,13 @@ It is not yet a turnkey, hosted multi-tenant SaaS distribution. A public deploym
 Create the database first:
 
 ~~~sql
-CREATE DATABASE creditplus_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE focal_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ~~~
 
 Configure the connection with environment variables when your local database does not use the defaults:
 
 ~~~powershell
-$env:SPRING_DATASOURCE_URL = "jdbc:mysql://localhost:3306/creditplus_db"
+$env:SPRING_DATASOURCE_URL = "jdbc:mysql://localhost:3306/focal_db"
 $env:SPRING_DATASOURCE_USERNAME = "root"
 $env:SPRING_DATASOURCE_PASSWORD = "your-password"
 $env:SECURITY_JWT_SECRET = "replace-with-a-long-random-local-secret"

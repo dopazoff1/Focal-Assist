@@ -1,4 +1,4 @@
-# Creditplus Observability
+# Focal Observability
 
 Local Grafana stack for frontend and backend analysis:
 
@@ -9,7 +9,7 @@ Local Grafana stack for frontend and backend analysis:
 
 ## Start
 
-From `C:\Users\asus\creditplus\creditplus-focal`:
+From `C:\Users\asus\focal\focal-assist`:
 
 ```powershell
 docker compose -f .\observability\docker-compose.yml up -d
@@ -25,7 +25,7 @@ Open:
 If the backend repo moves, set `BACKEND_REPO` before starting:
 
 ```powershell
-$env:BACKEND_REPO = 'C:/Users/asus/eclipse-workspace/creditplus-api'
+$env:BACKEND_REPO = 'C:/Users/asus/eclipse-workspace/focal-assist-api'
 docker compose -f .\observability\docker-compose.yml up -d
 ```
 
@@ -34,14 +34,14 @@ docker compose -f .\observability\docker-compose.yml up -d
 Frontend:
 
 ```powershell
-cd C:\Users\asus\creditplus\creditplus-focal
+cd C:\Users\asus\focal\focal-assist
 npm run start:dev 2>&1 | Tee-Object -FilePath .\logs\frontend-4200.log
 ```
 
 Backend:
 
 ```powershell
-cd C:\Users\asus\eclipse-workspace\creditplus-api
+cd C:\Users\asus\eclipse-workspace\focal-assist-api
 .\mvnw.cmd spring-boot:run 2>&1 | Tee-Object -FilePath .\backend-run.log
 ```
 
@@ -50,7 +50,7 @@ cd C:\Users\asus\eclipse-workspace\creditplus-api
 Backend request activity:
 
 ```logql
-{app="creditplus-api"} |= "http_request"
+{app="focal-assist-api"} |= "http_request"
 ```
 
 Frontend logs:
@@ -80,7 +80,7 @@ After restarting the backend:
 Invoke-WebRequest http://localhost:8080/actuator/prometheus
 ```
 
-Prometheus should show target `creditplus-api` as `UP` at:
+Prometheus should show target `focal-assist-api` as `UP` at:
 
 ```text
 http://localhost:9090/targets

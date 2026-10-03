@@ -6,7 +6,7 @@
 
 ## 1. PROJECT OVERVIEW
 
-**Project Name:** CreditPlus Focal  
+**Project Name:** Focal Assist  
 **Type:** Internal Customer Support & Knowledge Management Platform  
 **Architecture:** Full-stack monorepo with Spring Boot backend + Angular frontend (v3 shell)  
 **Package Manager:** npm (frontend), Maven (backend)  
@@ -1077,7 +1077,7 @@ npm run start:dev        # ng serve --configuration development --proxy-config p
 npm run build:prod       # ng build --configuration production
 
 # Production serve (SSR)
-npm run serve:ssr:creditplus-focal  # node dist/creditplus-focal/server/server.mjs
+npm run serve:ssr:focal-assist  # node dist/focal-assist/server/server.mjs
 ```
 
 ### 8.2 Backend Build Commands
@@ -1096,7 +1096,7 @@ java -jar target/api-0.0.1-SNAPSHOT.jar
 **Backend (application.properties with env override):**
 ```properties
 SERVER_PORT=8080
-SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/creditplus_db
+SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/focal_db
 SPRING_DATASOURCE_USERNAME=root
 SPRING_DATASOURCE_PASSWORD=secret
 SPRING_JPA_HIBERNATE_DDL_AUTO=update
@@ -1120,7 +1120,7 @@ CHAT_META_VERIFY_TOKEN=focal-meta-verify-token
 
 ### 8.4 Database Setup
 ```sql
-CREATE DATABASE creditplus_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE focal_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 -- Tables auto-created by Hibernate (ddl-auto=update)
 -- Or run migrations manually for production
 ```
@@ -1142,7 +1142,7 @@ CREATE DATABASE creditplus_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 10. Test API endpoints with Postman/curl
 
 ### Phase 2: Frontend Setup
-1. Create Angular 21 project: `ng new creditplus-focal --standalone --ssr --style=css`
+1. Create Angular 21 project: `ng new focal-assist --standalone --ssr --style=css`
 2. Install deps: `@tinymce/tinymce-angular`, `tinymce`, `rxjs`, `zone.js`
 3. Configure `app.config.ts` with router, HTTP interceptors, locale
 4. Create `AuthService`, `AccessControlService` first (core dependencies)
@@ -1208,7 +1208,7 @@ CREATE DATABASE creditplus_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 backend/
 ├── src/main/java/com/crdpls/api/
-│   ├── CreditplusApiApplication.java
+│   ├── FocalAssistApplication.java
 │   ├── controllers/          # 20+ REST controllers
 │   ├── dto/                  # Request/Response DTOs
 │   ├── models/               # 25+ JPA entities
@@ -1325,7 +1325,7 @@ cd frontend
 npm install
 npm run start:dev          # Dev server at localhost:4200
 npm run build:prod         # Production build in dist/
-npm run serve:ssr:creditplus-focal  # SSR server
+npm run serve:ssr:focal-assist  # SSR server
 
 # Backend
 cd backend
@@ -1334,7 +1334,7 @@ cd backend
 ./mvnw test                # Run tests
 
 # Database
-mysql -u root -p -e "CREATE DATABASE creditplus_db;"
+mysql -u root -p -e "CREATE DATABASE focal_db;"
 ```
 
 ---

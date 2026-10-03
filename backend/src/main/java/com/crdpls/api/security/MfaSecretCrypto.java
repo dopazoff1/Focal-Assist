@@ -22,7 +22,7 @@ public class MfaSecretCrypto {
     private final SecureRandom random = new SecureRandom();
 
     public MfaSecretCrypto(
-        @Value("${security.mfa.encryption-key:${security.jwt.secret:creditplus-change-this-secret-key-creditplus-change-this-secret}}") String encryptionKey
+        @Value("${security.mfa.encryption-key:${security.jwt.secret:focal-change-this-secret-key-focal-change-this-secret}}") String encryptionKey
     ) {
         try {
             byte[] digest = MessageDigest.getInstance("SHA-256")

@@ -29,10 +29,10 @@ You still need these before a complete deployment:
 
 - Backend source repo or deployable artifact.
 - Backend production environment variables.
-- Real database schema/data export, preferably `db/creditplus_db.sql`.
+- Real database schema/data export, preferably `db/focal_db.sql`.
 - OCI account, SSH key, and optional domain name.
 
-Do not rely on `.angular/cache/21.0.2/creditplus-focal/creditplus_db (2).sql` as the production source of truth. It is build cache, not a tracked database artifact.
+Do not rely on `.angular/cache/21.0.2/focal-assist/focal_db (2).sql` as the production source of truth. It is build cache, not a tracked database artifact.
 
 ## OCI Network
 
@@ -50,8 +50,8 @@ Create an OCI MySQL HeatWave Always Free DB system.
 Import the SQL from your VM after you have a real export:
 
 ```bash
-mysql -h <mysql-private-ip> -u <admin-user> -p -e "CREATE DATABASE IF NOT EXISTS creditplus_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-mysql -h <mysql-private-ip> -u <admin-user> -p creditplus_db < db/creditplus_db.sql
+mysql -h <mysql-private-ip> -u <admin-user> -p -e "CREATE DATABASE IF NOT EXISTS focal_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -h <mysql-private-ip> -u <admin-user> -p focal_db < db/focal_db.sql
 ```
 
 If the backend is not MySQL-compatible, use the backend's migration tool instead of importing the phpMyAdmin dump directly.
@@ -72,28 +72,28 @@ docker compose version
 Clone or copy both projects as sibling directories:
 
 ```bash
-sudo mkdir -p /opt/creditplus
-sudo chown "$USER":"$USER" /opt/creditplus
-cd /opt/creditplus
-git clone <frontend-repo-url> creditplus-focal
-git clone <backend-repo-url> creditplus-api
-cd creditplus-focal
+sudo mkdir -p /opt/focal
+sudo chown "$USER":"$USER" /opt/focal
+cd /opt/focal
+git clone <frontend-repo-url> focal-assist
+git clone <backend-repo-url> focal-assist-api
+cd focal-assist
 cp .env.oci.example .env
 ```
 
 Prepare the backend environment:
 
 ```bash
-cd /opt/creditplus/creditplus-api
+cd /opt/focal/focal-assist-api
 cp .env.oci.example .env.oci
 ```
 
-Edit `/opt/creditplus/creditplus-api/.env.oci` and set the MySQL, JWT, public URL, and optional integration secrets.
+Edit `/opt/focal/focal-assist-api/.env.oci` and set the MySQL, JWT, public URL, and optional integration secrets.
 
 Start frontend and backend together:
 
 ```bash
-cd /opt/creditplus/creditplus-focal
+cd /opt/focal/focal-assist
 docker compose -f docker-compose.oci.yml up -d --build
 docker compose -f docker-compose.oci.yml logs -f
 ```
@@ -106,11 +106,11 @@ http://<vm-public-ip>/
 
 ## Backend
 
-The backend container reads environment values from `/opt/creditplus/creditplus-api/.env.oci`.
+The backend container reads environment values from `/opt/focal/focal-assist-api/.env.oci`.
 At minimum set:
 
 ```bash
-SPRING_DATASOURCE_URL=jdbc:mysql://<mysql-private-ip>:3306/creditplus_db
+SPRING_DATASOURCE_URL=jdbc:mysql://<mysql-private-ip>:3306/focal_db
 SPRING_DATASOURCE_USERNAME=<db-user>
 SPRING_DATASOURCE_PASSWORD=<db-password>
 SERVER_PORT=8080
@@ -137,7 +137,7 @@ If Caddy binds public port `80`, set `WEB_PORT=8081` for the frontend container 
 
 The GitHub Actions workflow publishes multi-architecture images for:
 
-- `ghcr.io/<owner>/creditplus-focal-web`
-- `ghcr.io/<owner>/creditplus-focal-ssr`
+- `ghcr.io/<owner>/focal-assist-web`
+- `ghcr.io/<owner>/focal-assist-ssr`
 
 Multi-architecture publishing matters because OCI A1 is Arm-based. You can also build directly on the VM with `docker compose up -d --build`.

@@ -8,10 +8,10 @@
 		<version>4.0.0</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.creditplus</groupId>
+	<groupId>com.focalassist</groupId>
 	<artifactId>api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>creditplus-api</name>
+	<name>focal-assist-api</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>

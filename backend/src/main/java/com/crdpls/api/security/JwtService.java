@@ -20,7 +20,7 @@ public class JwtService {
     private final long attachmentExpirationSeconds;
 
     public JwtService(
-        @Value("${security.jwt.secret:creditplus-change-this-secret-key-creditplus-change-this-secret}") String secret,
+        @Value("${security.jwt.secret:focal-change-this-secret-key-focal-change-this-secret}") String secret,
         @Value("${security.jwt.expiration-seconds:43200}") long expirationSeconds,
         @Value("${security.jwt.attachment-expiration-seconds:600}") long attachmentExpirationSeconds
     ) {

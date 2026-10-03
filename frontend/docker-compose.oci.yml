@@ -1,11 +1,11 @@
 services:
   focalassist-api:
     build:
-      context: ${BACKEND_CONTEXT:-../creditplus-api}
+      context: ${BACKEND_CONTEXT:-../focal-assist-api}
       dockerfile: Dockerfile
     image: focalassist-api:latest
     env_file:
-      - ${BACKEND_ENV_FILE:-../creditplus-api/.env.oci}
+      - ${BACKEND_ENV_FILE:-../focal-assist-api/.env.oci}
     environment:
       SERVER_PORT: 8080
       TRAINING_ASSETS_DIR: /app/data/training-assets

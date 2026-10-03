@@ -1,4 +1,4 @@
-# Creditplusfocalassist
+# Focal Assist
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.2.
 
@@ -74,7 +74,7 @@ docker compose up --build
 Local compose serves the web image on `http://localhost:4200`.
 For OCI or another production VM, copy `.env.oci.example` to `.env` and set `WEB_PORT=80`.
 
-For full OCI deployment with the backend from `creditplus-api`, use:
+For full OCI deployment with the backend from `focal-assist-api`, use:
 
 ```bash
 docker compose -f docker-compose.oci.yml up -d --build
@@ -105,8 +105,8 @@ Cloudflare prints a public `https://...trycloudflare.com` URL you can share.
 
 GitHub Actions workflow `.github/workflows/docker-publish.yml` publishes both images to GHCR:
 
-- `ghcr.io/<owner>/creditplus-focal-web`
-- `ghcr.io/<owner>/creditplus-focal-ssr`
+- `ghcr.io/<owner>/focal-assist-web`
+- `ghcr.io/<owner>/focal-assist-ssr`
 
 ## Running unit tests
 

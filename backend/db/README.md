@@ -3,7 +3,7 @@
 Place the production MySQL/MariaDB export at:
 
 ```text
-db/creditplus_db.sql
+db/focal_db.sql
 ```
 
 Import it from the OCI VM:
@@ -12,8 +12,8 @@ Import it from the OCI VM:
 MYSQL_HOST=<mysql-private-ip> \
 MYSQL_USER=<db-user> \
 MYSQL_PASSWORD=<db-password> \
-MYSQL_DATABASE=creditplus_db \
-SQL_FILE=db/creditplus_db.sql \
+MYSQL_DATABASE=focal_db \
+SQL_FILE=db/focal_db.sql \
 sh deploy/import-sql.sh
 ```
 

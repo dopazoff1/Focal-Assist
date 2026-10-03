@@ -8,10 +8,10 @@ scrape_configs:
       - targets:
           - prometheus:9090
 
-  - job_name: creditplus-api
+  - job_name: focal-assist-api
     metrics_path: /actuator/prometheus
     static_configs:
       - targets:
           - host.docker.internal:8080
         labels:
-          application: creditplus-api
+          application: focal-assist-api

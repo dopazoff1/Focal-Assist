@@ -16,7 +16,7 @@ ENV PORT=4000
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
-COPY --from=build /app/dist/creditplus-focal ./dist/creditplus-focal
+COPY --from=build /app/dist/focal-assist ./dist/focal-assist
 
 EXPOSE 4000
-CMD ["node", "dist/creditplus-focal/server/server.mjs"]
+CMD ["node", "dist/focal-assist/server/server.mjs"]

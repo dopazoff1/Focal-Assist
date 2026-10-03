@@ -10,7 +10,7 @@
 
 ```
 backend/
-├── src/main/java/com/creditplus/focalassist/
+├── src/main/java/com/focalassist/focalassist/
 │   ├── focalAssistApplication.java          # Main entry point
 │   ├── config/
 │   │   ├── SecurityConfig.java             # Spring Security, JWT, CORS
@@ -138,7 +138,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/creditplus_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/focal_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: ${DB_USER:root}
     password: ${DB_PASSWORD:password}
     hikari:
@@ -178,7 +178,7 @@ meta:
 
 logging:
   level:
-    com.creditplus.focalassist: DEBUG
+    com.focalassist.focalassist: DEBUG
     org.springframework.security: DEBUG
 ```
 

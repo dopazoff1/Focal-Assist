@@ -1,9 +1,9 @@
 apiVersion: 1
 
 providers:
-  - name: Creditplus
+  - name: Focal
     orgId: 1
-    folder: Creditplus
+    folder: Focal
     type: file
     disableDeletion: false
     editable: true
