@@ -281,7 +281,7 @@ management:
         <appender-ref ref="FILE"/>
     </root>
     
-    <logger name="com.focalassist.focalassist" level="DEBUG"/>
+    <logger name="com.focal.api" level="DEBUG"/>
     <logger name="org.springframework.security" level="DEBUG"/>
 </configuration>
 ```

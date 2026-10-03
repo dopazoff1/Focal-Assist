@@ -10,7 +10,7 @@
 
 ```
 backend/
-├── src/main/java/com/focalassist/focalassist/
+├── src/main/java/com/focal/api/
 │   ├── focalAssistApplication.java          # Main entry point
 │   ├── config/
 │   │   ├── SecurityConfig.java             # Spring Security, JWT, CORS
@@ -178,7 +178,7 @@ meta:
 
 logging:
   level:
-    com.focalassist.focalassist: DEBUG
+    com.focal.api: DEBUG
     org.springframework.security: DEBUG
 ```
 

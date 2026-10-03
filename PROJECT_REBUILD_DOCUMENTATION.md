@@ -1207,7 +1207,7 @@ CREATE DATABASE focal_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ### Backend
 ```
 backend/
-├── src/main/java/com/crdpls/api/
+├── src/main/java/com/focal/api/
 │   ├── FocalAssistApplication.java
 │   ├── controllers/          # 20+ REST controllers
 │   ├── dto/                  # Request/Response DTOs
